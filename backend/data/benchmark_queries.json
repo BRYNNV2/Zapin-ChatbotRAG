@@ -1,0 +1,60 @@
+[
+  {
+    "query_id": "Q1",
+    "query": "Apa fungsi dan makna dari gerak Tahto dalam tari Zapin?",
+    "ground_truth_topics": [
+      "tahto",
+      "rendah hati",
+      "pembuka",
+      "kesopanan"
+    ],
+    "category": "Ragam & Struktur Gerak Zapin"
+  },
+  {
+    "query_id": "Q2",
+    "query": "Sebutkan alat musik utama yang digunakan untuk mengiringi tari Zapin Melayu!",
+    "ground_truth_topics": [
+      "gambus",
+      "marwas",
+      "alat musik",
+      "gendang"
+    ],
+    "category": "Musik & Iringan Tradisi"
+  },
+  {
+    "query_id": "Q3",
+    "query": "Bagaimana sejarah asal usul tari Zapin dan pengaruh budaya Hadramaut?",
+    "ground_truth_topics": [
+      "hadramaut",
+      "yaman",
+      "arab",
+      "sejarah",
+      "akulturasi"
+    ],
+    "category": "Sejarah & Nilai Filosofis"
+  },
+  {
+    "query_id": "Q4",
+    "query": "Apa perbedaan karakter gerak Zapin antara penari pria dan penari wanita?",
+    "ground_truth_topics": [
+      "pria",
+      "wanita",
+      "etika",
+      "langkah",
+      "santun",
+      "lemah lembut"
+    ],
+    "category": "Busana, Etika & Adat"
+  },
+  {
+    "query_id": "Q5",
+    "query": "Apa yang dimaksud dengan gerak Pecah dan gerak Sembah dalam Zapin?",
+    "ground_truth_topics": [
+      "pecah",
+      "sembah",
+      "ragam",
+      "penghormatan"
+    ],
+    "category": "Ragam & Struktur Gerak Zapin"
+  }
+]
