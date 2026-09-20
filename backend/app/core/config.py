@@ -7,6 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent.parent
 class Settings(BaseSettings):
     PROJECT_NAME: str = "Zapin AI Cultural Assistant"
     API_V1_STR: str = "/api"
+    BASE_DIR: Path = BASE_DIR
     
     # Model Configurations
     SBERT_MODEL_NAME: str = "paraphrase-multilingual-MiniLM-L12-v2"
