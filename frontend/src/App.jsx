@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import CulturalThemeHeader from './components/CulturalThemeHeader';
+import { PanelLeftOpen, Sparkles, CheckCircle2 } from 'lucide-react';
 import ChatHistorySidebar from './components/ChatHistorySidebar';
 import ChatContainer from './components/ChatContainer';
 import SourceReferenceDrawer from './components/SourceReferenceDrawer';
@@ -8,10 +8,10 @@ import EvaluationDashboard from './components/EvaluationDashboard';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('chat');
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [stats, setStats] = useState({ totalChunks: 0, totalDocuments: 0 });
-  const [suggestions, setSuggestions] = useState([]);
-  
-  // Riwayat percakapan
+
+  // Riwayat percakapan (persisten di localStorage)
   const [sessions, setSessions] = useState(() => {
     try {
       const saved = localStorage.getItem('zapin_chat_sessions');
@@ -25,7 +25,7 @@ export default function App() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Parameter RAG yang dapat dikonfigurasi peneliti
+  // Parameter RAG
   const [ragParams, setRagParams] = useState({ top_k: 4, threshold: 0.30 });
 
   // Drawer referensi sumber
@@ -33,7 +33,7 @@ export default function App() {
   const [activeSources, setActiveSources] = useState([]);
   const [highlightedCitationId, setHighlightedCitationId] = useState(null);
 
-  // Muat status pangkalan data & saran pertanyaan awal
+  // Fetch status pangkalan data
   const fetchStats = async () => {
     try {
       const res = await fetch('http://localhost:8000/api/dataset/documents');
@@ -45,28 +45,15 @@ export default function App() {
         });
       }
     } catch (err) {
-      console.warn('Backend server belum aktif atau tidak dapat diakses:', err.message);
-    }
-  };
-
-  const fetchSuggestions = async () => {
-    try {
-      const res = await fetch('http://localhost:8000/api/chat/suggestions');
-      if (res.ok) {
-        const data = await res.json();
-        setSuggestions(data.suggestions || []);
-      }
-    } catch (err) {
-      console.warn('Gagal memuat saran kueri:', err.message);
+      console.warn('Backend server belum aktif:', err.message);
     }
   };
 
   useEffect(() => {
     fetchStats();
-    fetchSuggestions();
   }, []);
 
-  // Simpan sesi ke localStorage jika berubah
+  // Simpan sesi ke localStorage
   useEffect(() => {
     try {
       localStorage.setItem('zapin_chat_sessions', JSON.stringify(sessions));
@@ -75,12 +62,13 @@ export default function App() {
     }
   }, [sessions]);
 
-  // Handler Percakapan Baru
+  // Handler Percakapan Baru (Kimi "Obrolan baru")
   const handleNewChat = () => {
+    setActiveTab('chat');
     const newId = Date.now().toString();
     const newSession = {
       id: newId,
-      title: 'Percakapan Baru',
+      title: 'Obrolan Baru',
       createdAt: new Date().toISOString(),
       messages: []
     };
@@ -124,7 +112,7 @@ export default function App() {
       currentSessionId = Date.now().toString();
       const newSession = {
         id: currentSessionId,
-        title: queryText.slice(0, 32) + (queryText.length > 32 ? '...' : ''),
+        title: queryText.slice(0, 30) + (queryText.length > 30 ? '...' : ''),
         createdAt: new Date().toISOString(),
         messages: updatedMessages
       };
@@ -160,13 +148,13 @@ export default function App() {
       const finalMessages = [...updatedMessages, assistantMsg];
       setMessages(finalMessages);
 
-      // Perbarui sesi
+      // Perbarui judul sesi jika masih default
       setSessions((prev) =>
         prev.map((s) => {
           if (s.id === currentSessionId) {
             return {
               ...s,
-              title: s.title === 'Percakapan Baru' ? queryText.slice(0, 32) + '...' : s.title,
+              title: s.title === 'Obrolan Baru' ? queryText.slice(0, 30) + '...' : s.title,
               messages: finalMessages
             };
           }
@@ -186,7 +174,7 @@ export default function App() {
     }
   };
 
-  // Handler Buka Sumber Kutipan
+  // Handler Buka Sumber Rujukan
   const handleOpenSources = (sources, citationId) => {
     setActiveSources(sources || []);
     setHighlightedCitationId(citationId);
@@ -194,34 +182,56 @@ export default function App() {
   };
 
   return (
-    <div className="app-container">
-      <CulturalThemeHeader
+    <div className="app-layout">
+      {/* Kimi Left Sidebar */}
+      <ChatHistorySidebar
+        isCollapsed={sidebarCollapsed}
+        onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
+        sessions={sessions}
+        activeSessionId={activeSessionId}
+        onSelectSession={handleSelectSession}
+        onNewChat={handleNewChat}
+        onDeleteSession={handleDeleteSession}
         stats={stats}
       />
 
-      <div className="main-workspace">
-        {activeTab === 'chat' && (
-          <>
-            <ChatHistorySidebar
-              sessions={sessions}
-              activeSessionId={activeSessionId}
-              onSelectSession={handleSelectSession}
-              onNewChat={handleNewChat}
-              onDeleteSession={handleDeleteSession}
-            />
+      {/* Main Content Stage */}
+      <div className="main-stage">
+        {/* Floating Top Bar */}
+        <div className="stage-top-bar">
+          <div>
+            {sidebarCollapsed && (
+              <button
+                className="sidebar-uncollapse-btn"
+                onClick={() => setSidebarCollapsed(false)}
+                title="Buka bilah samping"
+              >
+                <PanelLeftOpen size={18} />
+              </button>
+            )}
+          </div>
 
-            <ChatContainer
-              messages={messages}
-              onSendMessage={handleSendMessage}
-              isLoading={isLoading}
-              suggestions={suggestions}
-              onOpenSources={handleOpenSources}
-              ragParams={ragParams}
-              setRagParams={setRagParams}
-            />
-          </>
+          <div className="top-pill-badge">
+            <Sparkles size={13} color="#60a5fa" />
+            <span>Sentence-BERT Dense RAG • {stats.totalChunks || 5} Chunks Tervalidasi</span>
+          </div>
+
+          <div style={{ width: '40px' }}></div>
+        </div>
+
+        {/* Tab Views */}
+        {activeTab === 'chat' && (
+          <ChatContainer
+            messages={messages}
+            onSendMessage={handleSendMessage}
+            isLoading={isLoading}
+            onOpenSources={handleOpenSources}
+            onSwitchToDocs={() => setActiveTab('documents')}
+            ragParams={ragParams}
+            setRagParams={setRagParams}
+          />
         )}
 
         {activeTab === 'documents' && (
@@ -233,6 +243,7 @@ export default function App() {
         )}
       </div>
 
+      {/* Source Reference Drawer */}
       <SourceReferenceDrawer
         isOpen={drawerOpen}
         onClose={() => setDrawerOpen(false)}

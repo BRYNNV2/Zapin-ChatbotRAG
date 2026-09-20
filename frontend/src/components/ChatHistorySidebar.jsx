@@ -1,49 +1,156 @@
-import React from 'react';
-import { Plus, MessageSquare, Trash2 } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { 
+  Plus, 
+  MessageSquare, 
+  Trash2, 
+  PanelLeftClose, 
+  Compass, 
+  Cpu, 
+  BookOpen, 
+  BarChart3, 
+  MoreHorizontal, 
+  FolderPlus,
+  ArrowDownToLine
+} from 'lucide-react';
 
-export default function ChatHistorySidebar({ sessions, activeSessionId, onSelectSession, onNewChat, onDeleteSession }) {
+export default function ChatHistorySidebar({
+  isCollapsed,
+  onToggleCollapse,
+  activeTab,
+  setActiveTab,
+  sessions,
+  activeSessionId,
+  onSelectSession,
+  onNewChat,
+  onDeleteSession,
+  stats
+}) {
+  // Listen for Ctrl+K shortcut to create new chat
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        onNewChat();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [onNewChat]);
+
   return (
-    <aside className="chat-sidebar">
-      <button className="sidebar-new-btn" onClick={onNewChat}>
-        <Plus size={16} />
-        <span>Percakapan Baru</span>
-      </button>
+    <aside className={`kimi-sidebar ${isCollapsed ? 'collapsed' : ''}`}>
+      {/* Sidebar Header */}
+      <div className="sidebar-header">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div className="kimi-logo-badge">Z</div>
+        </div>
 
-      <div style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em', padding: '8px 4px 4px 4px' }}>
-        Riwayat Percakapan
+        <button 
+          className="sidebar-toggle-btn" 
+          onClick={onToggleCollapse} 
+          title="Tutup bilah samping"
+        >
+          <PanelLeftClose size={18} />
+        </button>
       </div>
 
-      <div className="history-list">
+      {/* Obrolan Baru Button (Kimi Pill) */}
+      <div className="sidebar-action-wrap">
+        <button className="btn-new-chat" onClick={onNewChat}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <Plus size={16} />
+            <span>Obrolan baru</span>
+          </div>
+          <span className="shortcut-badge">Ctrl K</span>
+        </button>
+      </div>
+
+      {/* Quick Navigation Items */}
+      <nav className="sidebar-nav-list">
+        <button
+          className={`sidebar-nav-item ${activeTab === 'chat' ? 'active' : ''}`}
+          onClick={() => setActiveTab('chat')}
+        >
+          <Compass size={16} />
+          <span>Zapin Assistant</span>
+        </button>
+
+        <button
+          className={`sidebar-nav-item ${activeTab === 'documents' ? 'active' : ''}`}
+          onClick={() => setActiveTab('documents')}
+        >
+          <BookOpen size={16} />
+          <span style={{ flex: 1 }}>Pangkalan Dokumen</span>
+          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+            {stats.totalChunks || 5}
+          </span>
+        </button>
+
+        <button
+          className={`sidebar-nav-item ${activeTab === 'evaluation' ? 'active' : ''}`}
+          onClick={() => setActiveTab('evaluation')}
+        >
+          <BarChart3 size={16} />
+          <span>Riset & Evaluasi</span>
+        </button>
+
+        <button
+          className="sidebar-nav-item"
+          onClick={() => setActiveTab('chat')}
+        >
+          <Cpu size={16} />
+          <span>Pipeline SBERT</span>
+        </button>
+
+        <button className="sidebar-nav-item">
+          <MoreHorizontal size={16} />
+          <span>Lainnya</span>
+        </button>
+      </nav>
+
+      <div className="sidebar-divider" />
+
+      {/* Ruang Kerja Section */}
+      <div className="sidebar-section-title">Ruang kerja</div>
+      <div style={{ padding: '0 8px', marginBottom: '8px' }}>
+        <button
+          className="sidebar-nav-item"
+          style={{ color: 'var(--text-secondary)' }}
+          onClick={() => setActiveTab('documents')}
+        >
+          <FolderPlus size={15} />
+          <span>Dataset Budaya Zapin</span>
+        </button>
+      </div>
+
+      {/* Chat History Section */}
+      <div className="sidebar-section-title">Chat</div>
+      <div className="sidebar-history-scroll">
         {sessions.length === 0 ? (
-          <div style={{ color: 'var(--text-muted)', fontSize: '0.8125rem', padding: '12px 6px', textAlign: 'center' }}>
-            Belum ada riwayat dialog.
+          <div style={{ padding: '12px 14px', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
+            Belum ada riwayat percakapan.
           </div>
         ) : (
           sessions.map((sess) => (
             <div
               key={sess.id}
-              className={`history-item ${sess.id === activeSessionId ? 'active' : ''}`}
-              onClick={() => onSelectSession(sess.id)}
+              className={`history-row ${sess.id === activeSessionId && activeTab === 'chat' ? 'active' : ''}`}
+              onClick={() => {
+                setActiveTab('chat');
+                onSelectSession(sess.id);
+              }}
             >
-              <MessageSquare size={14} style={{ flexShrink: 0 }} />
-              <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              <span className="history-text">
                 {sess.title || 'Percakapan Budaya Zapin'}
               </span>
+
               <button
+                className="history-delete-btn"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDeleteSession(sess.id);
                 }}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: 'var(--text-muted)',
-                  cursor: 'pointer',
-                  padding: '2px',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}
-                title="Hapus riwayat"
+                title="Hapus percakapan"
               >
                 <Trash2 size={13} />
               </button>
@@ -52,8 +159,22 @@ export default function ChatHistorySidebar({ sessions, activeSessionId, onSelect
         )}
       </div>
 
-      <div style={{ padding: '12px', borderTop: '1px solid var(--border-subtle)', fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'center' }}>
-        Tersimpan di Penyimpanan Lokal
+      {/* User Profile Footer */}
+      <div className="sidebar-footer">
+        <div className="user-profile-pill">
+          <div className="user-avatar-circle">M</div>
+          <span className="user-name-text">mh...</span>
+          <span className="upgrade-badge">Skripsi</span>
+        </div>
+
+        <button
+          className="action-btn-small"
+          style={{ padding: '4px' }}
+          title="Unduh laporan"
+          onClick={() => setActiveTab('evaluation')}
+        >
+          <ArrowDownToLine size={15} />
+        </button>
       </div>
     </aside>
   );
