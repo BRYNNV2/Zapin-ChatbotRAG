@@ -276,64 +276,66 @@ export default function ChatContainer({
         /* ACTIVE CHAT STATE */
         <>
           <div className="chat-scroll-area">
-            {messages.map((msg, idx) => (
-              <div
-                key={idx}
-                className={`kimi-message-row ${msg.sender === 'user' ? 'user' : 'assistant'}`}
-              >
-                {msg.sender === 'user' ? (
-                  <div className="kimi-user-bubble">
-                    {msg.text}
-                  </div>
-                ) : (
-                  <div className="kimi-assistant-wrap">
-                    <div className="kimi-assistant-avatar">Z</div>
+            <div className="chat-messages-inner">
+              {messages.map((msg, idx) => (
+                <div
+                  key={idx}
+                  className={`kimi-message-row ${msg.sender === 'user' ? 'user' : 'assistant'}`}
+                >
+                  {msg.sender === 'user' ? (
+                    <div className="kimi-user-bubble">
+                      {msg.text}
+                    </div>
+                  ) : (
+                    <div className="kimi-assistant-wrap">
+                      <div className="kimi-assistant-avatar">Z</div>
 
-                    <div className="kimi-assistant-content">
-                      <div style={{ whiteSpace: 'pre-wrap' }}>
-                        {renderMessageContent(msg.text, msg.sources)}
-                      </div>
+                      <div className="kimi-assistant-content">
+                        <div style={{ whiteSpace: 'pre-wrap' }}>
+                          {renderMessageContent(msg.text, msg.sources)}
+                        </div>
 
-                      {/* Action Bar Below Response */}
-                      <div className="assistant-actions-bar">
-                        {msg.sources && msg.sources.length > 0 && (
+                        {/* Action Bar Below Response */}
+                        <div className="assistant-actions-bar">
+                          {msg.sources && msg.sources.length > 0 && (
+                            <button
+                              className="source-pill-btn"
+                              onClick={() => onOpenSources(msg.sources, null)}
+                            >
+                              <BookOpen size={13} color="#9ca3af" />
+                              <span>{msg.sources.length} Sumber Tervalidasi</span>
+                            </button>
+                          )}
+
                           <button
-                            className="source-pill-btn"
-                            onClick={() => onOpenSources(msg.sources, null)}
+                            className="action-btn-small"
+                            onClick={() => handleCopy(msg.text, idx)}
+                            title="Salin jawaban"
                           >
-                            <BookOpen size={13} color="#9ca3af" />
-                            <span>{msg.sources.length} Sumber Tervalidasi</span>
+                            {copiedIdx === idx ? <Check size={13} color="#ffffff" /> : <Copy size={13} />}
+                            <span>{copiedIdx === idx ? 'Disalin' : 'Salin'}</span>
                           </button>
-                        )}
-
-                        <button
-                          className="action-btn-small"
-                          onClick={() => handleCopy(msg.text, idx)}
-                          title="Salin jawaban"
-                        >
-                          {copiedIdx === idx ? <Check size={13} color="#ffffff" /> : <Copy size={13} />}
-                          <span>{copiedIdx === idx ? 'Disalin' : 'Salin'}</span>
-                        </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ))}
+                  )}
+                </div>
+              ))}
 
-            {isLoading && (
-              <div className="kimi-message-row assistant">
-                <div className="kimi-assistant-wrap">
-                  <div className="kimi-assistant-avatar">Z</div>
-                  <div className="kimi-assistant-content" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)' }}>
-                    <Sparkles size={15} color="#d4af37" className="animate-spin-slow" />
-                    <span style={{ fontSize: '0.88rem' }}>Mencocokkan dense embeddings Sentence-BERT & rujukan pakar...</span>
+              {isLoading && (
+                <div className="kimi-message-row assistant">
+                  <div className="kimi-assistant-wrap">
+                    <div className="kimi-assistant-avatar">Z</div>
+                    <div className="kimi-assistant-content" style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--text-secondary)' }}>
+                      <Sparkles size={15} color="#d4af37" className="animate-spin-slow" />
+                      <span style={{ fontSize: '0.88rem' }}>Mencocokkan dense embeddings Sentence-BERT & rujukan pakar...</span>
+                    </div>
                   </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            <div ref={messagesEndRef} />
+              <div ref={messagesEndRef} />
+            </div>
           </div>
 
           {/* Floating Bottom Dock for Active Chat */}

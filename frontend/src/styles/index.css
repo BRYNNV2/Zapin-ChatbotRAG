@@ -714,12 +714,17 @@ body {
   flex: 1;
   overflow-y: auto;
   padding: 72px 24px 180px 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 28px;
+  width: 100%;
+  height: 100%;
+}
+
+.chat-messages-inner {
   max-width: 860px;
   margin: 0 auto;
   width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
 }
 
 .kimi-message-row {
