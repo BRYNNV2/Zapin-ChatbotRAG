@@ -4,12 +4,12 @@
   "sbert_metrics": {
     "hit_rate": 1.0,
     "mrr": 1.0,
-    "avg_latency_sec": 0.1546
+    "avg_latency_sec": 0.0621
   },
   "bm25_metrics": {
     "hit_rate": 1.0,
     "mrr": 1.0,
-    "avg_latency_sec": 0.0019
+    "avg_latency_sec": 0.001
   },
   "detailed_query_results": [
     {
@@ -17,50 +17,50 @@
       "query": "Apa fungsi dan makna dari gerak Tahto dalam tari Zapin?",
       "sbert_rank": 1,
       "sbert_hit": true,
-      "sbert_time_sec": 0.1761,
+      "sbert_time_sec": 0.0565,
       "bm25_rank": 1,
       "bm25_hit": true,
-      "bm25_time_sec": 0.0018
+      "bm25_time_sec": 0.001
     },
     {
       "query_id": "Q2",
       "query": "Sebutkan alat musik utama yang digunakan untuk mengiringi tari Zapin Melayu!",
       "sbert_rank": 1,
       "sbert_hit": true,
-      "sbert_time_sec": 0.1067,
+      "sbert_time_sec": 0.0701,
       "bm25_rank": 1,
       "bm25_hit": true,
-      "bm25_time_sec": 0.0016
+      "bm25_time_sec": 0.0011
     },
     {
       "query_id": "Q3",
       "query": "Bagaimana sejarah asal usul tari Zapin dan pengaruh budaya Hadramaut?",
       "sbert_rank": 1,
       "sbert_hit": true,
-      "sbert_time_sec": 0.1733,
+      "sbert_time_sec": 0.0651,
       "bm25_rank": 1,
       "bm25_hit": true,
-      "bm25_time_sec": 0.002
+      "bm25_time_sec": 0.001
     },
     {
       "query_id": "Q4",
       "query": "Apa perbedaan karakter gerak Zapin antara penari pria dan penari wanita?",
       "sbert_rank": 1,
       "sbert_hit": true,
-      "sbert_time_sec": 0.1663,
+      "sbert_time_sec": 0.0598,
       "bm25_rank": 1,
       "bm25_hit": true,
-      "bm25_time_sec": 0.0019
+      "bm25_time_sec": 0.001
     },
     {
       "query_id": "Q5",
       "query": "Apa yang dimaksud dengan gerak Pecah dan gerak Sembah dalam Zapin?",
       "sbert_rank": 1,
       "sbert_hit": true,
-      "sbert_time_sec": 0.1507,
+      "sbert_time_sec": 0.0592,
       "bm25_rank": 1,
       "bm25_hit": true,
-      "bm25_time_sec": 0.002
+      "bm25_time_sec": 0.001
     }
   ]
 }
