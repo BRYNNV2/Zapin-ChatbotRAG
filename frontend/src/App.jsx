@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PanelLeftOpen, Sparkles, CheckCircle2 } from 'lucide-react';
+import { PanelLeftOpen, Sparkles, CheckCircle2, BookOpen } from 'lucide-react';
 import ChatHistorySidebar from './components/ChatHistorySidebar';
 import ChatContainer from './components/ChatContainer';
 import SourceReferenceDrawer from './components/SourceReferenceDrawer';
@@ -77,6 +77,8 @@ export default function App() {
     setSessions([newSession, ...sessions]);
     setActiveSessionId(newId);
     setMessages([]);
+    setActiveSources([]);
+    setDrawerOpen(false);
   };
 
   // Handler Pilih Sesi
@@ -84,7 +86,15 @@ export default function App() {
     setActiveSessionId(id);
     const selected = sessions.find((s) => s.id === id);
     if (selected) {
-      setMessages(selected.messages || []);
+      const msgs = selected.messages || [];
+      setMessages(msgs);
+      const lastWithSources = [...msgs].reverse().find(m => m.sources && m.sources.length > 0);
+      if (lastWithSources) {
+        setActiveSources(lastWithSources.sources);
+      } else {
+        setActiveSources([]);
+        setDrawerOpen(false);
+      }
     }
   };
 
@@ -98,6 +108,8 @@ export default function App() {
       } else {
         setActiveSessionId(null);
         setMessages([]);
+        setActiveSources([]);
+        setDrawerOpen(false);
       }
     }
   };
@@ -150,6 +162,10 @@ export default function App() {
       const finalMessages = [...updatedMessages, assistantMsg];
       setMessages(finalMessages);
 
+      if (data.sources && data.sources.length > 0) {
+        setActiveSources(data.sources);
+      }
+
       // Perbarui judul sesi jika masih default
       setSessions((prev) =>
         prev.map((s) => {
@@ -176,7 +192,7 @@ export default function App() {
     }
   };
 
-  // Handler Buka Sumber Rujukan
+  // Handler Buka Sumber Rujukan (Bar Kanan)
   const handleOpenSources = (sources, citationId) => {
     setActiveSources(sources || []);
     setHighlightedCitationId(citationId);
@@ -221,39 +237,58 @@ export default function App() {
             <span>Sentence-BERT Dense RAG • {stats.totalChunks || 5} Chunks Tervalidasi</span>
           </div>
 
-          <div style={{ width: '40px' }}></div>
+          <div className="top-bar-right-slot">
+            {activeTab === 'chat' && activeSources && activeSources.length > 0 && (
+              <button
+                className={`top-source-toggle-btn ${drawerOpen ? 'active' : ''}`}
+                onClick={() => setDrawerOpen(!drawerOpen)}
+                title={drawerOpen ? "Tutup bar kanan rujukan" : "Buka bar kanan rujukan sumber"}
+              >
+                <BookOpen size={14} color={drawerOpen ? "#d4af37" : "currentColor"} />
+                <span>{drawerOpen ? "Tutup Bar Rujukan" : `Bar Rujukan (${activeSources.length})`}</span>
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* Tab Views */}
-        {activeTab === 'chat' && (
-          <ChatContainer
-            messages={messages}
-            onSendMessage={handleSendMessage}
-            isLoading={isLoading}
-            onOpenSources={handleOpenSources}
-            onSwitchToDocs={() => setActiveTab('documents')}
-            onOpenSbertModal={() => setSbertModalOpen(true)}
-            ragParams={ragParams}
-            setRagParams={setRagParams}
-          />
-        )}
+        {/* Workspace Body with Docked Bar Kanan Support */}
+        <div className="stage-workspace-body">
+          <div className="stage-main-scrollable">
+            {activeTab === 'chat' && (
+              <ChatContainer
+                messages={messages}
+                onSendMessage={handleSendMessage}
+                isLoading={isLoading}
+                onOpenSources={handleOpenSources}
+                onSwitchToDocs={() => setActiveTab('documents')}
+                onOpenSbertModal={() => setSbertModalOpen(true)}
+                ragParams={ragParams}
+                setRagParams={setRagParams}
+                isRightBarOpen={drawerOpen}
+              />
+            )}
 
-        {activeTab === 'documents' && (
-          <DocumentManager onRefreshStats={fetchStats} />
-        )}
+            {activeTab === 'documents' && (
+              <DocumentManager onRefreshStats={fetchStats} />
+            )}
 
-        {activeTab === 'evaluation' && (
-          <EvaluationDashboard />
-        )}
+            {activeTab === 'evaluation' && (
+              <EvaluationDashboard />
+            )}
+          </div>
+
+          {/* Bar Kanan (Docked Right Side Panel) */}
+          {activeTab === 'chat' && (
+            <SourceReferenceDrawer
+              isOpen={drawerOpen}
+              onClose={() => setDrawerOpen(false)}
+              sources={activeSources}
+              highlightedId={highlightedCitationId}
+              onSelectCitation={(id) => setHighlightedCitationId(id)}
+            />
+          )}
+        </div>
       </div>
-
-      {/* Source Reference Drawer */}
-      <SourceReferenceDrawer
-        isOpen={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
-        sources={activeSources}
-        highlightedId={highlightedCitationId}
-      />
 
       {/* SBERT Pipeline Specification Modal */}
       <SbertPipelineModal
