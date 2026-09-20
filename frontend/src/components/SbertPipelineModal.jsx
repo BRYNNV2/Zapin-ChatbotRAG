@@ -1,87 +1,101 @@
 import React from 'react';
-import { X, Cpu, Sparkles, CheckCircle2, Sliders, Layers, Network } from 'lucide-react';
+import { X, Cpu, Sliders, Layers, Network, CheckCircle2 } from 'lucide-react';
 
 export default function SbertPipelineModal({ isOpen, onClose, ragParams, setRagParams }) {
   if (!isOpen) return null;
 
   return (
-    <div className="source-drawer-overlay" onClick={onClose}>
-      <div 
-        className="source-drawer animate-slide-right" 
-        style={{ width: '480px' }}
+    <div className="sbert-modal-overlay" onClick={onClose}>
+      <aside 
+        className="sbert-modal-drawer animate-slide-in-right" 
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="drawer-header">
-          <div className="drawer-title">
-            <Cpu size={20} color="#60a5fa" />
-            <span>Spesifikasi Pipeline Sentence-BERT</span>
+        {/* Header */}
+        <div className="sbert-modal-header">
+          <div className="sbert-header-title-wrap">
+            <div className="sbert-header-icon">
+              <Cpu size={17} color="#d1d5db" />
+            </div>
+            <div>
+              <h3 className="sbert-modal-heading">Pipeline Sentence-BERT</h3>
+              <p className="sbert-modal-subheading">
+                Spesifikasi Dense Semantic Retrieval & Kalibrasi Skripsi
+              </p>
+            </div>
           </div>
 
-          <button className="drawer-close-btn" onClick={onClose} title="Tutup">
-            <X size={18} />
+          <button 
+            className="sbert-modal-close-btn" 
+            onClick={onClose} 
+            title="Tutup panel"
+          >
+            <X size={17} />
           </button>
         </div>
 
-        <div className="drawer-content">
-          <div style={{
-            padding: '14px 16px',
-            borderRadius: '12px',
-            background: 'rgba(37, 99, 235, 0.12)',
-            border: '1px solid rgba(59, 130, 246, 0.3)',
-            color: '#93c5fd',
-            fontSize: '0.82rem',
-            lineHeight: 1.5
-          }}>
-            <strong style={{ color: '#ffffff' }}>Metode Usulan Skripsi:</strong> Dense Semantic Retrieval menggunakan arsitektur Sentence-BERT untuk mengubah kueri pengguna dan naskah Zapin menjadi representasi vektor makna 384 dimensi.
+        {/* Scrollable Content */}
+        <div className="sbert-modal-content">
+          {/* Deskripsi Arsitektur RAG */}
+          <div className="sbert-info-card">
+            <span className="sbert-info-title">Arsitektur Dense Retrieval</span>
+            <p className="sbert-info-text">
+              Sistem menggunakan representasi vektor padat (dense embedding) dari model <strong>Sentence-BERT</strong> untuk memetakan pertanyaan pengguna dan naskah budaya Zapin ke dalam ruang semantik 384 dimensi, memungkinkan pencarian berbasis makna dan konteks sejarah.
+            </p>
           </div>
 
-          {/* Kartu Parameter Teknis */}
-          <div className="source-card">
-            <div style={{ fontSize: '0.86rem', fontWeight: 600, color: '#ffffff', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Network size={16} color="#d4af37" />
-              <span>Parameter Model & Vektor</span>
+          {/* Tabel Parameter Teknis */}
+          <div className="sbert-section-card">
+            <div className="sbert-section-header">
+              <Network size={15} color="#9ca3af" />
+              <span>Parameter Model & Ruang Vektor</span>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', fontSize: '0.8rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '6px' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Model Pretrained</span>
-                <span style={{ color: 'var(--text-main)', fontWeight: 600, fontFamily: 'monospace' }}>paraphrase-multilingual-MiniLM-L12-v2</span>
+            <div className="sbert-param-list">
+              <div className="sbert-param-row">
+                <span className="sbert-param-label">Model Pretrained</span>
+                <span className="sbert-param-value mono">paraphrase-multilingual-MiniLM-L12-v2</span>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '6px' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Dimensi Embedding</span>
-                <span style={{ color: '#60a5fa', fontWeight: 600 }}>384 Dimensi (Dense)</span>
+              <div className="sbert-param-row">
+                <span className="sbert-param-label">Dimensi Embedding</span>
+                <span className="sbert-param-value">384 Dimensi (Dense)</span>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '6px' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Fungsi Kesamaan</span>
-                <span style={{ color: '#34d399', fontWeight: 600 }}>Cosine Similarity (L2 Normalized)</span>
+              <div className="sbert-param-row">
+                <span className="sbert-param-label">Fungsi Kesamaan</span>
+                <span className="sbert-param-value">Cosine Similarity (L2 Normalized)</span>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid var(--border-subtle)', paddingBottom: '6px' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Strategi Chunking</span>
-                <span style={{ color: 'var(--text-main)' }}>450 Karakter (Overlap 80)</span>
+              <div className="sbert-param-row">
+                <span className="sbert-param-label">Strategi Chunking</span>
+                <span className="sbert-param-value">450 Karakter (Overlap 80)</span>
               </div>
 
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Bahasa Didukung</span>
-                <span style={{ color: 'var(--text-main)' }}>Bahasa Indonesia, Melayu, Multilingual</span>
+              <div className="sbert-param-row">
+                <span className="sbert-param-label">Bahasa Didukung</span>
+                <span className="sbert-param-value">Bahasa Indonesia, Melayu, Multilingual</span>
+              </div>
+
+              <div className="sbert-param-row">
+                <span className="sbert-param-label">Format Dokumen</span>
+                <span className="sbert-param-value">PDF & DOCX Terindeks</span>
               </div>
             </div>
           </div>
 
           {/* Pengaturan Live Parameter Retrieval */}
-          <div className="source-card">
-            <div style={{ fontSize: '0.86rem', fontWeight: 600, color: '#ffffff', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <Sliders size={16} color="#34d399" />
+          <div className="sbert-section-card">
+            <div className="sbert-section-header">
+              <Sliders size={15} color="#9ca3af" />
               <span>Kalibrasi Eksperimen Retrieval</span>
             </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', fontSize: '0.82rem' }}>
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>Top-K Context Chunks:</span>
-                  <span style={{ fontWeight: 700, color: '#60a5fa' }}>K = {ragParams.top_k}</span>
+            <div className="sbert-calibration-wrap">
+              {/* Slider Top-K */}
+              <div className="sbert-slider-group">
+                <div className="sbert-slider-top">
+                  <span className="sbert-slider-label">Top-K Context Chunks (k):</span>
+                  <span className="sbert-slider-badge">K = {ragParams.top_k}</span>
                 </div>
                 <input
                   type="range"
@@ -89,17 +103,18 @@ export default function SbertPipelineModal({ isOpen, onClose, ragParams, setRagP
                   max="6"
                   value={ragParams.top_k}
                   onChange={(e) => setRagParams({ ...ragParams, top_k: parseInt(e.target.value) })}
-                  style={{ width: '100%' }}
+                  className="sbert-range-input"
                 />
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Jumlah dokumen teratas yang dilampirkan ke prompt LLM.
+                <div className="sbert-slider-hint">
+                  Jumlah kutipan naskah teratas yang dilampirkan ke LLM untuk sintesis jawaban.
                 </div>
               </div>
 
-              <div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '6px' }}>
-                  <span style={{ color: 'var(--text-secondary)' }}>Ambang Batas Semantik (Threshold):</span>
-                  <span style={{ fontWeight: 700, color: '#d4af37' }}>{ragParams.threshold}</span>
+              {/* Slider Threshold */}
+              <div className="sbert-slider-group">
+                <div className="sbert-slider-top">
+                  <span className="sbert-slider-label">Ambang Batas Semantik (Threshold):</span>
+                  <span className="sbert-slider-badge">{ragParams.threshold}</span>
                 </div>
                 <input
                   type="range"
@@ -108,16 +123,24 @@ export default function SbertPipelineModal({ isOpen, onClose, ragParams, setRagP
                   step="0.05"
                   value={ragParams.threshold}
                   onChange={(e) => setRagParams({ ...ragParams, threshold: parseFloat(e.target.value) })}
-                  style={{ width: '100%' }}
+                  className="sbert-range-input"
                 />
-                <div style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>
-                  Nilai minimum Cosine Similarity agar rujukan dianggap relevan.
+                <div className="sbert-slider-hint">
+                  Batas minimum nilai Cosine Similarity agar dokumen dianggap relevan dengan kueri.
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+
+        {/* Footer */}
+        <div className="sbert-modal-footer">
+          <span className="sbert-footer-note">ZapinAI • SBERT Dense Retrieval</span>
+          <button className="sbert-apply-btn" onClick={onClose}>
+            Selesai
+          </button>
+        </div>
+      </aside>
     </div>
   );
 }

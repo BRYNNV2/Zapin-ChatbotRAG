@@ -1452,3 +1452,260 @@ body {
 .animate-spin-slow {
   animation: spinSlow 3s linear infinite;
 }
+
+/* ========================================================== */
+/* SBERT PIPELINE MODAL DRAWER (MONOCHROMATIC MINIMALIST)     */
+/* ========================================================== */
+.sbert-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: flex;
+  justify-content: flex-end;
+  animation: fadeIn 0.2s ease-out;
+}
+
+.sbert-modal-drawer {
+  width: 480px;
+  max-width: 92vw;
+  height: 100vh;
+  background: #141417;
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  box-shadow: -16px 0 48px rgba(0, 0, 0, 0.85);
+  z-index: 1001;
+  animation: slideInFromRight 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  overflow: hidden;
+}
+
+.sbert-modal-header {
+  padding: 16px 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #17171b;
+  flex-shrink: 0;
+}
+
+.sbert-header-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.sbert-header-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.sbert-modal-heading {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.sbert-modal-subheading {
+  font-size: 0.72rem;
+  color: #8b8b94;
+  margin: 2px 0 0 0;
+}
+
+.sbert-modal-close-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.sbert-modal-close-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.sbert-modal-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sbert-info-card {
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sbert-info-title {
+  font-size: 0.73rem;
+  font-weight: 600;
+  color: #d1d5db;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.sbert-info-text {
+  font-size: 0.75rem;
+  color: #8b8b94;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.sbert-info-text strong {
+  color: #ededed;
+}
+
+.sbert-section-card {
+  background: #18181c;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 15px;
+}
+
+.sbert-section-header {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #e5e7eb;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sbert-param-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  font-size: 0.77rem;
+}
+
+.sbert-param-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  padding-bottom: 7px;
+}
+
+.sbert-param-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.sbert-param-label {
+  color: #8b8b94;
+}
+
+.sbert-param-value {
+  color: #d1d5db;
+  font-weight: 500;
+  text-align: right;
+}
+
+.sbert-param-value.mono {
+  font-family: monospace;
+  font-size: 0.72rem;
+  color: #ededed;
+}
+
+.sbert-calibration-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.sbert-slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.sbert-slider-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sbert-slider-label {
+  font-size: 0.75rem;
+  color: #d1d5db;
+  font-weight: 500;
+}
+
+.sbert-slider-badge {
+  font-size: 0.73rem;
+  font-weight: 600;
+  color: #ffffff;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 1px 7px;
+  border-radius: 4px;
+}
+
+.sbert-range-input {
+  width: 100%;
+  accent-color: #ffffff;
+  cursor: pointer;
+  margin: 4px 0;
+}
+
+.sbert-slider-hint {
+  font-size: 0.7rem;
+  color: #6b7280;
+  line-height: 1.35;
+}
+
+.sbert-modal-footer {
+  padding: 12px 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  background: #161619;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+}
+
+.sbert-footer-note {
+  font-size: 0.71rem;
+  color: #6b7280;
+}
+
+.sbert-apply-btn {
+  background: #ffffff;
+  color: #121214;
+  border: none;
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 5px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sbert-apply-btn:hover {
+  background: #e2e2e6;
+}
