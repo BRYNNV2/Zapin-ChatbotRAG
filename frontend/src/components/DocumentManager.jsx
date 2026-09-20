@@ -110,9 +110,22 @@ export default function DocumentManager({ onRefreshStats }) {
   return (
     <div className="view-container animate-fade-in">
       <div className="view-header">
-        <h2 className="view-title">Pangkalan Dokumen & Validasi Pakar</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '8px' }}>
+          <h2 className="view-title" style={{ margin: 0 }}>Pustaka Pengetahuan Zapin Tervalidasi</h2>
+          <span style={{
+            fontSize: '0.75rem',
+            fontWeight: 600,
+            padding: '4px 10px',
+            borderRadius: '20px',
+            background: 'rgba(16, 185, 129, 0.15)',
+            color: '#34d399',
+            border: '1px solid rgba(16, 185, 129, 0.3)'
+          }}>
+            Terpasang di Sistem (Siap Pakai)
+          </span>
+        </div>
         <p className="view-subtitle">
-          Kelola dokumen naskah tari Zapin (PDF, DOCX, TXT) yang telah divalidasi oleh ahli seni budaya Melayu.
+          Seluruh naskah, buku, dan jurnal di bawah ini telah diindeks ke dalam memori Sentence-BERT dan siap ditanyakan langsung oleh pengguna tanpa perlu mengunggah dokumen lagi.
         </p>
       </div>
 
@@ -130,12 +143,15 @@ export default function DocumentManager({ onRefreshStats }) {
         </div>
       )}
 
-      {/* Form Upload Dokumen */}
+      {/* Form Upload Dokumen (Khusus Peneliti/Admin) */}
       <div className="glass-card" style={{ padding: '24px', marginBottom: '32px' }}>
-        <h3 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--gold-300)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <UploadCloud size={18} />
-          <span>Unggah Dokumen Zapin Baru</span>
+        <h3 style={{ fontSize: '1.05rem', fontWeight: 600, color: '#ffffff', marginBottom: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <UploadCloud size={18} color="#d4af37" />
+          <span>Tambah Dokumen Baru (Khusus Peneliti / Admin)</span>
         </h3>
+        <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '16px' }}>
+          Gunakan formulir ini jika Anda sebagai peneliti ingin memperkaya koleksi naskah Zapin baru ke pangkalan data vektor.
+        </p>
 
         <form onSubmit={handleUpload}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px', marginBottom: '20px' }}>
