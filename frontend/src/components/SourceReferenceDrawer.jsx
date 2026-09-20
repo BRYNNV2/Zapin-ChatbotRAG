@@ -4,15 +4,12 @@ import {
   BookOpen, 
   ShieldCheck, 
   FileText, 
-  Sparkles, 
   Copy, 
   Check, 
   Layers, 
-  ChevronRight,
-  ExternalLink,
-  Target,
-  Hash,
-  Database
+  Hash, 
+  Database,
+  ArrowUpRight
 } from 'lucide-react';
 
 export default function SourceReferenceDrawer({ 
@@ -52,16 +49,16 @@ export default function SourceReferenceDrawer({
 
   return (
     <aside className="source-side-panel animate-slide-in-right">
-      {/* Panel Header */}
+      {/* Header: Bersih, Minimalis & Monokrom */}
       <div className="source-panel-header">
         <div className="source-panel-title-wrap">
           <div className="source-panel-icon-badge">
-            <BookOpen size={17} color="#d4af37" />
+            <BookOpen size={16} color="#d1d5db" />
           </div>
           <div>
-            <h3 className="source-panel-heading">Rujukan Sumber & Asal Data</h3>
+            <h3 className="source-panel-heading">Rujukan Sumber Naskah</h3>
             <p className="source-panel-subheading">
-              {sources.length} kutipan naskah otentik terverifikasi
+              {sources.length} kutipan otentik terverifikasi
             </p>
           </div>
         </div>
@@ -71,25 +68,22 @@ export default function SourceReferenceDrawer({
           onClick={onClose}
           title="Tutup bar kanan rujukan"
         >
-          <X size={18} />
+          <X size={17} />
         </button>
       </div>
 
-      {/* SBERT Semantic Method Header Info */}
+      {/* Method Info: Netral & Muted, Tidak Warna-Warni */}
       <div className="source-method-banner">
         <div className="method-banner-top">
-          <div className="method-tag">
-            <Sparkles size={12} color="#60a5fa" />
-            <span>Dense Semantic Retrieval</span>
-          </div>
-          <span className="method-dim-badge">384 Dimensi Vektor</span>
+          <span className="method-tag">Sentence-BERT Semantic Retrieval</span>
+          <span className="method-dim-badge">384-dim</span>
         </div>
         <p className="method-banner-desc">
-          Data di bawah ini ditarik secara otomatis menggunakan model <strong>Sentence-BERT</strong> berdasarkan kedekatan semantik (Cosine Similarity) dengan pertanyaan Anda.
+          Kutipan diekstrak dari pangkalan naskah berdasarkan skor kemiripan semantik terhadap kueri Anda.
         </p>
       </div>
 
-      {/* Quick Jump Filter Chips */}
+      {/* Filter Chips: Monokromatis Minimalis */}
       {sources.length > 1 && (
         <div className="source-filter-chips-row">
           <button
@@ -99,7 +93,7 @@ export default function SourceReferenceDrawer({
               if (onSelectCitation) onSelectCitation(null);
             }}
           >
-            <span>Semua ({sources.length})</span>
+            Semua ({sources.length})
           </button>
           
           {sources.map((src) => {
@@ -113,7 +107,7 @@ export default function SourceReferenceDrawer({
                   if (onSelectCitation) onSelectCitation(src.citation_id);
                 }}
               >
-                <span>Sitasi [{src.citation_id}]</span>
+                [{src.citation_id}]
               </button>
             );
           })}
@@ -124,10 +118,10 @@ export default function SourceReferenceDrawer({
       <div className="source-panel-scroll">
         {(!sources || sources.length === 0) ? (
           <div className="source-empty-state">
-            <Database size={36} color="var(--text-muted)" style={{ marginBottom: '12px', opacity: 0.5 }} />
+            <Database size={32} color="var(--text-muted)" style={{ marginBottom: '12px', opacity: 0.4 }} />
             <p>Tidak ada rujukan sumber untuk pesan ini.</p>
-            <span style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>
-              Klik tombol rujukan pada jawaban asisten untuk memunculkan detail asal naskah.
+            <span style={{ fontSize: '0.76rem', color: 'var(--text-muted)' }}>
+              Pilih rujukan pada jawaban asisten untuk memeriksa asal naskah.
             </span>
           </div>
         ) : (
@@ -136,18 +130,13 @@ export default function SourceReferenceDrawer({
             const simScore = src.similarity_score || 0;
             const simPercent = Math.round(simScore * 100);
 
-            // Determine similarity color
-            let simColor = '#10b981'; // Green
-            if (simPercent < 60) simColor = '#f59e0b'; // Amber
-            if (simPercent < 35) simColor = '#3b82f6'; // Blue
-
             return (
               <div
                 key={src.citation_id}
                 ref={el => cardRefs.current[src.citation_id] = el}
                 className={`source-detail-card ${isTargeted ? 'highlighted' : ''}`}
               >
-                {/* Card Top Header */}
+                {/* Header Card: Monokrom rapi */}
                 <div className="source-detail-top">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span className="source-citation-badge">
@@ -158,35 +147,15 @@ export default function SourceReferenceDrawer({
                     </span>
                   </div>
 
-                  {/* Similarity Pill */}
-                  <div 
-                    className="source-sim-score-pill" 
-                    style={{ borderColor: `${simColor}40`, color: simColor }}
-                    title={`Nilai Cosine Similarity: ${simScore.toFixed(4)}`}
-                  >
-                    <Target size={12} />
-                    <span>Kemiripan {simPercent}%</span>
-                  </div>
+                  <span className="source-sim-score-clean" title={`Cosine Similarity: ${simScore.toFixed(4)}`}>
+                    {simPercent}% Relevansi
+                  </span>
                 </div>
 
-                {/* Similarity Progress Bar */}
-                <div className="similarity-bar-track">
-                  <div 
-                    className="similarity-bar-fill" 
-                    style={{ 
-                      width: `${Math.min(100, Math.max(10, simPercent))}%`,
-                      background: simColor 
-                    }}
-                  />
-                </div>
-
-                {/* Document Origin Breakdown */}
+                {/* Detail Asal Dokumen */}
                 <div className="source-origin-breakdown">
                   <div className="origin-row">
-                    <div className="origin-icon-label">
-                      <FileText size={14} color="#d4af37" />
-                      <span className="origin-label">Asal Naskah:</span>
-                    </div>
+                    <span className="origin-label">Dokumen Sumber</span>
                     <span className="origin-value doc-name" title={src.document_name}>
                       {src.document_name}
                     </span>
@@ -194,60 +163,56 @@ export default function SourceReferenceDrawer({
 
                   <div className="origin-meta-grid">
                     <div className="origin-meta-item">
-                      <Hash size={13} color="var(--text-muted)" />
-                      <span>Halaman <strong>{src.page_number}</strong></span>
+                      <Hash size={12} color="var(--text-muted)" />
+                      <span>Hal. <strong>{src.page_number}</strong></span>
                     </div>
 
                     <div className="origin-meta-item">
-                      <Layers size={13} color="var(--text-muted)" />
-                      <span>Format <strong>{src.document_name.endsWith('.docx') ? 'DOCX' : 'PDF'} Otentik</strong></span>
+                      <Layers size={12} color="var(--text-muted)" />
+                      <span>{src.document_name.endsWith('.docx') ? 'Naskah DOCX' : 'Naskah PDF'}</span>
                     </div>
                   </div>
 
-                  {/* Expert Validator Box */}
-                  <div className="source-validator-row">
-                    <ShieldCheck size={15} color="#10b981" />
-                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span className="validator-title">Tervalidasi Pakar Budaya</span>
-                      <span className="validator-name">{src.validator_name || 'Dewan Kesenian & Budayawan Melayu'}</span>
-                    </div>
+                  {/* Validasi Pakar: Gaya catatan editorial bersih */}
+                  <div className="source-validator-clean">
+                    <ShieldCheck size={14} color="#9ca3af" />
+                    <span className="validator-clean-text">
+                      Validasi: <strong>{src.validator_name || 'Dewan Kesenian & Budayawan Melayu'}</strong>
+                    </span>
                   </div>
                 </div>
 
-                {/* Ground Truth Authentic Quote */}
+                {/* Kutipan Teks Naskah Asli */}
                 <div className="source-ground-truth-section">
                   <div className="ground-truth-header">
-                    <span className="ground-truth-label">Kutipan Teks Asli Dokumen (Ground Truth):</span>
+                    <span className="ground-truth-label">Kutipan Teks Asli:</span>
                     <button 
                       className="copy-quote-btn"
                       onClick={() => handleCopyQuote(src.full_text || src.snippet, src.citation_id)}
-                      title="Salin kutipan teks naskah"
+                      title="Salin kutipan naskah"
                     >
                       {copiedId === src.citation_id ? (
                         <>
-                          <Check size={12} color="#10b981" />
-                          <span style={{ color: '#10b981' }}>Tersalin</span>
+                          <Check size={11} color="#ffffff" />
+                          <span>Disalin</span>
                         </>
                       ) : (
                         <>
-                          <Copy size={12} />
+                          <Copy size={11} />
                           <span>Salin</span>
                         </>
                       )}
                     </button>
                   </div>
 
-                  <blockquote className="source-quote-box-enhanced">
+                  <div className="source-quote-box-clean">
                     "{src.full_text || src.snippet}"
-                  </blockquote>
+                  </div>
                 </div>
 
-                {/* RAG Synthesis Context Note */}
-                <div className="source-synthesis-note">
-                  <span className="synthesis-bullet">💡</span>
-                  <span>
-                    Kutipan ini digunakan oleh generator RAG untuk memverifikasi keaslian fakta pada butir jawaban <strong>[{src.citation_id}]</strong> tanpa halusinasi.
-                  </span>
+                {/* Catatan Sintesis: Muted & Minimalis */}
+                <div className="source-synthesis-clean">
+                  <span>Rujukan data primer untuk jawaban poin <strong>[{src.citation_id}]</strong>.</span>
                 </div>
               </div>
             );
@@ -255,13 +220,10 @@ export default function SourceReferenceDrawer({
         )}
       </div>
 
-      {/* Footer Info */}
+      {/* Footer Minimalis */}
       <div className="source-panel-footer">
-        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-          <ShieldCheck size={13} color="#d4af37" />
-          <span>Integritas Akademik ZapinAI</span>
-        </div>
-        <span>Skripsi SBERT RAG 2026</span>
+        <span>Arsip Budaya Zapin Tervalidasi</span>
+        <span>Sentence-BERT RAG</span>
       </div>
     </aside>
   );

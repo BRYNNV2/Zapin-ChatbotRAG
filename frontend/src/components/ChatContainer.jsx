@@ -301,7 +301,7 @@ export default function ChatContainer({
                             className="source-pill-btn"
                             onClick={() => onOpenSources(msg.sources, null)}
                           >
-                            <CheckCircle2 size={13} color="#10b981" />
+                            <BookOpen size={13} color="#9ca3af" />
                             <span>{msg.sources.length} Sumber Tervalidasi</span>
                           </button>
                         )}
@@ -311,7 +311,7 @@ export default function ChatContainer({
                           onClick={() => handleCopy(msg.text, idx)}
                           title="Salin jawaban"
                         >
-                          {copiedIdx === idx ? <Check size={13} color="#10b981" /> : <Copy size={13} />}
+                          {copiedIdx === idx ? <Check size={13} color="#ffffff" /> : <Copy size={13} />}
                           <span>{copiedIdx === idx ? 'Disalin' : 'Salin'}</span>
                         </button>
                       </div>
