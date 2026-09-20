@@ -10,6 +10,7 @@ import {
   ChevronDown,
   Layers,
   FileText,
+  BookOpen,
   Lightbulb,
   Music,
   History,
@@ -27,6 +28,7 @@ export default function ChatContainer({
   isLoading,
   onOpenSources,
   onSwitchToDocs,
+  onOpenSbertModal,
   ragParams,
   setRagParams
 }) {
@@ -159,8 +161,8 @@ export default function ChatContainer({
 
                 <div 
                   className="kimi-select-pill"
-                  onClick={() => setShowSettings(!showSettings)}
-                  title="Pengaturan parameter retrieval"
+                  onClick={onOpenSbertModal}
+                  title="Lihat spesifikasi & kalibrasi Sentence-BERT"
                 >
                   <Sparkles size={13} color="#60a5fa" />
                   <span>Dense SBERT</span>
@@ -357,7 +359,7 @@ export default function ChatContainer({
                       <span>Katalog Pustaka</span>
                     </div>
 
-                    <div className="kimi-select-pill" onClick={() => setShowSettings(!showSettings)}>
+                    <div className="kimi-select-pill" onClick={onOpenSbertModal} title="Lihat spesifikasi SBERT">
                       <Sparkles size={12} color="#60a5fa" />
                       <span>Dense SBERT</span>
                     </div>

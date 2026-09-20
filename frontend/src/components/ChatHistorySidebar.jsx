@@ -23,7 +23,8 @@ export default function ChatHistorySidebar({
   onSelectSession,
   onNewChat,
   onDeleteSession,
-  stats
+  stats,
+  onOpenSbertModal
 }) {
   // Listen for Ctrl+K shortcut to create new chat
   useEffect(() => {
@@ -96,9 +97,10 @@ export default function ChatHistorySidebar({
 
         <button
           className="sidebar-nav-item"
-          onClick={() => setActiveTab('chat')}
+          onClick={onOpenSbertModal}
+          title="Lihat spesifikasi & kalibrasi Sentence-BERT"
         >
-          <Cpu size={16} />
+          <Cpu size={16} color="#60a5fa" />
           <span>Pipeline SBERT</span>
         </button>
       </nav>

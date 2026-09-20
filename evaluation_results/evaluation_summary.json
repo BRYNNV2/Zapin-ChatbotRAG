@@ -4,12 +4,12 @@
   "sbert_metrics": {
     "hit_rate": 1.0,
     "mrr": 1.0,
-    "avg_latency_sec": 0.0621
+    "avg_latency_sec": 0.0631
   },
   "bm25_metrics": {
     "hit_rate": 1.0,
     "mrr": 1.0,
-    "avg_latency_sec": 0.001
+    "avg_latency_sec": 0.0025
   },
   "detailed_query_results": [
     {
@@ -17,50 +17,50 @@
       "query": "Apa fungsi dan makna dari gerak Tahto dalam tari Zapin?",
       "sbert_rank": 1,
       "sbert_hit": true,
-      "sbert_time_sec": 0.0565,
+      "sbert_time_sec": 0.0656,
       "bm25_rank": 1,
       "bm25_hit": true,
-      "bm25_time_sec": 0.001
+      "bm25_time_sec": 0.0033
     },
     {
       "query_id": "Q2",
       "query": "Sebutkan alat musik utama yang digunakan untuk mengiringi tari Zapin Melayu!",
       "sbert_rank": 1,
       "sbert_hit": true,
-      "sbert_time_sec": 0.0701,
+      "sbert_time_sec": 0.0735,
       "bm25_rank": 1,
       "bm25_hit": true,
-      "bm25_time_sec": 0.0011
+      "bm25_time_sec": 0.002
     },
     {
       "query_id": "Q3",
       "query": "Bagaimana sejarah asal usul tari Zapin dan pengaruh budaya Hadramaut?",
       "sbert_rank": 1,
       "sbert_hit": true,
-      "sbert_time_sec": 0.0651,
+      "sbert_time_sec": 0.0583,
       "bm25_rank": 1,
       "bm25_hit": true,
-      "bm25_time_sec": 0.001
+      "bm25_time_sec": 0.0022
     },
     {
       "query_id": "Q4",
       "query": "Apa perbedaan karakter gerak Zapin antara penari pria dan penari wanita?",
       "sbert_rank": 1,
       "sbert_hit": true,
-      "sbert_time_sec": 0.0598,
+      "sbert_time_sec": 0.0551,
       "bm25_rank": 1,
       "bm25_hit": true,
-      "bm25_time_sec": 0.001
+      "bm25_time_sec": 0.0025
     },
     {
       "query_id": "Q5",
       "query": "Apa yang dimaksud dengan gerak Pecah dan gerak Sembah dalam Zapin?",
       "sbert_rank": 1,
       "sbert_hit": true,
-      "sbert_time_sec": 0.0592,
+      "sbert_time_sec": 0.0631,
       "bm25_rank": 1,
       "bm25_hit": true,
-      "bm25_time_sec": 0.001
+      "bm25_time_sec": 0.0023
     }
   ]
 }

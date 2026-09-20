@@ -5,6 +5,7 @@ import ChatContainer from './components/ChatContainer';
 import SourceReferenceDrawer from './components/SourceReferenceDrawer';
 import DocumentManager from './components/DocumentManager';
 import EvaluationDashboard from './components/EvaluationDashboard';
+import SbertPipelineModal from './components/SbertPipelineModal';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('chat');
@@ -28,8 +29,9 @@ export default function App() {
   // Parameter RAG
   const [ragParams, setRagParams] = useState({ top_k: 4, threshold: 0.30 });
 
-  // Drawer referensi sumber
+  // Drawer & Modal state
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [sbertModalOpen, setSbertModalOpen] = useState(false);
   const [activeSources, setActiveSources] = useState([]);
   const [highlightedCitationId, setHighlightedCitationId] = useState(null);
 
@@ -195,6 +197,7 @@ export default function App() {
         onNewChat={handleNewChat}
         onDeleteSession={handleDeleteSession}
         stats={stats}
+        onOpenSbertModal={() => setSbertModalOpen(true)}
       />
 
       {/* Main Content Stage */}
@@ -229,6 +232,7 @@ export default function App() {
             isLoading={isLoading}
             onOpenSources={handleOpenSources}
             onSwitchToDocs={() => setActiveTab('documents')}
+            onOpenSbertModal={() => setSbertModalOpen(true)}
             ragParams={ragParams}
             setRagParams={setRagParams}
           />
@@ -249,6 +253,14 @@ export default function App() {
         onClose={() => setDrawerOpen(false)}
         sources={activeSources}
         highlightedId={highlightedCitationId}
+      />
+
+      {/* SBERT Pipeline Specification Modal */}
+      <SbertPipelineModal
+        isOpen={sbertModalOpen}
+        onClose={() => setSbertModalOpen(false)}
+        ragParams={ragParams}
+        setRagParams={setRagParams}
       />
     </div>
   );
