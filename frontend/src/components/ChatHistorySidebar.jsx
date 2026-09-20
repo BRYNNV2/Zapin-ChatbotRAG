@@ -80,9 +80,9 @@ export default function ChatHistorySidebar({
           onClick={() => setActiveTab('documents')}
         >
           <BookOpen size={16} />
-          <span style={{ flex: 1 }}>Pangkalan Dokumen</span>
+          <span style={{ flex: 1 }}>Katalog Pustaka</span>
           <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-            {stats.totalChunks || 5}
+            {stats.totalDocuments || 4} Naskah
           </span>
         </button>
 
@@ -101,25 +101,20 @@ export default function ChatHistorySidebar({
           <Cpu size={16} />
           <span>Pipeline SBERT</span>
         </button>
-
-        <button className="sidebar-nav-item">
-          <MoreHorizontal size={16} />
-          <span>Lainnya</span>
-        </button>
       </nav>
 
       <div className="sidebar-divider" />
 
-      {/* Ruang Kerja Section */}
-      <div className="sidebar-section-title">Ruang kerja</div>
+      {/* Basis Data Pengetahuan Section */}
+      <div className="sidebar-section-title">Basis Data Pengetahuan</div>
       <div style={{ padding: '0 8px', marginBottom: '8px' }}>
         <button
           className="sidebar-nav-item"
           style={{ color: 'var(--text-secondary)' }}
           onClick={() => setActiveTab('documents')}
         >
-          <FolderPlus size={15} />
-          <span>Dataset Budaya Zapin</span>
+          <BookOpen size={15} color="#d4af37" />
+          <span>Naskah Zapin Tervalidasi</span>
         </button>
       </div>
 

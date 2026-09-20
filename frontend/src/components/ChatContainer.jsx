@@ -147,21 +147,13 @@ export default function ChatContainer({
 
             <div className="kimi-box-bottom">
               <div className="kimi-box-left">
-                <button 
-                  className="kimi-circle-icon-btn" 
-                  onClick={onSwitchToDocs}
-                  title="Unggah atau kelola dokumen Zapin"
-                >
-                  <Plus size={16} />
-                </button>
-
                 <div 
                   className="kimi-select-pill"
                   onClick={onSwitchToDocs}
-                  title="Pilih atau lihat dokumen terdaftar"
+                  title="Lihat katalog naskah Zapin tervalidasi"
                 >
-                  <FileText size={13} />
-                  <span>Pilih dokumen</span>
+                  <BookOpen size={13} color="#d4af37" />
+                  <span>Katalog Pustaka</span>
                   <ChevronDown size={12} />
                 </div>
 
@@ -170,7 +162,7 @@ export default function ChatContainer({
                   onClick={() => setShowSettings(!showSettings)}
                   title="Pengaturan parameter retrieval"
                 >
-                  <Sparkles size={13} color="#d4af37" />
+                  <Sparkles size={13} color="#60a5fa" />
                   <span>Dense SBERT</span>
                   <ChevronDown size={12} />
                 </div>
@@ -360,22 +352,14 @@ export default function ChatContainer({
 
                 <div className="kimi-box-bottom" style={{ marginTop: '4px', paddingTop: '4px' }}>
                   <div className="kimi-box-left">
-                    <button 
-                      className="kimi-circle-icon-btn" 
-                      onClick={onSwitchToDocs}
-                      title="Kelola dokumen"
-                    >
-                      <Plus size={15} />
-                    </button>
-
-                    <div className="kimi-select-pill" onClick={onSwitchToDocs}>
-                      <FileText size={12} />
-                      <span>Dokumen</span>
+                    <div className="kimi-select-pill" onClick={onSwitchToDocs} title="Lihat katalog pustaka">
+                      <BookOpen size={12} color="#d4af37" />
+                      <span>Katalog Pustaka</span>
                     </div>
 
                     <div className="kimi-select-pill" onClick={() => setShowSettings(!showSettings)}>
-                      <Sparkles size={12} color="#d4af37" />
-                      <span>SBERT</span>
+                      <Sparkles size={12} color="#60a5fa" />
+                      <span>Dense SBERT</span>
                     </div>
                   </div>
 
