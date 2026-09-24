@@ -74,9 +74,26 @@ class RAGService:
     def _generate_with_gemini(self, prompt: str) -> str:
         """Memanggil Google Gemini API untuk melakukan grounded generation."""
         import google.generativeai as genai
-        model = genai.GenerativeModel(settings.GEMINI_MODEL)
-        response = model.generate_content(prompt)
-        return response.text.strip()
+        models_to_try = [
+            settings.GEMINI_MODEL,
+            "gemini-3.6-flash",
+            "gemini-flash-latest",
+            "gemini-3.7-flash",
+            "gemini-2.5-flash"
+        ]
+        
+        last_error = None
+        for model_name in models_to_try:
+            try:
+                model = genai.GenerativeModel(model_name)
+                response = model.generate_content(prompt)
+                if response and response.text:
+                    return response.text.strip()
+            except Exception as e:
+                last_error = e
+                continue
+        
+        raise last_error or RuntimeError("Gagal menghasilkan konten dengan model Gemini yang tersedia.")
 
     def _generate_local_fallback(self, query: str, chunks: List[Dict[str, Any]]) -> str:
         """Fallback cerdas jika pengguna belum memasukkan API Key Gemini saat pengujian awal."""
