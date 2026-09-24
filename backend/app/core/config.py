@@ -23,6 +23,9 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-3.6-flash"
     
+    # PostgreSQL Database URL
+    DATABASE_URL: str = ""
+    
     # Storage Paths
     DATA_DIR: Path = BASE_DIR / "data"
     RAW_DOCS_DIR: Path = DATA_DIR / "raw_documents"

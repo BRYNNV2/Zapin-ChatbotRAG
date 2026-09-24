@@ -17,7 +17,10 @@ import {
   Settings,
   ChevronRight,
   FolderPlus,
-  Check
+  Check,
+  User as UserIcon,
+  LogIn,
+  LogOut
 } from 'lucide-react';
 
 export default function ChatHistorySidebar({
@@ -31,7 +34,10 @@ export default function ChatHistorySidebar({
   onNewChat,
   onDeleteSession,
   stats,
-  onOpenSbertModal
+  onOpenSbertModal,
+  currentUser,
+  onOpenAuthModal,
+  onLogout
 }) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [activeModal, setActiveModal] = useState(null); // 'about', 'app', 'lang', null
@@ -223,76 +229,98 @@ export default function ChatHistorySidebar({
       {/* User Profile Footer with Popup Class Bar */}
       <div className="sidebar-footer">
         {/* Profile Popover Menu (Seperti Kimi AI) */}
-        {showProfileMenu && (
+        {showProfileMenu && currentUser && (
           <div className="kimi-profile-popover animate-fade-in" ref={popoverRef}>
+            {/* User Account Info Card */}
+            <div className="popover-user-card">
+              <div className="popover-user-avatar">
+                {currentUser.full_name ? currentUser.full_name[0].toUpperCase() : currentUser.username[0].toUpperCase()}
+              </div>
+              <div className="popover-user-details">
+                <div className="popover-user-name">{currentUser.full_name || currentUser.username}</div>
+                <div className="popover-user-email">{currentUser.email}</div>
+                <div className="popover-user-role-badge">{currentUser.role}</div>
+              </div>
+            </div>
+
+            <div className="popover-menu-divider" />
+
             <div className="popover-menu-item" onClick={() => handleMenuItemClick('app')}>
               <div className="popover-menu-left">
                 <Download size={15} />
-                <span>Dapatkan Aplikasi</span>
+                <span>Dapatkan Aplikasi / Ekspor</span>
               </div>
               <ChevronRight size={14} color="var(--text-muted)" />
-            </div>
-
-            <div className="popover-menu-item" onClick={() => handleMenuItemClick('membership')}>
-              <div className="popover-menu-left">
-                <Sparkles size={15} />
-                <span>Paket Keanggotaan</span>
-              </div>
-            </div>
-
-            <div className="popover-menu-item" onClick={() => handleMenuItemClick('gift')}>
-              <div className="popover-menu-left">
-                <Gift size={15} />
-                <span>Kartu Hadiah</span>
-              </div>
             </div>
 
             <div className="popover-menu-item" onClick={() => handleMenuItemClick('about')}>
               <div className="popover-menu-left">
                 <Info size={15} />
-                <span>Tentang kami</span>
+                <span>Tentang ZapinAI</span>
               </div>
               <ChevronRight size={14} color="var(--text-muted)" />
             </div>
-
-            <div className="popover-menu-item" onClick={() => handleMenuItemClick('language')}>
-              <div className="popover-menu-left">
-                <Globe size={15} />
-                <span>Bahasa</span>
-              </div>
-              <ChevronRight size={14} color="var(--text-muted)" />
-            </div>
-
-            <div className="popover-menu-item" onClick={() => handleMenuItemClick('help')}>
-              <div className="popover-menu-left">
-                <HelpCircle size={15} />
-                <span>Bantuan & Dukungan</span>
-              </div>
-              <ChevronRight size={14} color="var(--text-muted)" />
-            </div>
-
-            <div className="popover-menu-divider" />
 
             <div className="popover-menu-item" onClick={() => handleMenuItemClick('settings')}>
               <div className="popover-menu-left">
                 <Settings size={15} />
-                <span>Pengaturan</span>
+                <span>Pengaturan Pipeline SBERT</span>
+              </div>
+            </div>
+
+            <div className="popover-menu-divider" />
+
+            <div 
+              className="popover-menu-item" 
+              onClick={() => {
+                setShowProfileMenu(false);
+                if (onLogout) onLogout();
+              }}
+              style={{ color: '#ef4444' }}
+            >
+              <div className="popover-menu-left">
+                <LogOut size={15} color="#ef4444" />
+                <span style={{ color: '#ef4444', fontWeight: 500 }}>Keluar (Logout)</span>
               </div>
             </div>
           </div>
         )}
 
-        {/* Profile Button */}
-        <div 
-          ref={profileButtonRef}
-          className={`user-profile-pill ${showProfileMenu ? 'active' : ''}`}
-          onClick={() => setShowProfileMenu(!showProfileMenu)}
-          title="Klik untuk melihat menu akun & pengaturan"
-        >
-          <div className="user-avatar-circle">M</div>
-          <span className="user-name-text">mh...</span>
-          <span className="upgrade-badge">Tingkatkan</span>
-        </div>
+        {/* Profile Button / Login Button */}
+        {currentUser ? (
+          <div 
+            ref={profileButtonRef}
+            className={`user-profile-pill ${showProfileMenu ? 'active' : ''}`}
+            onClick={() => setShowProfileMenu(!showProfileMenu)}
+            title="Klik untuk melihat menu akun & profil"
+          >
+            <div className="user-avatar-circle">
+              {currentUser.full_name ? currentUser.full_name[0].toUpperCase() : currentUser.username[0].toUpperCase()}
+            </div>
+            <span className="user-name-text">
+              {currentUser.full_name 
+                ? (currentUser.full_name.length > 10 ? currentUser.full_name.slice(0, 9) + '...' : currentUser.full_name) 
+                : currentUser.username}
+            </span>
+            <span className="upgrade-badge">
+              {currentUser.role.includes('Pakar') ? 'Pakar' : currentUser.role.includes('Peneliti') ? 'Peneliti' : 'Aktif'}
+            </span>
+          </div>
+        ) : (
+          <div 
+            className="user-profile-pill not-logged-in"
+            onClick={onOpenAuthModal}
+            title="Masuk atau Daftar akun untuk menyimpan riwayat di cloud"
+          >
+            <div className="user-avatar-circle" style={{ background: '#27272e', color: '#d1d5db' }}>
+              <LogIn size={13} />
+            </div>
+            <span className="user-name-text">Masuk / Daftar</span>
+            <span className="upgrade-badge" style={{ background: 'rgba(255,255,255,0.08)', color: '#d1d5db' }}>
+              Cloud
+            </span>
+          </div>
+        )}
 
         <button
           className="sidebar-download-btn"
