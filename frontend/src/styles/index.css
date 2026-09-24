@@ -481,19 +481,18 @@ body {
   overflow: hidden;
 }
 
-/* Top Floating Bar */
+/* Top Minimalist Header Bar */
 .stage-top-bar {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 56px;
+  position: relative;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 0 24px;
   z-index: 20;
-  pointer-events: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: var(--kimi-bg);
+  flex-shrink: 0;
 }
 
 .stage-top-bar > * {
@@ -522,14 +521,13 @@ body {
   display: flex;
   align-items: center;
   gap: 7px;
-  padding: 5px 14px;
+  padding: 4px 12px;
   border-radius: 20px;
-  background: rgba(37, 99, 235, 0.15);
-  border: 1px solid rgba(59, 130, 246, 0.35);
-  color: #60a5fa;
-  font-size: 0.78rem;
-  font-weight: 600;
-  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #9ca3af;
+  font-size: 0.76rem;
+  font-weight: 500;
 }
 
 .top-bar-right-slot {
@@ -570,7 +568,7 @@ body {
 .stage-workspace-body {
   flex: 1;
   display: flex;
-  height: 100vh;
+  height: calc(100vh - 48px);
   width: 100%;
   overflow: hidden;
   position: relative;
@@ -921,11 +919,94 @@ body {
   user-select: text;
 }
 
-.kimi-assistant-content p {
-  margin-bottom: 12px;
+/* Rich Markdown Typography in Chat Stream */
+.kimi-markdown-body {
+  width: 100%;
 }
-.kimi-assistant-content p:last-child {
+
+.kimi-markdown-body .md-paragraph {
+  margin-bottom: 12px;
+  line-height: 1.72;
+}
+
+.kimi-markdown-body .md-paragraph:last-child {
   margin-bottom: 0;
+}
+
+.kimi-markdown-body .md-bold {
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.kimi-markdown-body .md-italic {
+  font-style: italic;
+  color: #d1d5db;
+}
+
+.kimi-markdown-body .md-subheading {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-top: 18px;
+  margin-bottom: 8px;
+  letter-spacing: -0.01em;
+}
+
+.kimi-markdown-body .md-heading {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-top: 20px;
+  margin-bottom: 10px;
+  letter-spacing: -0.01em;
+}
+
+.kimi-markdown-body .md-list {
+  margin: 10px 0 14px 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.kimi-markdown-body .md-list-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  line-height: 1.65;
+}
+
+.kimi-markdown-body .md-bullet {
+  color: #9ca3af;
+  font-size: 1rem;
+  line-height: 1.5;
+  flex-shrink: 0;
+  user-select: none;
+}
+
+.kimi-markdown-body .md-number {
+  color: #9ca3af;
+  font-weight: 600;
+  font-size: 0.88rem;
+  line-height: 1.65;
+  flex-shrink: 0;
+  min-width: 18px;
+  user-select: none;
+}
+
+.kimi-markdown-body .md-item-content {
+  flex: 1;
+}
+
+.kimi-markdown-body .md-inline-code {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-size: 0.85em;
+  color: #f3f4f6;
 }
 
 /* Citation Pill Badge in Assistant Messages - Monochromatic Editorial */

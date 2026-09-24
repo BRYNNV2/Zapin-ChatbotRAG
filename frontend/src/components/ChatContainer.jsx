@@ -21,6 +21,7 @@ import {
 import cardTahto from '../assets/card_tahto.jpg';
 import cardMusic from '../assets/card_music.jpg';
 import cardHistory from '../assets/card_history.jpg';
+import MarkdownMessage from './MarkdownMessage';
 
 export default function ChatContainer({
   messages,
@@ -291,9 +292,11 @@ export default function ChatContainer({
                       <div className="kimi-assistant-avatar">Z</div>
 
                       <div className="kimi-assistant-content">
-                        <div style={{ whiteSpace: 'pre-wrap' }}>
-                          {renderMessageContent(msg.text, msg.sources)}
-                        </div>
+                        <MarkdownMessage 
+                          text={msg.text} 
+                          sources={msg.sources} 
+                          onOpenSources={onOpenSources} 
+                        />
 
                         {/* Action Bar Below Response */}
                         <div className="assistant-actions-bar">
