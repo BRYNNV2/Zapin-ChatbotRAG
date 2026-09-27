@@ -2284,3 +2284,377 @@ body {
   background: rgba(255, 255, 255, 0.08);
 }
 
+/* ==========================================================================
+   Kimi AI Full-Page Settings View (Persis Referensi Pengaturan Kimi)
+   ========================================================================== */
+
+.kimi-settings-screen {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  background: #121214;
+  color: #ededf0;
+  z-index: 500;
+  overflow: hidden;
+}
+
+/* Sidebar Navigasi Pengaturan */
+.kimi-settings-sidebar {
+  width: 230px;
+  min-width: 230px;
+  background: #17171a;
+  border-right: 1px solid rgba(255, 255, 255, 0.06);
+  display: flex;
+  flex-direction: column;
+  padding: 16px 10px;
+  user-select: none;
+}
+
+.settings-back-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: transparent;
+  border: none;
+  color: #a1a1aa;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 8px;
+  transition: all 0.15s ease;
+  margin-bottom: 12px;
+}
+
+.settings-back-btn:hover {
+  background: rgba(255, 255, 255, 0.06);
+  color: #ffffff;
+}
+
+.settings-nav-scroll {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-nav-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.settings-section-heading {
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: #71717a;
+  padding: 14px 12px 6px 12px;
+  letter-spacing: 0.01em;
+}
+
+.settings-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: transparent;
+  border: none;
+  color: #a1a1aa;
+  font-size: 0.86rem;
+  font-weight: 450;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.settings-nav-item svg {
+  color: #71717a;
+  flex-shrink: 0;
+  transition: color 0.15s ease;
+}
+
+.settings-nav-item:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ededf0;
+}
+
+.settings-nav-item:hover svg {
+  color: #ededf0;
+}
+
+.settings-nav-item.active {
+  background: #27272a;
+  color: #ffffff;
+  font-weight: 500;
+}
+
+.settings-nav-item.active svg {
+  color: #ffffff;
+}
+
+/* Area Konten Utama */
+.kimi-settings-main {
+  flex: 1;
+  height: 100%;
+  overflow-y: auto;
+  background: #121214;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.settings-content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 40px 24px 60px 24px;
+}
+
+.settings-account-content {
+  width: 100%;
+  max-width: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 auto;
+}
+
+.settings-generic-content {
+  width: 100%;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.settings-generic-content h3 {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 4px;
+}
+
+.settings-subtitle {
+  font-size: 0.84rem;
+  color: #71717a;
+}
+
+/* Profil Avatar & Username */
+.settings-profile-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 28px;
+}
+
+.settings-avatar-circle {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: #27272a;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+}
+
+.settings-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.settings-username {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-top: 12px;
+  letter-spacing: -0.01em;
+}
+
+/* Card Sections */
+.settings-card-section {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 18px;
+}
+
+.settings-group-label {
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: #71717a;
+  margin-bottom: 8px;
+  padding-left: 2px;
+}
+
+.settings-card-box {
+  width: 100%;
+  background: #1c1c1f;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.settings-card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 13px 16px;
+  font-size: 0.88rem;
+  color: #ededf0;
+}
+
+.settings-card-row.clickable {
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.settings-card-row.clickable:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.settings-row-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: #ededf0;
+}
+
+.settings-row-right {
+  display: flex;
+  align-items: center;
+}
+
+.settings-row-divider {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.06);
+  margin: 0 16px;
+}
+
+.settings-row-value {
+  font-size: 0.86rem;
+  color: #9ca3af;
+}
+
+.settings-link-action-btn {
+  background: transparent;
+  border: none;
+  color: #3b82f6;
+  font-size: 0.86rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.15s ease;
+}
+
+.settings-link-action-btn:hover {
+  color: #60a5fa;
+  text-decoration: underline;
+}
+
+/* Logout Button */
+.settings-logout-btn {
+  width: 100%;
+  height: 42px;
+  margin-top: 14px;
+  background: #25252a;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  color: #e4e4e7;
+  font-size: 0.88rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.settings-logout-btn:hover {
+  background: #2e2e34;
+  color: #ffffff;
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* Bottom Delete Account */
+.settings-delete-account-wrap {
+  margin-top: 50px;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.settings-delete-account-btn {
+  background: transparent;
+  border: none;
+  color: #71717a;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: color 0.15s ease;
+  padding: 6px 12px;
+}
+
+.settings-delete-account-btn:hover {
+  color: #ef4444;
+}
+
+.settings-kbd {
+  background: #27272a;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 0.76rem;
+  font-family: inherit;
+  color: #d1d5db;
+}
+
+.settings-badge-gold {
+  background: rgba(234, 179, 8, 0.15);
+  color: #facc15;
+  border: 1px solid rgba(234, 179, 8, 0.3);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.settings-action-pill-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #25252a;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f3f4f6;
+  font-size: 0.84rem;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.settings-action-pill-btn:hover {
+  background: #2e2e34;
+  border-color: rgba(255, 255, 255, 0.18);
+}
+
+.settings-text-input {
+  background: #222226;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: #ffffff;
+  padding: 8px 12px;
+  font-size: 0.86rem;
+  outline: none;
+}
+
+.settings-text-input:focus {
+  border-color: #3b82f6;
+}
+
+

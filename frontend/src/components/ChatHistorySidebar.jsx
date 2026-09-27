@@ -81,7 +81,7 @@ export default function ChatHistorySidebar({
     setShowProfileMenu(false);
 
     if (type === 'settings') {
-      onOpenSbertModal();
+      setActiveTab('settings');
     } else if (type === 'about') {
       setActiveModal('about');
     } else if (type === 'app') {

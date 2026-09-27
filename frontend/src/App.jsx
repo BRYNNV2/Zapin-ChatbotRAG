@@ -7,9 +7,11 @@ import DocumentManager from './components/DocumentManager';
 import EvaluationDashboard from './components/EvaluationDashboard';
 import SbertPipelineModal from './components/SbertPipelineModal';
 import AuthModal from './components/AuthModal';
+import SettingsPage from './components/SettingsPage';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('chat');
+  const [previousTab, setPreviousTab] = useState('chat');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [stats, setStats] = useState({ totalChunks: 0, totalDocuments: 0 });
 
@@ -313,6 +315,40 @@ export default function App() {
     setDrawerOpen(true);
   };
 
+  const handleSelectTab = (tab) => {
+    if (tab === 'settings' && activeTab !== 'settings') {
+      setPreviousTab(activeTab);
+    }
+    setActiveTab(tab);
+  };
+
+  if (activeTab === 'settings') {
+    return (
+      <div className="app-root-container">
+        <SettingsPage
+          onBack={() => setActiveTab(previousTab || 'chat')}
+          currentUser={currentUser}
+          onLogout={handleLogout}
+          onOpenAuthModal={() => setAuthModalOpen(true)}
+          ragParams={ragParams}
+          setRagParams={setRagParams}
+          onOpenSbertModal={() => setSbertModalOpen(true)}
+        />
+        <SbertPipelineModal
+          isOpen={sbertModalOpen}
+          onClose={() => setSbertModalOpen(false)}
+          ragParams={ragParams}
+          setRagParams={setRagParams}
+        />
+        <AuthModal
+          isOpen={authModalOpen}
+          onClose={() => setAuthModalOpen(false)}
+          onAuthSuccess={handleAuthSuccess}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="app-layout">
       {/* Kimi Left Sidebar */}
@@ -320,7 +356,7 @@ export default function App() {
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         activeTab={activeTab}
-        setActiveTab={setActiveTab}
+        setActiveTab={handleSelectTab}
         sessions={sessions}
         activeSessionId={activeSessionId}
         onSelectSession={handleSelectSession}
