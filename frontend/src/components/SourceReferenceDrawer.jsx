@@ -23,10 +23,23 @@ export default function SourceReferenceDrawer({
   const [selectedFilter, setSelectedFilter] = useState('all'); // 'all' or citation_id
   const cardRefs = useRef({});
 
+  // Pastikan sources selalu berupa array of objects yang valid (terlindungi jika berupa JSON string atau number)
+  let safeSources = [];
+  if (Array.isArray(sources)) {
+    safeSources = sources;
+  } else if (typeof sources === 'string') {
+    try {
+      const parsed = JSON.parse(sources);
+      if (Array.isArray(parsed)) safeSources = parsed;
+    } catch {
+      safeSources = [];
+    }
+  }
+
   // Sinkronkan filter jika ada highlightedId dari klik sitasi di chat
   useEffect(() => {
     if (highlightedId) {
-      setSelectedFilter(highlightedId.toString());
+      setSelectedFilter(String(highlightedId));
       if (cardRefs.current[highlightedId]) {
         cardRefs.current[highlightedId].scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
@@ -38,14 +51,15 @@ export default function SourceReferenceDrawer({
   if (!isOpen) return null;
 
   const handleCopyQuote = (text, id) => {
+    if (!text) return;
     navigator.clipboard.writeText(text);
     setCopiedId(id);
     setTimeout(() => setCopiedId(null), 2000);
   };
 
   const filteredSources = selectedFilter === 'all'
-    ? sources
-    : sources.filter(s => s.citation_id.toString() === selectedFilter);
+    ? safeSources
+    : safeSources.filter(s => String(s?.citation_id) === String(selectedFilter));
 
   return (
     <aside className="source-side-panel animate-slide-in-right">
@@ -58,7 +72,7 @@ export default function SourceReferenceDrawer({
           <div>
             <h3 className="source-panel-heading">Rujukan Sumber Naskah</h3>
             <p className="source-panel-subheading">
-              {sources.length} kutipan otentik terverifikasi
+              {safeSources.length} kutipan otentik terverifikasi
             </p>
           </div>
         </div>
@@ -84,7 +98,7 @@ export default function SourceReferenceDrawer({
       </div>
 
       {/* Filter Chips: Monokromatis Minimalis */}
-      {sources.length > 1 && (
+      {safeSources.length > 1 && (
         <div className="source-filter-chips-row">
           <button
             className={`source-chip-btn ${selectedFilter === 'all' ? 'active' : ''}`}
@@ -93,21 +107,22 @@ export default function SourceReferenceDrawer({
               if (onSelectCitation) onSelectCitation(null);
             }}
           >
-            Semua ({sources.length})
+            Semua ({safeSources.length})
           </button>
           
-          {sources.map((src) => {
-            const isSelected = selectedFilter === src.citation_id.toString();
+          {safeSources.map((src, idx) => {
+            const citId = src?.citation_id ?? (idx + 1);
+            const isSelected = String(selectedFilter) === String(citId);
             return (
               <button
-                key={src.citation_id}
+                key={citId}
                 className={`source-chip-btn ${isSelected ? 'active' : ''}`}
                 onClick={() => {
-                  setSelectedFilter(src.citation_id.toString());
-                  if (onSelectCitation) onSelectCitation(src.citation_id);
+                  setSelectedFilter(String(citId));
+                  if (onSelectCitation) onSelectCitation(citId);
                 }}
               >
-                [{src.citation_id}]
+                [{citId}]
               </button>
             );
           })}
@@ -116,7 +131,7 @@ export default function SourceReferenceDrawer({
 
       {/* Source Cards List */}
       <div className="source-panel-scroll">
-        {(!sources || sources.length === 0) ? (
+        {(!safeSources || safeSources.length === 0) ? (
           <div className="source-empty-state">
             <Database size={32} color="var(--text-muted)" style={{ marginBottom: '12px', opacity: 0.4 }} />
             <p>Tidak ada rujukan sumber untuk pesan ini.</p>
@@ -125,25 +140,30 @@ export default function SourceReferenceDrawer({
             </span>
           </div>
         ) : (
-          filteredSources.map((src) => {
-            const isTargeted = highlightedId && Number(highlightedId) === src.citation_id;
-            const simScore = src.similarity_score || 0;
+          filteredSources.map((src, idx) => {
+            const citId = src?.citation_id ?? (idx + 1);
+            const isTargeted = highlightedId && Number(highlightedId) === Number(citId);
+            const simScore = typeof src?.similarity_score === 'number' ? src.similarity_score : 0;
             const simPercent = Math.round(simScore * 100);
+            const docName = src?.document_name || 'Naskah Budaya Zapin';
+            const pageNum = src?.page_number ?? 1;
+            const isDocx = String(docName).toLowerCase().endsWith('.docx');
+            const quoteText = src?.full_text || src?.snippet || 'Teks naskah tersimpan.';
 
             return (
               <div
-                key={src.citation_id}
-                ref={el => cardRefs.current[src.citation_id] = el}
+                key={citId}
+                ref={el => cardRefs.current[citId] = el}
                 className={`source-detail-card ${isTargeted ? 'highlighted' : ''}`}
               >
                 {/* Header Card: Monokrom rapi */}
                 <div className="source-detail-top">
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <span className="source-citation-badge">
-                      Sitasi [{src.citation_id}]
+                      Sitasi [{citId}]
                     </span>
                     <span className="source-category-tag">
-                      {src.cultural_category || 'Budaya Zapin'}
+                      {src?.cultural_category || 'Budaya Zapin'}
                     </span>
                   </div>
 
@@ -156,20 +176,20 @@ export default function SourceReferenceDrawer({
                 <div className="source-origin-breakdown">
                   <div className="origin-row">
                     <span className="origin-label">Dokumen Sumber</span>
-                    <span className="origin-value doc-name" title={src.document_name}>
-                      {src.document_name}
+                    <span className="origin-value doc-name" title={docName}>
+                      {docName}
                     </span>
                   </div>
 
                   <div className="origin-meta-grid">
                     <div className="origin-meta-item">
                       <Hash size={12} color="var(--text-muted)" />
-                      <span>Hal. <strong>{src.page_number}</strong></span>
+                      <span>Hal. <strong>{pageNum}</strong></span>
                     </div>
 
                     <div className="origin-meta-item">
                       <Layers size={12} color="var(--text-muted)" />
-                      <span>{src.document_name.endsWith('.docx') ? 'Naskah DOCX' : 'Naskah PDF'}</span>
+                      <span>{isDocx ? 'Naskah DOCX' : 'Naskah PDF'}</span>
                     </div>
                   </div>
 
@@ -177,7 +197,7 @@ export default function SourceReferenceDrawer({
                   <div className="source-validator-clean">
                     <ShieldCheck size={14} color="#9ca3af" />
                     <span className="validator-clean-text">
-                      Validasi: <strong>{src.validator_name || 'Dewan Kesenian & Budayawan Melayu'}</strong>
+                      Validasi: <strong>{src?.validator_name || 'Dewan Kesenian & Budayawan Melayu'}</strong>
                     </span>
                   </div>
                 </div>
@@ -188,10 +208,10 @@ export default function SourceReferenceDrawer({
                     <span className="ground-truth-label">Kutipan Teks Asli:</span>
                     <button 
                       className="copy-quote-btn"
-                      onClick={() => handleCopyQuote(src.full_text || src.snippet, src.citation_id)}
+                      onClick={() => handleCopyQuote(quoteText, citId)}
                       title="Salin kutipan naskah"
                     >
-                      {copiedId === src.citation_id ? (
+                      {copiedId === citId ? (
                         <>
                           <Check size={11} color="#ffffff" />
                           <span>Disalin</span>
@@ -206,13 +226,13 @@ export default function SourceReferenceDrawer({
                   </div>
 
                   <div className="source-quote-box-clean">
-                    "{src.full_text || src.snippet}"
+                    "{quoteText}"
                   </div>
                 </div>
 
                 {/* Catatan Sintesis: Muted & Minimalis */}
                 <div className="source-synthesis-clean">
-                  <span>Rujukan data primer untuk jawaban poin <strong>[{src.citation_id}]</strong>.</span>
+                  <span>Rujukan data primer untuk jawaban poin <strong>[{citId}]</strong>.</span>
                 </div>
               </div>
             );

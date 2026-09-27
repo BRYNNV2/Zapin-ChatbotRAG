@@ -164,8 +164,16 @@ export default function App() {
       if (res.ok) {
         const data = await res.json();
         if (data.session && data.session.messages) {
-          setMessages(data.session.messages);
-          const lastWithSources = [...data.session.messages].reverse().find(
+          const parsedMessages = data.session.messages.map(m => {
+            let safeSources = m.sources;
+            if (typeof safeSources === 'string') {
+              try { safeSources = JSON.parse(safeSources); } catch { safeSources = []; }
+            }
+            if (!Array.isArray(safeSources)) safeSources = [];
+            return { ...m, sources: safeSources };
+          });
+          setMessages(parsedMessages);
+          const lastWithSources = [...parsedMessages].reverse().find(
             (m) => m.sources && m.sources.length > 0
           );
           if (lastWithSources) {
@@ -311,7 +319,18 @@ export default function App() {
 
   // Handler Buka Sumber Rujukan (Bar Kanan)
   const handleOpenSources = (sources, citationId) => {
-    setActiveSources(sources || []);
+    let safeList = [];
+    if (Array.isArray(sources)) {
+      safeList = sources;
+    } else if (typeof sources === 'string') {
+      try {
+        const p = JSON.parse(sources);
+        if (Array.isArray(p)) safeList = p;
+      } catch {
+        safeList = [];
+      }
+    }
+    setActiveSources(safeList);
     setHighlightedCitationId(citationId);
     setDrawerOpen(true);
   };

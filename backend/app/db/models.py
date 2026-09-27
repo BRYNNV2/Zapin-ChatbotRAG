@@ -1,4 +1,5 @@
 import uuid
+import json
 from datetime import datetime
 from sqlalchemy import Column, String, Text, DateTime, ForeignKey, JSON
 from sqlalchemy.orm import relationship
@@ -68,11 +69,20 @@ class ChatMessage(Base):
     conversation = relationship("Conversation", back_populates="messages")
 
     def to_dict(self):
+        parsed_sources = self.sources
+        if isinstance(parsed_sources, str):
+            try:
+                parsed_sources = json.loads(parsed_sources)
+            except Exception:
+                parsed_sources = []
+        elif not isinstance(parsed_sources, list):
+            parsed_sources = []
+
         return {
             "id": self.id,
             "conversation_id": self.conversation_id,
             "sender": self.sender,
             "text": self.text,
-            "sources": self.sources or [],
+            "sources": parsed_sources,
             "created_at": self.created_at.isoformat() if self.created_at else None
         }

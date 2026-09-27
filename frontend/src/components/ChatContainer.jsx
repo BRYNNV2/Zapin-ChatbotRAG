@@ -300,15 +300,28 @@ export default function ChatContainer({
 
                         {/* Action Bar Below Response */}
                         <div className="assistant-actions-bar">
-                          {msg.sources && msg.sources.length > 0 && (
-                            <button
-                              className="source-pill-btn"
-                              onClick={() => onOpenSources(msg.sources, null)}
-                            >
-                              <BookOpen size={13} color="#9ca3af" />
-                              <span>{msg.sources.length} Sumber Tervalidasi</span>
-                            </button>
-                          )}
+                          {(() => {
+                            let srcList = [];
+                            if (Array.isArray(msg.sources)) {
+                              srcList = msg.sources;
+                            } else if (typeof msg.sources === 'string') {
+                              try {
+                                const p = JSON.parse(msg.sources);
+                                if (Array.isArray(p)) srcList = p;
+                              } catch {}
+                            }
+                            if (srcList.length === 0) return null;
+
+                            return (
+                              <button
+                                className="source-pill-btn"
+                                onClick={() => onOpenSources(srcList, null)}
+                              >
+                                <BookOpen size={13} color="#9ca3af" />
+                                <span>{srcList.length} Sumber Tervalidasi</span>
+                              </button>
+                            );
+                          })()}
 
                           <button
                             className="action-btn-small"
