@@ -20,7 +20,10 @@ import {
   Check,
   User as UserIcon,
   LogIn,
-  LogOut
+  LogOut,
+  Languages,
+  Bell,
+  Music
 } from 'lucide-react';
 
 export default function ChatHistorySidebar({
@@ -104,6 +107,8 @@ export default function ChatHistorySidebar({
       setActiveModal('gift');
     } else if (type === 'language') {
       setActiveModal('language');
+    } else if (type === 'messages') {
+      setActiveModal('messages');
     } else if (type === 'help') {
       setActiveTab('documents');
     }
@@ -226,109 +231,154 @@ export default function ChatHistorySidebar({
         )}
       </div>
 
-      {/* User Profile Footer with Popup Class Bar */}
+      {/* User Profile Footer with Popup Class Bar (Persis Kimi AI) */}
       <div className="sidebar-footer">
-        {/* Profile Popover Menu (Seperti Kimi AI) */}
-        {showProfileMenu && currentUser && (
+        {/* Profile Popover Menu (Persis Kimi AI) */}
+        {showProfileMenu && (
           <div className="kimi-profile-popover animate-fade-in" ref={popoverRef}>
-            {/* User Account Info Card */}
-            <div className="popover-user-card">
-              <div className="popover-user-avatar">
-                {currentUser.full_name ? currentUser.full_name[0].toUpperCase() : currentUser.username[0].toUpperCase()}
-              </div>
-              <div className="popover-user-details">
-                <div className="popover-user-name">{currentUser.full_name || currentUser.username}</div>
-                <div className="popover-user-email">{currentUser.email}</div>
-                <div className="popover-user-role-badge">{currentUser.role}</div>
-              </div>
-            </div>
-
-            <div className="popover-menu-divider" />
-
+            {/* 1. Dapatkan Aplikasi */}
             <div className="popover-menu-item" onClick={() => handleMenuItemClick('app')}>
               <div className="popover-menu-left">
-                <Download size={15} />
-                <span>Dapatkan Aplikasi / Ekspor</span>
+                <Download size={16} />
+                <span>Dapatkan Aplikasi</span>
               </div>
-              <ChevronRight size={14} color="var(--text-muted)" />
+              <ChevronRight size={15} color="#6b7280" />
             </div>
 
+            {/* 2. Paket Keanggotaan */}
+            <div className="popover-menu-item" onClick={() => handleMenuItemClick('membership')}>
+              <div className="popover-menu-left">
+                <Music size={16} />
+                <span>Paket Keanggotaan</span>
+              </div>
+            </div>
+
+            {/* 3. Kartu Hadiah */}
+            <div className="popover-menu-item" onClick={() => handleMenuItemClick('gift')}>
+              <div className="popover-menu-left">
+                <Gift size={16} />
+                <span>Kartu Hadiah</span>
+              </div>
+            </div>
+
+            {/* 4. Tentang kami */}
             <div className="popover-menu-item" onClick={() => handleMenuItemClick('about')}>
               <div className="popover-menu-left">
-                <Info size={15} />
-                <span>Tentang ZapinAI</span>
+                <Info size={16} />
+                <span>Tentang kami</span>
               </div>
-              <ChevronRight size={14} color="var(--text-muted)" />
+              <ChevronRight size={15} color="#6b7280" />
             </div>
 
+            {/* 5. Bahasa */}
+            <div className="popover-menu-item" onClick={() => handleMenuItemClick('language')}>
+              <div className="popover-menu-left">
+                <Languages size={16} />
+                <span>Bahasa</span>
+              </div>
+              <ChevronRight size={15} color="#6b7280" />
+            </div>
+
+            {/* 6. Pusat pesan */}
+            <div className="popover-menu-item" onClick={() => handleMenuItemClick('messages')}>
+              <div className="popover-menu-left">
+                <Bell size={16} />
+                <span>Pusat pesan</span>
+              </div>
+            </div>
+
+            {/* 7. Bantuan & Dukungan */}
+            <div className="popover-menu-item" onClick={() => handleMenuItemClick('help')}>
+              <div className="popover-menu-left">
+                <HelpCircle size={16} />
+                <span>Bantuan & Dukungan</span>
+              </div>
+              <ChevronRight size={15} color="#6b7280" />
+            </div>
+
+            {/* 8. Pengaturan */}
             <div className="popover-menu-item" onClick={() => handleMenuItemClick('settings')}>
               <div className="popover-menu-left">
-                <Settings size={15} />
-                <span>Pengaturan Pipeline SBERT</span>
+                <Settings size={16} />
+                <span>Pengaturan</span>
               </div>
             </div>
 
-            <div className="popover-menu-divider" />
-
-            <div 
-              className="popover-menu-item" 
-              onClick={() => {
-                setShowProfileMenu(false);
-                if (onLogout) onLogout();
-              }}
-              style={{ color: '#ef4444' }}
-            >
-              <div className="popover-menu-left">
-                <LogOut size={15} color="#ef4444" />
-                <span style={{ color: '#ef4444', fontWeight: 500 }}>Keluar (Logout)</span>
-              </div>
-            </div>
+            {/* Akun Status / Keluar (Jika Sedang Login) */}
+            {currentUser && (
+              <>
+                <div className="popover-menu-divider" />
+                <div 
+                  className="popover-menu-item logout" 
+                  onClick={() => {
+                    setShowProfileMenu(false);
+                    if (onLogout) onLogout();
+                  }}
+                >
+                  <div className="popover-menu-left">
+                    <LogOut size={16} color="#f87171" />
+                    <span style={{ color: '#f87171' }}>Keluar ({currentUser.username})</span>
+                  </div>
+                </div>
+              </>
+            )}
           </div>
         )}
 
-        {/* Profile Button / Login Button */}
-        {currentUser ? (
+        {/* Profile Pill & Standalone Download Icon Button (Sesuai Screenshot Kimi AI) */}
+        <div className="sidebar-footer-row">
           <div 
             ref={profileButtonRef}
             className={`user-profile-pill ${showProfileMenu ? 'active' : ''}`}
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            title="Klik untuk melihat menu akun & profil"
+            title="Klik untuk membuka menu akun & pengaturan"
           >
             <div className="user-avatar-circle">
-              {currentUser.full_name ? currentUser.full_name[0].toUpperCase() : currentUser.username[0].toUpperCase()}
+              {currentUser && currentUser.full_name ? (
+                currentUser.full_name[0].toUpperCase()
+              ) : currentUser && currentUser.username ? (
+                currentUser.username[0].toUpperCase()
+              ) : (
+                <img 
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80" 
+                  alt="Avatar" 
+                  className="user-avatar-img"
+                  onError={(e) => { e.target.style.display = 'none'; }}
+                />
+              )}
             </div>
-            <span className="user-name-text">
-              {currentUser.full_name 
-                ? (currentUser.full_name.length > 10 ? currentUser.full_name.slice(0, 9) + '...' : currentUser.full_name) 
-                : currentUser.username}
-            </span>
-            <span className="upgrade-badge">
-              {currentUser.role.includes('Pakar') ? 'Pakar' : currentUser.role.includes('Peneliti') ? 'Peneliti' : 'Aktif'}
-            </span>
-          </div>
-        ) : (
-          <div 
-            className="user-profile-pill not-logged-in"
-            onClick={onOpenAuthModal}
-            title="Masuk atau Daftar akun untuk menyimpan riwayat di cloud"
-          >
-            <div className="user-avatar-circle" style={{ background: '#27272e', color: '#d1d5db' }}>
-              <LogIn size={13} />
-            </div>
-            <span className="user-name-text">Masuk / Daftar</span>
-            <span className="upgrade-badge" style={{ background: 'rgba(255,255,255,0.08)', color: '#d1d5db' }}>
-              Cloud
-            </span>
-          </div>
-        )}
 
-        <button
-          className="sidebar-download-btn"
-          title="Unduh / Ekspor Percakapan"
-          onClick={() => handleMenuItemClick('app')}
-        >
-          <ArrowDownToLine size={15} />
-        </button>
+            <span className="user-name-text">
+              {currentUser 
+                ? (currentUser.full_name || currentUser.username).slice(0, 5) + '...'
+                : 'mh...'}
+            </span>
+
+            <button 
+              type="button" 
+              className="upgrade-btn-pill"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (!currentUser && onOpenAuthModal) {
+                  onOpenAuthModal();
+                } else {
+                  setActiveModal('membership');
+                }
+              }}
+            >
+              Tingkatkan
+            </button>
+          </div>
+
+          <button
+            type="button"
+            className="sidebar-download-btn"
+            title="Unduh / Ekspor Percakapan"
+            onClick={() => handleMenuItemClick('app')}
+          >
+            <ArrowDownToLine size={16} />
+          </button>
+        </div>
       </div>
 
       {/* Mini Modal Informasional dari Popover */}
@@ -338,9 +388,10 @@ export default function ChatHistorySidebar({
             <div className="simple-modal-header">
               <h3>
                 {activeModal === 'about' && 'Tentang ZapinAI'}
-                {activeModal === 'membership' && 'Paket Riset Budaya'}
-                {activeModal === 'gift' && 'Akses Literatur Terverifikasi'}
+                {activeModal === 'membership' && 'Paket Keanggotaan & Riset'}
+                {activeModal === 'gift' && 'Kartu Hadiah Riset Budaya'}
                 {activeModal === 'language' && 'Pengaturan Bahasa'}
+                {activeModal === 'messages' && 'Pusat Pesan'}
               </h3>
               <button className="simple-modal-close" onClick={() => setActiveModal(null)}>
                 ×
@@ -369,6 +420,12 @@ export default function ChatHistorySidebar({
               {activeModal === 'language' && (
                 <p>
                   Bahasa aktif sistem: <strong>Bahasa Indonesia & Melayu Multilingual</strong> (didukung oleh arsitektur multilingual Sentence-BERT).
+                </p>
+              )}
+
+              {activeModal === 'messages' && (
+                <p>
+                  <strong>Pusat Pesan:</strong> Tidak ada pemberitahuan baru saat ini. Pipeline Sentence-BERT tervalidasi dan model Google Gemini 3.6 Flash beroperasi optimal dengan latensi sub-detik.
                 </p>
               )}
             </div>
