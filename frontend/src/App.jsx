@@ -12,6 +12,7 @@ import SettingsPage from './components/SettingsPage';
 export default function App() {
   const [activeTab, setActiveTab] = useState('chat');
   const [previousTab, setPreviousTab] = useState('chat');
+  const [settingsSubTab, setSettingsSubTab] = useState('account');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [stats, setStats] = useState({ totalChunks: 0, totalDocuments: 0 });
 
@@ -333,6 +334,7 @@ export default function App() {
           ragParams={ragParams}
           setRagParams={setRagParams}
           onOpenSbertModal={() => setSbertModalOpen(true)}
+          initialSubTab={settingsSubTab}
         />
         <SbertPipelineModal
           isOpen={sbertModalOpen}
@@ -357,6 +359,7 @@ export default function App() {
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
         activeTab={activeTab}
         setActiveTab={handleSelectTab}
+        setSettingsSubTab={setSettingsSubTab}
         sessions={sessions}
         activeSessionId={activeSessionId}
         onSelectSession={handleSelectSession}

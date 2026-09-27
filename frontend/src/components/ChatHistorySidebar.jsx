@@ -40,7 +40,8 @@ export default function ChatHistorySidebar({
   onOpenSbertModal,
   currentUser,
   onOpenAuthModal,
-  onLogout
+  onLogout,
+  setSettingsSubTab
 }) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const [activeModal, setActiveModal] = useState(null); // 'about', 'app', 'lang', null
@@ -81,6 +82,7 @@ export default function ChatHistorySidebar({
     setShowProfileMenu(false);
 
     if (type === 'settings') {
+      if (setSettingsSubTab) setSettingsSubTab('account');
       setActiveTab('settings');
     } else if (type === 'about') {
       setActiveModal('about');
@@ -108,7 +110,8 @@ export default function ChatHistorySidebar({
     } else if (type === 'language') {
       setActiveModal('language');
     } else if (type === 'messages') {
-      setActiveModal('messages');
+      if (setSettingsSubTab) setSettingsSubTab('notifications');
+      setActiveTab('settings');
     } else if (type === 'help') {
       setActiveTab('documents');
     }
@@ -297,7 +300,7 @@ export default function ChatHistorySidebar({
             </div>
 
             {/* 8. Pengaturan */}
-            <div className="popover-menu-item" onClick={() => handleMenuItemClick('settings')}>
+            <div id="profile-popover-settings" className="popover-menu-item" onClick={() => handleMenuItemClick('settings')}>
               <div className="popover-menu-left">
                 <Settings size={16} />
                 <span>Pengaturan</span>
@@ -328,6 +331,7 @@ export default function ChatHistorySidebar({
         {/* Profile Pill & Standalone Download Icon Button (Sesuai Screenshot Kimi AI) */}
         <div className="sidebar-footer-row">
           <div 
+            id="user-profile-pill-btn"
             ref={profileButtonRef}
             className={`user-profile-pill ${showProfileMenu ? 'active' : ''}`}
             onClick={() => setShowProfileMenu(!showProfileMenu)}

@@ -2657,4 +2657,179 @@ body {
   border-color: #3b82f6;
 }
 
+/* ==========================================================================
+   Notifikasi Subtab (Persis Referensi Kimi AI)
+   ========================================================================== */
+
+.settings-notif-container {
+  width: 100%;
+  max-width: 580px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-page-title {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #ffffff;
+  margin-bottom: 20px;
+  letter-spacing: -0.01em;
+}
+
+.notif-card-box {
+  background: #1c1c1f;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.settings-notif-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 18px 20px;
+}
+
+.settings-notif-text-group {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-notif-item-title {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: #ededf0;
+  margin-bottom: 4px;
+}
+
+.settings-notif-item-desc {
+  font-size: 0.82rem;
+  color: #8b8b93;
+  line-height: 1.45;
+}
+
+/* Modern iOS/Kimi style Toggle Switch */
+.kimi-switch {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.kimi-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.kimi-switch-slider {
+  position: absolute;
+  cursor: pointer;
+  inset: 0;
+  background-color: #2f2f35;
+  transition: 0.2s ease;
+  border-radius: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.kimi-switch-slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #ffffff;
+  transition: 0.2s ease;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.kimi-switch input:checked + .kimi-switch-slider {
+  background-color: #2563eb;
+  border-color: #2563eb;
+}
+
+.kimi-switch input:checked + .kimi-switch-slider:before {
+  transform: translateX(20px);
+}
+
+/* Ilustrasi Mockup Notifikasi Desktop Kimi AI */
+.notif-preview-canvas {
+  margin-top: 14px;
+  width: 195px;
+  height: 94px;
+  background: #8fc7ff;
+  border-radius: 12px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  user-select: none;
+}
+
+.notif-preview-header-icons {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 6px;
+  padding-right: 2px;
+}
+
+.notif-toast-mockup {
+  background: #ffffff;
+  border-radius: 8px;
+  padding: 7px 9px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.notif-toast-logo {
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  background: #111113;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.72rem;
+  flex-shrink: 0;
+}
+
+.notif-toast-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  overflow: hidden;
+  line-height: 1.15;
+}
+
+.notif-toast-title {
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: #111827;
+  white-space: nowrap;
+}
+
+.notif-toast-site {
+  font-size: 0.55rem;
+  color: #6b7280;
+}
+
+.notif-toast-status {
+  font-size: 0.52rem;
+  color: #9ca3af;
+  white-space: nowrap;
+}
+
 

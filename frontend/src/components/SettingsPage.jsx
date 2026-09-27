@@ -19,7 +19,9 @@ import {
   Sliders,
   Check,
   AlertTriangle,
-  Monitor
+  Monitor,
+  Search,
+  SlidersHorizontal
 } from 'lucide-react';
 
 const GoogleIcon = () => (
@@ -50,14 +52,18 @@ export default function SettingsPage({
   onOpenAuthModal,
   ragParams,
   setRagParams,
-  onOpenSbertModal
+  onOpenSbertModal,
+  initialSubTab = 'account'
 }) {
-  const [activeSubTab, setActiveSubTab] = useState('account');
+  const [activeSubTab, setActiveSubTab] = useState(initialSubTab);
   const [phoneLinked, setPhoneLinked] = useState(false);
   const [showPhoneModal, setShowPhoneModal] = useState(false);
   const [phoneNumberInput, setPhoneNumberInput] = useState('');
   const [showDeviceModal, setShowDeviceModal] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [notifKimi, setNotifKimi] = useState(true);
+  const [notifRealtime, setNotifRealtime] = useState(false);
+  const [notifBrowser, setNotifBrowser] = useState(false);
 
   // Fallback data profil pengguna sesuai tangkapan layar Kimi AI
   const username = currentUser ? currentUser.username : 'mhmddfebry';
@@ -76,7 +82,7 @@ export default function SettingsPage({
       {/* Sidebar Navigasi Pengaturan Kimi AI */}
       <aside className="kimi-settings-sidebar">
         {/* Tombol < Kembali */}
-        <button className="settings-back-btn" onClick={onBack} title="Kembali ke Obrolan">
+        <button id="settings-back-btn" className="settings-back-btn" onClick={onBack} title="Kembali ke Obrolan">
           <ChevronLeft size={18} />
           <span>Kembali</span>
         </button>
@@ -85,6 +91,7 @@ export default function SettingsPage({
           {/* Kelompok 1: Utama & Akun */}
           <div className="settings-nav-group">
             <button
+              id="settings-nav-account"
               className={`settings-nav-item ${activeSubTab === 'account' ? 'active' : ''}`}
               onClick={() => setActiveSubTab('account')}
             >
@@ -93,6 +100,7 @@ export default function SettingsPage({
             </button>
 
             <button
+              id="settings-nav-notifications"
               className={`settings-nav-item ${activeSubTab === 'notifications' ? 'active' : ''}`}
               onClick={() => setActiveSubTab('notifications')}
             >
@@ -292,28 +300,86 @@ export default function SettingsPage({
           </div>
         )}
 
-        {/* SUBTAB 2: Notifikasi */}
+        {/* SUBTAB 2: Notifikasi (Persis Kimi AI) */}
         {activeSubTab === 'notifications' && (
           <div className="settings-content-wrapper">
-            <div className="settings-generic-content">
-              <h3>Pengaturan Notifikasi</h3>
-              <p className="settings-subtitle">Kelola bagaimana ZapinAI mengirimkan pembaruan dan pemberitahuan.</p>
-              
-              <div className="settings-card-box" style={{ marginTop: '16px' }}>
-                <div className="settings-card-row">
-                  <div>
-                    <div style={{ fontWeight: 500, color: '#f3f4f6' }}>Pemberitahuan Streaming Selesai</div>
-                    <div style={{ fontSize: '0.78rem', color: '#9ca3af' }}>Bunyikan notifikasi halus ketika respons AI telah lengkap.</div>
+            <div className="settings-notif-container">
+              <h2 className="settings-page-title">Notifikasi</h2>
+
+              <div className="settings-card-box notif-card-box">
+                {/* 1. Notifikasi Kimi */}
+                <div className="settings-notif-row">
+                  <div className="settings-notif-text-group">
+                    <div className="settings-notif-item-title">Notifikasi Kimi</div>
+                    <div className="settings-notif-item-desc">
+                      Dapatkan notifikasi saat tugas Anda diperbarui atau memerlukan tanggapan Anda.
+                    </div>
                   </div>
-                  <input type="checkbox" defaultChecked style={{ accentColor: '#3b82f6', width: 18, height: 18 }} />
+                  <label className="kimi-switch">
+                    <input
+                      type="checkbox"
+                      checked={notifKimi}
+                      onChange={(e) => setNotifKimi(e.target.checked)}
+                    />
+                    <span className="kimi-switch-slider" />
+                  </label>
                 </div>
+
                 <div className="settings-row-divider" />
-                <div className="settings-card-row">
-                  <div>
-                    <div style={{ fontWeight: 500, color: '#f3f4f6' }}>Pembaruan Naskah Pustaka</div>
-                    <div style={{ fontSize: '0.78rem', color: '#9ca3af' }}>Dapatkan info saat naskah tari Zapin baru ditambahkan ke katalog.</div>
+
+                {/* 2. Pengingat real-time beranda */}
+                <div className="settings-notif-row">
+                  <div className="settings-notif-text-group">
+                    <div className="settings-notif-item-title">Pengingat real-time beranda</div>
+                    <div className="settings-notif-item-desc">
+                      Jika diaktifkan, notifikasi Kimi akan ditampilkan secara real-time di bawah kotak input di beranda.
+                    </div>
                   </div>
-                  <input type="checkbox" defaultChecked style={{ accentColor: '#3b82f6', width: 18, height: 18 }} />
+                  <label className="kimi-switch">
+                    <input
+                      type="checkbox"
+                      checked={notifRealtime}
+                      onChange={(e) => setNotifRealtime(e.target.checked)}
+                    />
+                    <span className="kimi-switch-slider" />
+                  </label>
+                </div>
+
+                <div className="settings-row-divider" />
+
+                {/* 3. Notifikasi browser */}
+                <div className="settings-notif-row notif-browser-row">
+                  <div className="settings-notif-text-group">
+                    <div className="settings-notif-item-title">Notifikasi browser</div>
+                    <div className="settings-notif-item-desc">
+                      Dapatkan notifikasi browser saat Anda tidak berada di Kimi.
+                    </div>
+
+                    {/* Ilustrasi Preview Mockup Notifikasi Desktop Kimi AI */}
+                    <div className="notif-preview-canvas">
+                      <div className="notif-preview-header-icons">
+                        <Search size={11} color="#1e3a8a" />
+                        <SlidersHorizontal size={11} color="#1e3a8a" />
+                      </div>
+                      <div className="notif-toast-mockup">
+                        <div className="notif-toast-logo">K</div>
+                        <div className="notif-toast-content">
+                          <div className="notif-toast-title">Brand upgrade planning</div>
+                          <div className="notif-toast-site">kimi.com</div>
+                          <div className="notif-toast-status">Task complete. View results</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <label className="kimi-switch">
+                    <input
+                      type="checkbox"
+                      checked={notifBrowser}
+                      onChange={(e) => setNotifBrowser(e.target.checked)}
+                    />
+                    <span className="kimi-switch-slider" />
+                  </label>
                 </div>
               </div>
             </div>
