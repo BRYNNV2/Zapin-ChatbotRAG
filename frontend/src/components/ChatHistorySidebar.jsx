@@ -239,6 +239,40 @@ export default function ChatHistorySidebar({
         {/* Profile Popover Menu (Persis Kimi AI) */}
         {showProfileMenu && (
           <div className="kimi-profile-popover animate-fade-in" ref={popoverRef}>
+            {/* Header Profil / Opsi Masuk di Atas Popover */}
+            {!currentUser ? (
+              <div 
+                className="popover-auth-prompt-card"
+                onClick={() => {
+                  setShowProfileMenu(false);
+                  if (onOpenAuthModal) onOpenAuthModal();
+                }}
+              >
+                <div className="popover-auth-left">
+                  <div className="popover-auth-avatar">
+                    <UserIcon size={16} />
+                  </div>
+                  <div>
+                    <div className="popover-auth-title">Masuk ke ZapinAI</div>
+                    <div className="popover-auth-sub">Simpan obrolan di cloud</div>
+                  </div>
+                </div>
+                <LogIn size={15} color="#d4af37" />
+              </div>
+            ) : (
+              <div className="popover-user-profile-card">
+                <div className="popover-user-avatar">
+                  {currentUser.full_name ? currentUser.full_name[0].toUpperCase() : (currentUser.username ? currentUser.username[0].toUpperCase() : 'U')}
+                </div>
+                <div className="popover-user-meta">
+                  <div className="popover-user-name">{currentUser.full_name || currentUser.username}</div>
+                  <div className="popover-user-sub">{currentUser.email || currentUser.role || 'Pengguna'}</div>
+                </div>
+              </div>
+            )}
+
+            <div className="popover-menu-divider" />
+
             {/* 1. Dapatkan Aplikasi */}
             <div className="popover-menu-item" onClick={() => handleMenuItemClick('app')}>
               <div className="popover-menu-left">
@@ -307,7 +341,7 @@ export default function ChatHistorySidebar({
               </div>
             </div>
 
-            {/* Akun Status / Keluar (Jika Sedang Login) */}
+            {/* Akun Status / Keluar (Hanya Jika Sedang Login) */}
             {currentUser && (
               <>
                 <div className="popover-menu-divider" />
@@ -328,50 +362,58 @@ export default function ChatHistorySidebar({
           </div>
         )}
 
-        {/* Profile Pill & Standalone Download Icon Button (Sesuai Screenshot Kimi AI) */}
+        {/* Profile Pill & Standalone Download Icon Button */}
         <div className="sidebar-footer-row">
           <div 
             id="user-profile-pill-btn"
             ref={profileButtonRef}
             className={`user-profile-pill ${showProfileMenu ? 'active' : ''}`}
             onClick={() => setShowProfileMenu(!showProfileMenu)}
-            title="Klik untuk membuka menu akun & pengaturan"
+            title={currentUser ? "Klik untuk membuka menu akun & pengaturan" : "Klik untuk membuka menu atau masuk"}
           >
-            <div className="user-avatar-circle">
-              {currentUser && currentUser.full_name ? (
-                currentUser.full_name[0].toUpperCase()
-              ) : currentUser && currentUser.username ? (
-                currentUser.username[0].toUpperCase()
+            <div className={`user-avatar-circle ${!currentUser ? 'guest-avatar' : ''}`}>
+              {currentUser ? (
+                currentUser.full_name ? (
+                  currentUser.full_name[0].toUpperCase()
+                ) : currentUser.username ? (
+                  currentUser.username[0].toUpperCase()
+                ) : (
+                  'U'
+                )
               ) : (
-                <img 
-                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=80&auto=format&fit=crop&q=80" 
-                  alt="Avatar" 
-                  className="user-avatar-img"
-                  onError={(e) => { e.target.style.display = 'none'; }}
-                />
+                <UserIcon size={14} color="#9ca3af" />
               )}
             </div>
 
             <span className="user-name-text">
               {currentUser 
-                ? (currentUser.full_name || currentUser.username).slice(0, 5) + '...'
-                : 'mh...'}
+                ? (currentUser.full_name || currentUser.username)
+                : 'Belum Masuk'}
             </span>
 
-            <button 
-              type="button" 
-              className="upgrade-btn-pill"
-              onClick={(e) => {
-                e.stopPropagation();
-                if (!currentUser && onOpenAuthModal) {
-                  onOpenAuthModal();
-                } else {
+            {currentUser ? (
+              <button 
+                type="button" 
+                className="upgrade-btn-pill"
+                onClick={(e) => {
+                  e.stopPropagation();
                   setActiveModal('membership');
-                }
-              }}
-            >
-              Tingkatkan
-            </button>
+                }}
+              >
+                Tingkatkan
+              </button>
+            ) : (
+              <button 
+                type="button" 
+                className="upgrade-btn-pill login-btn-pill"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (onOpenAuthModal) onOpenAuthModal();
+                }}
+              >
+                Masuk
+              </button>
+            )}
           </div>
 
           <button

@@ -15,6 +15,7 @@ import {
   Smartphone,
   ChevronRight,
   LogOut,
+  LogIn,
   Shield,
   Sliders,
   Check,
@@ -65,10 +66,12 @@ export default function SettingsPage({
   const [notifRealtime, setNotifRealtime] = useState(false);
   const [notifBrowser, setNotifBrowser] = useState(false);
 
-  // Fallback data profil pengguna sesuai tangkapan layar Kimi AI
-  const username = currentUser ? currentUser.username : 'mhmddfebry';
-  const googleEmail = currentUser ? (currentUser.email || currentUser.username) : 'mhmddfebry';
-  const avatarUrl = currentUser?.avatar_url || 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80';
+  // Data profil pengguna aktif dari PostgreSQL (tanpa data tiruan default)
+  const username = currentUser?.username || '';
+  const displayName = currentUser?.full_name || currentUser?.username || '';
+  const userEmail = currentUser?.email || '';
+  const userRole = currentUser?.role || 'Peneliti / Mahasiswa Budaya';
+  const avatarInitial = (displayName || username || 'U')[0].toUpperCase();
 
   const handleLinkPhone = () => {
     if (phoneNumberInput.trim()) {
@@ -197,105 +200,130 @@ export default function SettingsPage({
         {activeSubTab === 'account' && (
           <div className="settings-content-wrapper">
             <div className="settings-account-content">
-              {/* Foto Profil & Username */}
-              <div className="settings-profile-header">
-                <div className="settings-avatar-circle">
-                  <img
-                    src={avatarUrl}
-                    alt="Foto Profil"
-                    className="settings-avatar-img"
-                    onError={(e) => {
-                      e.target.style.display = 'none';
+              {currentUser ? (
+                <>
+                  {/* Foto Profil & Username Asli */}
+                  <div className="settings-profile-header">
+                    <div className="settings-avatar-circle">
+                      {avatarInitial}
+                    </div>
+                    <div className="settings-profile-info-group">
+                      <h2 className="settings-username">{displayName}</h2>
+                      <span className="settings-user-role-pill">{userRole}</span>
+                    </div>
+                  </div>
+
+                  {/* Seksi 1: Tautan Akun */}
+                  <div className="settings-card-section">
+                    <span className="settings-group-label">Tautan Akun</span>
+                    <div className="settings-card-box">
+                      {/* Baris Email */}
+                      <div className="settings-card-row">
+                        <div className="settings-row-left">
+                          <GoogleIcon />
+                          <span>Email Terdaftar</span>
+                        </div>
+                        <div className="settings-row-right">
+                          <span className="settings-row-value">{userEmail || '-'}</span>
+                        </div>
+                      </div>
+
+                      <div className="settings-row-divider" />
+
+                      {/* Baris Nomor Telepon */}
+                      <div className="settings-card-row">
+                        <div className="settings-row-left">
+                          <Smartphone size={18} color="#9ca3af" />
+                          <span>Nomor telepon</span>
+                        </div>
+                        <div className="settings-row-right">
+                          {phoneLinked ? (
+                            <span style={{ color: '#10b981', fontSize: '0.86rem' }}>
+                              +62 812-3456-7890
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              className="settings-link-action-btn"
+                              onClick={() => setShowPhoneModal(true)}
+                            >
+                              Tautkan
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Seksi 2: Keamanan Akun */}
+                  <div className="settings-card-section">
+                    <span className="settings-group-label">Keamanan Akun</span>
+                    <div className="settings-card-box">
+                      <div
+                        className="settings-card-row clickable"
+                        onClick={() => setShowDeviceModal(true)}
+                      >
+                        <div className="settings-row-left">
+                          <Shield size={18} color="#9ca3af" />
+                          <span>Kelola Perangkat & Sesi</span>
+                        </div>
+                        <div className="settings-row-right" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span className="settings-row-value">Sesi Aktif</span>
+                          <ChevronRight size={15} color="#71717a" />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tombol Keluar (Pill Lebar) */}
+                  <button
+                    type="button"
+                    className="settings-logout-btn"
+                    onClick={() => {
+                      if (onLogout) onLogout();
+                      onBack();
                     }}
-                  />
-                </div>
-                <h2 className="settings-username">{username}</h2>
-              </div>
-
-              {/* Seksi 1: Tautan Akun */}
-              <div className="settings-card-section">
-                <span className="settings-group-label">Tautan Akun</span>
-                <div className="settings-card-box">
-                  {/* Baris Nomor Telepon */}
-                  <div className="settings-card-row">
-                    <div className="settings-row-left">
-                      <Smartphone size={18} color="#9ca3af" />
-                      <span>Nomor telepon</span>
-                    </div>
-                    <div className="settings-row-right">
-                      {phoneLinked ? (
-                        <span style={{ color: '#10b981', fontSize: '0.86rem' }}>
-                          +62 812-3456-7890
-                        </span>
-                      ) : (
-                        <button
-                          type="button"
-                          className="settings-link-action-btn"
-                          onClick={() => setShowPhoneModal(true)}
-                        >
-                          Tautkan
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="settings-row-divider" />
-
-                  {/* Baris Google */}
-                  <div className="settings-card-row">
-                    <div className="settings-row-left">
-                      <GoogleIcon />
-                      <span>Google</span>
-                    </div>
-                    <div className="settings-row-right">
-                      <span className="settings-row-value">{googleEmail}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Seksi 2: Keamanan Akun */}
-              <div className="settings-card-section">
-                <span className="settings-group-label">Keamanan Akun</span>
-                <div className="settings-card-box">
-                  <div
-                    className="settings-card-row clickable"
-                    onClick={() => setShowDeviceModal(true)}
                   >
-                    <div className="settings-row-left">
-                      <span>Kelola Perangkat</span>
+                    <LogOut size={16} />
+                    <span>Keluar ({username})</span>
+                  </button>
+
+                  {/* Link Hapus Akun di Bagian Bawah */}
+                  <div className="settings-delete-account-wrap">
+                    <button
+                      type="button"
+                      className="settings-delete-account-btn"
+                      onClick={() => setShowDeleteConfirm(true)}
+                    >
+                      Hapus Akun
+                    </button>
+                  </div>
+                </>
+              ) : (
+                /* Tampilan Belum Login (Mode Tamu) */
+                <div className="settings-unauth-container">
+                  <div className="settings-unauth-card">
+                    <div className="settings-unauth-avatar">
+                      <User size={36} color="#9ca3af" />
                     </div>
-                    <div className="settings-row-right" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <span className="settings-row-value">1 perangkat</span>
-                      <ChevronRight size={15} color="#71717a" />
-                    </div>
+                    <h2 className="settings-unauth-title">Anda Belum Masuk</h2>
+                    <p className="settings-unauth-desc">
+                      Saat ini Anda berada dalam mode tamu. Silakan masuk atau daftar akun untuk menyinkronkan riwayat percakapan Zapin ke cloud PostgreSQL, mengamankan data riset, dan mengelola profil akun.
+                    </p>
+                    <button
+                      type="button"
+                      className="settings-unauth-login-btn"
+                      onClick={() => {
+                        onBack();
+                        if (onOpenAuthModal) onOpenAuthModal();
+                      }}
+                    >
+                      <LogIn size={16} />
+                      <span>Masuk atau Daftar Akun</span>
+                    </button>
                   </div>
                 </div>
-              </div>
-
-              {/* Tombol Keluar (Pill Lebar) */}
-              <button
-                type="button"
-                className="settings-logout-btn"
-                onClick={() => {
-                  if (onLogout) onLogout();
-                  onBack();
-                }}
-              >
-                <LogOut size={16} />
-                <span>Keluar</span>
-              </button>
-
-              {/* Link Hapus Akun di Bagian Bawah */}
-              <div className="settings-delete-account-wrap">
-                <button
-                  type="button"
-                  className="settings-delete-account-btn"
-                  onClick={() => setShowDeleteConfirm(true)}
-                >
-                  Hapus Akun
-                </button>
-              </div>
+              )}
             </div>
           </div>
         )}
