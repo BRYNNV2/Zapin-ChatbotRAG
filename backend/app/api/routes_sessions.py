@@ -25,14 +25,20 @@ def list_sessions(
     if not db:
         return {"status": "success", "sessions": []}
 
-    query = db.query(Conversation)
-    if current_user:
-        query = query.filter(Conversation.user_id == current_user.id)
-    else:
-        # Jika mode tamu (belum login), ambil sesi anonim
-        query = query.filter(Conversation.user_id.is_(None))
+    # Jika mode tamu (belum login), kembalikan daftar kosong
+    if not current_user:
+        return {
+            "status": "success",
+            "total": 0,
+            "sessions": []
+        }
 
-    sessions = query.order_by(Conversation.updated_at.desc()).limit(50).all()
+    sessions = db.query(Conversation)\
+        .filter(Conversation.user_id == current_user.id)\
+        .order_by(Conversation.updated_at.desc())\
+        .limit(50)\
+        .all()
+
     return {
         "status": "success",
         "total": len(sessions),
@@ -49,9 +55,24 @@ def create_session(
     if not db:
         raise HTTPException(status_code=500, detail="Database belum terhubung.")
 
+    # Jika belum login (tamu), kembalikan sesi sementara tanpa disimpan persisten ke DB
+    if not current_user:
+        return {
+            "status": "success",
+            "message": "Sesi sementara mode tamu.",
+            "session": {
+                "id": f"guest-{uuid.uuid4()}",
+                "user_id": None,
+                "title": req.title or "Obrolan Baru",
+                "created_at": datetime.utcnow().isoformat(),
+                "updated_at": datetime.utcnow().isoformat(),
+                "message_count": 0
+            }
+        }
+
     new_session = Conversation(
         id=str(uuid.uuid4()),
-        user_id=current_user.id if current_user else None,
+        user_id=current_user.id,
         title=req.title or "Obrolan Baru",
         created_at=datetime.utcnow(),
         updated_at=datetime.utcnow()

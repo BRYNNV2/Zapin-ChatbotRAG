@@ -65,8 +65,16 @@ export default function App() {
 
   // Fetch daftar sesi dari PostgreSQL (Neon)
   const fetchSessions = async (token = authToken) => {
+    // Mode tamu (belum login): riwayat percakapan tidak dimuat dari database
+    if (!token) {
+      setSessions([]);
+      setActiveSessionId(null);
+      setMessages([]);
+      return;
+    }
+
     try {
-      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      const headers = { 'Authorization': `Bearer ${token}` };
       const res = await fetch('http://localhost:8000/api/chat/sessions', { headers });
       if (res.ok) {
         const data = await res.json();
@@ -85,7 +93,13 @@ export default function App() {
 
   useEffect(() => {
     fetchStats();
-    fetchSessions();
+    if (authToken) {
+      fetchSessions(authToken);
+    } else {
+      setSessions([]);
+      setActiveSessionId(null);
+      setMessages([]);
+    }
   }, []);
 
   // Handler Auth Berhasil
@@ -127,9 +141,17 @@ export default function App() {
     setActiveSources([]);
     setDrawerOpen(false);
 
+    // Mode tamu: langsung mulai percakapan baru di layar tanpa simpan ke database
+    if (!authToken) {
+      setActiveSessionId(null);
+      return;
+    }
+
     try {
-      const headers = { 'Content-Type': 'application/json' };
-      if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+      const headers = { 
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${authToken}` 
+      };
 
       const res = await fetch('http://localhost:8000/api/chat/sessions', {
         method: 'POST',
@@ -148,9 +170,7 @@ export default function App() {
       console.warn('Gagal membuat sesi di cloud database:', err.message);
     }
 
-    // Fallback lokal jika offline
-    const localId = Date.now().toString();
-    setActiveSessionId(localId);
+    setActiveSessionId(Date.now().toString());
   };
 
   // Handler Pilih Sesi & Ambil Riwayat dari PostgreSQL
@@ -231,11 +251,13 @@ export default function App() {
 
     let currentSessionId = activeSessionId;
 
-    // Jika belum ada sesi aktif, buat sesi baru di PostgreSQL terlebih dahulu
-    if (!currentSessionId) {
+    // Jika sudah login dan belum ada sesi aktif, buat sesi baru di PostgreSQL
+    if (authToken && !currentSessionId) {
       try {
-        const headers = { 'Content-Type': 'application/json' };
-        if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+        const headers = { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${authToken}` 
+        };
 
         const sessRes = await fetch('http://localhost:8000/api/chat/sessions', {
           method: 'POST',
@@ -253,8 +275,6 @@ export default function App() {
         }
       } catch (err) {
         console.warn('Gagal inisialisasi sesi otomatis:', err.message);
-        currentSessionId = Date.now().toString();
-        setActiveSessionId(currentSessionId);
       }
     }
 

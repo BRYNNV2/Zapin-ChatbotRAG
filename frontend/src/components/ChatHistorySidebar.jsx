@@ -201,7 +201,23 @@ export default function ChatHistorySidebar({
       {/* Chat History Section */}
       <div className="sidebar-section-title">Chat</div>
       <div className="sidebar-history-scroll">
-        {sessions.length === 0 ? (
+        {!currentUser ? (
+          <div className="sidebar-guest-notice">
+            <span className="sidebar-guest-notice-text">
+              Riwayat percakapan hanya tersimpan saat Anda masuk ke akun.
+            </span>
+            <button
+              type="button"
+              className="sidebar-guest-notice-btn"
+              onClick={() => {
+                if (onOpenAuthModal) onOpenAuthModal();
+              }}
+            >
+              <LogIn size={13} />
+              <span>Masuk Sekarang</span>
+            </button>
+          </div>
+        ) : sessions.length === 0 ? (
           <div style={{ padding: '12px 14px', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
             Belum ada riwayat percakapan.
           </div>

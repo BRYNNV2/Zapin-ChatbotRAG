@@ -3049,5 +3049,46 @@ body {
   transform: translateY(-1px);
 }
 
+/* Sidebar History - Guest Notice Box */
+.sidebar-guest-notice {
+  margin: 10px 8px;
+  padding: 12px 14px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px dashed rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sidebar-guest-notice-text {
+  font-size: 0.74rem;
+  color: #9ca3af;
+  line-height: 1.45;
+}
+
+.sidebar-guest-notice-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: rgba(212, 175, 55, 0.12);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #fbbf24;
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.sidebar-guest-notice-btn:hover {
+  background: rgba(212, 175, 55, 0.22);
+  border-color: rgba(212, 175, 55, 0.5);
+  color: #fef08a;
+}
+
+
 
 

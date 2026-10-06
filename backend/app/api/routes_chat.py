@@ -34,8 +34,8 @@ async def ask_zapin_assistant(req: ChatRequest, db: Session = Depends(get_db)):
             threshold=req.threshold
         )
 
-        # 2. Jika session_id disediakan dan db aktif, simpan percakapan ke PostgreSQL
-        if req.session_id and db:
+        # 2. Jika session_id disediakan, db aktif, dan bukan mode tamu, simpan percakapan ke PostgreSQL
+        if req.session_id and db and not req.session_id.startswith("guest-"):
             try:
                 conv = db.query(Conversation).filter(Conversation.id == req.session_id).first()
                 if conv:
