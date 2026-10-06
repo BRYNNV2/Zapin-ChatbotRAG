@@ -1,47 +1,101 @@
 import React, { useState } from 'react';
-import { X, User, Lock, Mail, Shield, Sparkles, LogIn, UserPlus } from 'lucide-react';
+import { X, ChevronDown, Check, Sparkles, Eye, EyeOff } from 'lucide-react';
+
+const GoogleIcon = () => (
+  <svg width="18" height="18" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+    <path
+      fill="#4285F4"
+      d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
+    />
+    <path
+      fill="#34A853"
+      d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+    />
+    <path
+      fill="#FBBC05"
+      d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
+    />
+    <path
+      fill="#EA4335"
+      d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
+    />
+  </svg>
+);
 
 export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
   const [isRegister, setIsRegister] = useState(false);
-  const [formData, setFormData] = useState({
-    username: '',
-    email: '',
-    password: '',
-    full_name: '',
-    role: 'Peneliti / Mahasiswa Budaya'
-  });
+  const [countryCode, setCountryCode] = useState('+62');
+  const [showCountryMenu, setShowCountryMenu] = useState(false);
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
+  const [fullName, setFullName] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [agreed, setAgreed] = useState(true);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
+  const [toastMsg, setToastMsg] = useState('');
 
   if (!isOpen) return null;
 
-  const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-    setErrorMsg('');
+  const showToast = (msg) => {
+    setToastMsg(msg);
+    setTimeout(() => setToastMsg(''), 4500);
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
+    if (!agreed) {
+      setErrorMsg('Harap setujui Perjanjian Layanan dan Kebijakan Privasi terlebih dahulu.');
+      return;
+    }
+    if (!identifier.trim() || !password.trim()) {
+      setErrorMsg('Silakan lengkapi nomor telepon/email dan kata sandi.');
+      return;
+    }
+
     setLoading(true);
     setErrorMsg('');
 
     try {
       const endpoint = isRegister ? '/api/auth/register' : '/api/auth/login';
-      const payload = isRegister
-        ? {
-            username: formData.username.trim(),
-            email: formData.email.trim(),
-            password: formData.password,
-            full_name: formData.full_name.trim(),
-            role: formData.role
-          }
-        : {
-            identifier: formData.username.trim(),
-            password: formData.password
-          };
+      const cleanId = identifier.trim();
+
+      let payload = {};
+      if (isRegister) {
+        // Tentukan apakah identifier adalah nomor hp atau email
+        const isNumeric = /^[0-9+ -]+$/.test(cleanId);
+        const isEmail = cleanId.includes('@');
+
+        let phoneVal = null;
+        let emailVal = null;
+        let usernameVal = '';
+
+        if (isEmail) {
+          emailVal = cleanId;
+          usernameVal = cleanId.split('@')[0].replace(/[^a-zA-Z0-9_]/g, '') || `user_${Date.now()}`;
+        } else if (isNumeric) {
+          phoneVal = cleanId.startsWith('+') ? cleanId : `${countryCode}${cleanId.replace(/^0+/, '')}`;
+          usernameVal = `user_${cleanId.replace(/[^0-9]/g, '').slice(-6)}`;
+          emailVal = `${usernameVal}@zapin.ai`;
+        } else {
+          usernameVal = cleanId;
+          emailVal = `${cleanId}@zapin.ai`;
+        }
+
+        payload = {
+          username: usernameVal,
+          email: emailVal,
+          phone: phoneVal,
+          password: password,
+          full_name: fullName.trim() || usernameVal,
+          role: 'Peneliti / Mahasiswa Budaya'
+        };
+      } else {
+        payload = {
+          identifier: cleanId,
+          password: password
+        };
+      }
 
       const res = await fetch(`http://localhost:8000${endpoint}`, {
         method: 'POST',
@@ -51,10 +105,10 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
 
       const data = await res.json();
       if (!res.ok) {
-        throw new Error(data.detail || 'Terjadi kesalahan autentikasi.');
+        throw new Error(data.detail || 'Terjadi kesalahan saat masuk.');
       }
 
-      // Berhasil
+      // Berhasil login / register
       onAuthSuccess(data.user, data.token);
       onClose();
     } catch (err) {
@@ -64,171 +118,240 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
     }
   };
 
+  const countryOptions = [
+    { code: '+62', name: 'Indonesia (+62)' },
+    { code: '+60', name: 'Malaysia (+60)' },
+    { code: '+65', name: 'Singapura (+65)' },
+    { code: '+1', name: 'Amerika Serikat (+1)' }
+  ];
+
   return (
-    <div className="auth-modal-overlay animate-fade-in" onClick={onClose}>
+    <div className="auth-kimi-backdrop animate-fade-in" onClick={onClose}>
       <div 
-        className="auth-modal-card animate-scale-up" 
+        className="auth-kimi-split-card animate-scale-up" 
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Close Button */}
-        <button className="auth-modal-close-btn" onClick={onClose} title="Tutup">
+        {/* Tombol Tutup X di Kanan Atas */}
+        <button className="auth-kimi-close-btn" onClick={onClose} title="Tutup">
           <X size={18} />
         </button>
 
-        {/* Header Branding */}
-        <div className="auth-modal-header">
-          <div className="auth-logo-badge">Z</div>
-          <h3 className="auth-modal-title">
-            {isRegister ? 'Daftar Akun Baru' : 'Masuk ke ZapinAI'}
-          </h3>
-          <p className="auth-modal-sub">
-            {isRegister 
-              ? 'Simpan riwayat riset budaya dan eksplorasi tari Zapin di cloud.' 
-              : 'Akses riwayat percakapan dan pangkalan naskah tervalidasi Anda.'}
-          </p>
-        </div>
-
-        {/* Tab Switcher */}
-        <div className="auth-tab-switch">
-          <button
-            type="button"
-            className={`auth-tab-btn ${!isRegister ? 'active' : ''}`}
-            onClick={() => { setIsRegister(false); setErrorMsg(''); }}
-          >
-            <LogIn size={14} />
-            <span>Masuk</span>
-          </button>
-          <button
-            type="button"
-            className={`auth-tab-btn ${isRegister ? 'active' : ''}`}
-            onClick={() => { setIsRegister(true); setErrorMsg(''); }}
-          >
-            <UserPlus size={14} />
-            <span>Daftar Akun</span>
-          </button>
-        </div>
-
-        {/* Error Alert */}
-        {errorMsg && (
-          <div className="auth-error-alert animate-shake">
-            <span>{errorMsg}</span>
+        {/* ================= PANEL KIRI: ARTWORK HALFTONE GLOBE ================= */}
+        <div className="auth-kimi-art-panel">
+          <div className="auth-globe-wrapper">
+            {/* ASCII / Halftone Globe Art sesuai Screenshot Kimi AI (Gambar 2) */}
+            <pre className="auth-ascii-sphere" aria-hidden="true">
+{`                        .*#^▲▲▲▲▲▲▲▲...
+              ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲*******
+          /// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲*********
+        //    ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲*******
+              ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲*****
+      (---)(---)  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲***
+            ////  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+                  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
+          •••///  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
+                  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
+                  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
+       (---)(---) ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
+                  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
+                  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
+                  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
+          •••///  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
+                  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
+                  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
+                     ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●
+                        ▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●
+                           ▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●
+                              ▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●
+                                 ▲▲▲▲▲●●●●●●●●●●
+                                    ▲▲●●●●●`}
+            </pre>
           </div>
-        )}
+        </div>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="auth-form-body">
-          {isRegister && (
-            <div className="auth-input-group">
-              <label className="auth-label">Nama Lengkap</label>
-              <div className="auth-input-wrap">
-                <User size={15} className="auth-icon" />
-                <input
-                  type="text"
-                  name="full_name"
-                  placeholder="Contoh: Ahmad Peneliti Zapin"
-                  value={formData.full_name}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
+        {/* ================= PANEL KANAN: FORM LOGIN KIMI ================= */}
+        <div className="auth-kimi-form-panel">
+          {/* Header Judul KIMI / ZAPIN */}
+          <div className="auth-kimi-brand-header">
+            <h1 className="auth-kimi-title">KIMI</h1>
+          </div>
+
+          {/* Alert Error / Toast Pesan */}
+          {errorMsg && (
+            <div className="auth-kimi-alert animate-shake">
+              <span>{errorMsg}</span>
             </div>
           )}
 
-          <div className="auth-input-group">
-            <label className="auth-label">
-              {isRegister ? 'Nama Pengguna (Username)' : 'Username atau Email'}
-            </label>
-            <div className="auth-input-wrap">
-              <User size={15} className="auth-icon" />
+          {toastMsg && (
+            <div className="auth-kimi-toast animate-fade-in">
+              <span>{toastMsg}</span>
+            </div>
+          )}
+
+          <form onSubmit={handleSubmit} className="auth-kimi-form">
+            {/* Input 1: Nomor Telepon atau Email dengan Prefix Dropdown */}
+            <div className="auth-kimi-input-box">
+              <div 
+                className="auth-kimi-country-btn"
+                onClick={() => setShowCountryMenu(!showCountryMenu)}
+                title="Pilih kode negara"
+              >
+                <span>{countryCode}</span>
+                <ChevronDown size={14} color="#9ca3af" />
+              </div>
+
+              {showCountryMenu && (
+                <div className="auth-country-dropdown animate-fade-in">
+                  {countryOptions.map((opt) => (
+                    <div
+                      key={opt.code}
+                      className={`auth-country-item ${countryCode === opt.code ? 'selected' : ''}`}
+                      onClick={() => {
+                        setCountryCode(opt.code);
+                        setShowCountryMenu(false);
+                      }}
+                    >
+                      <span>{opt.name}</span>
+                      {countryCode === opt.code && <Check size={14} color="#d4af37" />}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="auth-kimi-divider-v" />
+
               <input
                 type="text"
-                name="username"
-                placeholder={isRegister ? "Minimal 3 karakter tanpa spasi" : "Masukkan username atau email"}
-                value={formData.username}
-                onChange={handleChange}
-                required
+                className="auth-kimi-input-field"
+                placeholder={isRegister ? "Nomor telepon atau Email baru" : "Nomor telepon atau Email"}
+                value={identifier}
+                onChange={(e) => {
+                  setIdentifier(e.target.value);
+                  setErrorMsg('');
+                }}
+                autoFocus
               />
             </div>
-          </div>
 
-          {isRegister && (
-            <div className="auth-input-group">
-              <label className="auth-label">Alamat Email</label>
-              <div className="auth-input-wrap">
-                <Mail size={15} className="auth-icon" />
+            {/* Input Tambahan Nama Lengkap saat Daftar */}
+            {isRegister && (
+              <div className="auth-kimi-input-box">
                 <input
-                  type="email"
-                  name="email"
-                  placeholder="nama@email.com"
-                  value={formData.email}
-                  onChange={handleChange}
-                  required
+                  type="text"
+                  className="auth-kimi-input-field"
+                  placeholder="Nama Lengkap Anda"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
                 />
               </div>
-            </div>
-          )}
+            )}
 
-          <div className="auth-input-group">
-            <label className="auth-label">Kata Sandi</label>
-            <div className="auth-input-wrap">
-              <Lock size={15} className="auth-icon" />
+            {/* Input 2: Kata Sandi / Kode Verifikasi */}
+            <div className="auth-kimi-input-box">
               <input
-                type="password"
-                name="password"
-                placeholder={isRegister ? "Minimal 6 karakter" : "Masukkan kata sandi"}
-                value={formData.password}
-                onChange={handleChange}
-                required
+                type={showPassword ? "text" : "password"}
+                className="auth-kimi-input-field"
+                placeholder={isRegister ? "Buat Kata Sandi (min. 6 karakter)" : "Kata Sandi"}
+                value={password}
+                onChange={(e) => {
+                  setPassword(e.target.value);
+                  setErrorMsg('');
+                }}
               />
+              <button
+                type="button"
+                className="auth-kimi-eye-btn"
+                onClick={() => setShowPassword(!showPassword)}
+                title={showPassword ? "Sembunyikan sandi" : "Lihat sandi"}
+              >
+                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+              </button>
             </div>
-          </div>
 
-          {isRegister && (
-            <div className="auth-input-group">
-              <label className="auth-label">Peran Pengguna</label>
-              <div className="auth-input-wrap">
-                <Shield size={15} className="auth-icon" />
-                <select
-                  name="role"
-                  value={formData.role}
-                  onChange={handleChange}
-                  className="auth-select"
+            {/* Tombol Utama: Login / Daftar */}
+            <button
+              type="submit"
+              className={`auth-kimi-submit-btn ${identifier.trim() && password.trim() ? 'active' : ''}`}
+              disabled={loading}
+            >
+              {loading ? (
+                <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                  <Sparkles size={16} className="animate-spin-slow" />
+                  Memproses...
+                </span>
+              ) : isRegister ? (
+                'Daftar Sekarang'
+              ) : (
+                'Login'
+              )}
+            </button>
+
+            {/* Pemisah OR */}
+            <div className="auth-kimi-or-line">
+              <div className="or-line" />
+              <span className="or-text">OR</span>
+              <div className="or-line" />
+            </div>
+
+            {/* Tombol Lanjutkan dengan Google */}
+            <button
+              type="button"
+              className="auth-kimi-google-btn"
+              onClick={() => showToast('Login akun Google akan segera tersedia nanti. Silakan masuk menggunakan Nomor Telepon/Email dan Kata Sandi.')}
+            >
+              <GoogleIcon />
+              <span>Lanjutkan dengan Google</span>
+            </button>
+
+            {/* Link Toggle Mode / SSO */}
+            <div className="auth-kimi-extra-links">
+              <button
+                type="button"
+                className="auth-kimi-text-link"
+                onClick={() => {
+                  setIsRegister(!isRegister);
+                  setErrorMsg('');
+                }}
+              >
+                {isRegister ? 'Sudah memiliki akun? Login di sini' : 'Belum punya akun? Daftar sekarang'}
+              </button>
+              
+              {!isRegister && (
+                <button
+                  type="button"
+                  className="auth-kimi-text-link sub"
+                  onClick={() => showToast('Login SSO perusahaan sedang dalam pengembangan.')}
                 >
-                  <option value="Peneliti / Mahasiswa Budaya">Peneliti / Mahasiswa Budaya</option>
-                  <option value="Pakar / Seniman Tari Zapin">Pakar / Seniman Tari Zapin</option>
-                  <option value="Pengunjung Umum">Pengunjung Umum</option>
-                </select>
+                  Login SSO perusahaan
+                </button>
+              )}
+            </div>
+
+            {/* Checkbox Persetujuan Perjanjian Layanan */}
+            <div className="auth-kimi-terms-wrap">
+              <label className="auth-kimi-checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={agreed}
+                  onChange={(e) => setAgreed(e.target.checked)}
+                  className="auth-kimi-checkbox"
+                />
+                <span className="auth-kimi-terms-text">
+                  Saya telah membaca dan menyetujui{' '}
+                  <span className="auth-link-bold">Perjanjian Layanan Model</span> dan{' '}
+                  <span className="auth-link-bold">Kebijakan Privasi</span>
+                </span>
+              </label>
+
+              <div className="auth-kimi-footer-info">
+                <span>Butuh bantuan?</span>
+                <span className="auth-feedback-link" onClick={() => showToast('Kirimkan pertanyaan atau saran Anda ke pengembang.')}>
+                  Beri umpan balik
+                </span>
               </div>
             </div>
-          )}
-
-          <button 
-            type="submit" 
-            className="auth-submit-btn" 
-            disabled={loading}
-          >
-            {loading ? (
-              <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                <Sparkles size={15} className="animate-spin-slow" />
-                Memproses...
-              </span>
-            ) : isRegister ? (
-              'Daftar Sekarang'
-            ) : (
-              'Masuk Akun'
-            )}
-          </button>
-        </form>
-
-        {/* Footer Alternative */}
-        <div className="auth-modal-footer">
-          <button 
-            type="button" 
-            className="auth-guest-btn" 
-            onClick={onClose}
-          >
-            Lanjutkan sebagai Tamu (Guest Mode)
-          </button>
+          </form>
         </div>
       </div>
     </div>

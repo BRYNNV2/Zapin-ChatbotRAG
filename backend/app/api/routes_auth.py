@@ -11,13 +11,14 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
 # Schemas
 class RegisterRequest(BaseModel):
     username: str
-    email: EmailStr
+    email: Optional[EmailStr] = None
+    phone: Optional[str] = None
     password: str
     full_name: Optional[str] = None
     role: Optional[str] = "Peneliti / Mahasiswa Budaya"
 
 class LoginRequest(BaseModel):
-    identifier: str  # username or email
+    identifier: str  # username, email, or phone number
     password: str
 
 class AuthResponse(BaseModel):
@@ -63,7 +64,8 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Database belum terhubung.")
 
     clean_username = req.username.strip().lower()
-    clean_email = req.email.strip().lower()
+    clean_email = req.email.strip().lower() if req.email else f"{clean_username}@zapin.ai"
+    clean_phone = req.phone.strip() if req.phone else None
 
     if len(clean_username) < 3:
         raise HTTPException(status_code=400, detail="Username minimal 3 karakter.")
@@ -72,7 +74,8 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
 
     # Cek duplikasi
     existing_user = db.query(User).filter(
-        (User.username == clean_username) | (User.email == clean_email)
+        (User.username == clean_username) | 
+        (User.email == clean_email)
     ).first()
     if existing_user:
         if existing_user.username == clean_username:
@@ -80,11 +83,17 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
         else:
             raise HTTPException(status_code=400, detail="Email sudah terdaftar.")
 
+    if clean_phone:
+        existing_phone = db.query(User).filter(User.phone == clean_phone).first()
+        if existing_phone:
+            raise HTTPException(status_code=400, detail="Nomor telepon sudah terdaftar.")
+
     # Buat user baru
     token = generate_session_token()
     new_user = User(
         username=clean_username,
         email=clean_email,
+        phone=clean_phone,
         full_name=req.full_name.strip() if req.full_name else clean_username,
         password_hash=hash_password(req.password),
         role=req.role or "Peneliti / Mahasiswa Budaya",
@@ -103,17 +112,28 @@ def register(req: RegisterRequest, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=AuthResponse)
 def login(req: LoginRequest, db: Session = Depends(get_db)):
-    """Masuk menggunakan username atau email dan kata sandi."""
+    """Masuk menggunakan username, email, atau nomor telepon dan kata sandi."""
     if not db:
         raise HTTPException(status_code=500, detail="Database belum terhubung.")
 
-    clean_id = req.identifier.strip().lower()
+    clean_id = req.identifier.strip()
+    clean_lower = clean_id.lower()
+    digits_id = "".join(filter(str.isdigit, clean_id))
+
+    # Cari user berdasarkan username, email, atau nohp
     user = db.query(User).filter(
-        (User.username == clean_id) | (User.email == clean_id)
+        (User.username == clean_lower) | 
+        (User.email == clean_lower) |
+        (User.phone == clean_id)
     ).first()
 
+    # Jika belum ketemu dan ada digit nomor telepon
+    if not user and digits_id and len(digits_id) >= 8:
+        tail = digits_id[-8:]
+        user = db.query(User).filter(User.phone.like(f"%{tail}")).first()
+
     if not user or not verify_password(req.password, user.password_hash):
-        raise HTTPException(status_code=401, detail="Username/email atau kata sandi tidak sesuai.")
+        raise HTTPException(status_code=401, detail="Nomor telepon/email/username atau kata sandi tidak sesuai.")
 
     # Perbarui session token
     token = generate_session_token()

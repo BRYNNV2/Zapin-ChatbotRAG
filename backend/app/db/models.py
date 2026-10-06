@@ -11,6 +11,7 @@ class User(Base):
     id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     username = Column(String(50), unique=True, index=True, nullable=False)
     email = Column(String(100), unique=True, index=True, nullable=False)
+    phone = Column(String(30), unique=True, index=True, nullable=True)
     full_name = Column(String(100), nullable=True)
     password_hash = Column(String(255), nullable=False)
     role = Column(String(60), default="Peneliti / Mahasiswa Budaya")
@@ -25,6 +26,7 @@ class User(Base):
             "id": self.id,
             "username": self.username,
             "email": self.email,
+            "phone": self.phone,
             "full_name": self.full_name or self.username,
             "role": self.role,
             "created_at": self.created_at.isoformat() if self.created_at else None

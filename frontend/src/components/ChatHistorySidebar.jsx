@@ -23,7 +23,11 @@ import {
   LogOut,
   Languages,
   Bell,
-  Music
+  Music,
+  Clock,
+  Presentation,
+  MoreHorizontal,
+  Lightbulb
 } from 'lucide-react';
 
 export default function ChatHistorySidebar({
@@ -122,7 +126,7 @@ export default function ChatHistorySidebar({
       {/* Sidebar Header */}
       <div className="sidebar-header">
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div className="kimi-logo-badge">Z</div>
+          <div className="kimi-logo-badge">K</div>
         </div>
 
         <button 
@@ -136,7 +140,16 @@ export default function ChatHistorySidebar({
 
       {/* Obrolan Baru Button (Kimi Pill) */}
       <div className="sidebar-action-wrap">
-        <button className="btn-new-chat" onClick={onNewChat}>
+        <button 
+          className="btn-new-chat" 
+          onClick={() => {
+            if (!currentUser) {
+              if (onOpenAuthModal) onOpenAuthModal();
+            } else {
+              onNewChat();
+            }
+          }}
+        >
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <Plus size={16} />
             <span>Obrolan baru</span>
@@ -145,42 +158,90 @@ export default function ChatHistorySidebar({
         </button>
       </div>
 
-      {/* Quick Navigation Items: Monochromatic & Elegant */}
+      {/* Quick Navigation Items: Monochromatic & Elegant (Persis Gambar 1) */}
       <nav className="sidebar-nav-list">
         <button
           className={`sidebar-nav-item ${activeTab === 'chat' ? 'active' : ''}`}
-          onClick={() => setActiveTab('chat')}
+          onClick={() => {
+            if (!currentUser) {
+              if (onOpenAuthModal) onOpenAuthModal();
+            } else {
+              setActiveTab('chat');
+            }
+          }}
         >
           <Compass size={16} />
-          <span>Zapin Assistant</span>
-        </button>
-
-        <button
-          className={`sidebar-nav-item ${activeTab === 'documents' ? 'active' : ''}`}
-          onClick={() => setActiveTab('documents')}
-        >
-          <BookOpen size={16} />
-          <span style={{ flex: 1 }}>Katalog Pustaka</span>
-          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-            {stats.totalDocuments || 4} Naskah
-          </span>
-        </button>
-
-        <button
-          className={`sidebar-nav-item ${activeTab === 'evaluation' ? 'active' : ''}`}
-          onClick={() => setActiveTab('evaluation')}
-        >
-          <BarChart3 size={16} />
-          <span>Riset & Evaluasi</span>
+          <span>Kimi Saya</span>
         </button>
 
         <button
           className="sidebar-nav-item"
-          onClick={onOpenSbertModal}
-          title="Lihat spesifikasi & kalibrasi Sentence-BERT"
+          onClick={() => {
+            if (!currentUser) {
+              if (onOpenAuthModal) onOpenAuthModal();
+            } else {
+              onOpenSbertModal();
+            }
+          }}
         >
           <Cpu size={16} />
-          <span>Pipeline SBERT</span>
+          <span>Plugin</span>
+        </button>
+
+        <button
+          className={`sidebar-nav-item ${activeTab === 'evaluation' ? 'active' : ''}`}
+          onClick={() => {
+            if (!currentUser) {
+              if (onOpenAuthModal) onOpenAuthModal();
+            } else {
+              setActiveTab('evaluation');
+            }
+          }}
+        >
+          <Clock size={16} />
+          <span>Tugas Terjadwal</span>
+        </button>
+
+        <button
+          className="sidebar-nav-item"
+          onClick={() => {
+            if (!currentUser) {
+              if (onOpenAuthModal) onOpenAuthModal();
+            } else {
+              setActiveTab('chat');
+            }
+          }}
+        >
+          <Lightbulb size={16} />
+          <span>Inspirasi</span>
+        </button>
+
+        <button
+          className={`sidebar-nav-item ${activeTab === 'documents' ? 'active' : ''}`}
+          onClick={() => {
+            if (!currentUser) {
+              if (onOpenAuthModal) onOpenAuthModal();
+            } else {
+              setActiveTab('documents');
+            }
+          }}
+        >
+          <Presentation size={16} />
+          <span>Slide</span>
+        </button>
+
+        <button
+          className="sidebar-nav-item"
+          onClick={() => {
+            if (!currentUser) {
+              if (onOpenAuthModal) onOpenAuthModal();
+            } else {
+              handleMenuItemClick('settings');
+            }
+          }}
+        >
+          <MoreHorizontal size={16} />
+          <span>Lainnya</span>
         </button>
       </nav>
 
@@ -191,10 +252,16 @@ export default function ChatHistorySidebar({
       <div style={{ padding: '0 8px', marginBottom: '8px' }}>
         <button
           className="sidebar-nav-item"
-          onClick={() => setActiveTab('documents')}
+          onClick={() => {
+            if (!currentUser) {
+              if (onOpenAuthModal) onOpenAuthModal();
+            } else {
+              setActiveTab('documents');
+            }
+          }}
         >
           <FolderPlus size={16} />
-          <span>Naskah & Literatur</span>
+          <span>Proyek Baru</span>
         </button>
       </div>
 
@@ -202,20 +269,14 @@ export default function ChatHistorySidebar({
       <div className="sidebar-section-title">Chat</div>
       <div className="sidebar-history-scroll">
         {!currentUser ? (
-          <div className="sidebar-guest-notice">
-            <span className="sidebar-guest-notice-text">
-              Riwayat percakapan hanya tersimpan saat Anda masuk ke akun.
-            </span>
-            <button
-              type="button"
-              className="sidebar-guest-notice-btn"
-              onClick={() => {
-                if (onOpenAuthModal) onOpenAuthModal();
-              }}
-            >
-              <LogIn size={13} />
-              <span>Masuk Sekarang</span>
-            </button>
+          <div
+            className="sidebar-guest-sync-row"
+            onClick={() => {
+              if (onOpenAuthModal) onOpenAuthModal();
+            }}
+            title="Login untuk menyinkronkan riwayat"
+          >
+            <span>Login untuk menyinkronkan riw...</span>
           </div>
         ) : sessions.length === 0 ? (
           <div style={{ padding: '12px 14px', fontSize: '0.78rem', color: 'var(--text-muted)' }}>
@@ -378,36 +439,54 @@ export default function ChatHistorySidebar({
           </div>
         )}
 
-        {/* Profile Pill & Standalone Download Icon Button */}
-        <div className="sidebar-footer-row">
-          <div 
-            id="user-profile-pill-btn"
-            ref={profileButtonRef}
-            className={`user-profile-pill ${showProfileMenu ? 'active' : ''}`}
-            onClick={() => setShowProfileMenu(!showProfileMenu)}
-            title={currentUser ? "Klik untuk membuka menu akun & pengaturan" : "Klik untuk membuka menu atau masuk"}
-          >
-            <div className={`user-avatar-circle ${!currentUser ? 'guest-avatar' : ''}`}>
-              {currentUser ? (
-                currentUser.full_name ? (
+        {/* Profile Pill & Standalone Download Icon Button (Persis Gambar 1) */}
+        {!currentUser ? (
+          <div className="sidebar-footer-row guest-footer">
+            <div 
+              className="sidebar-guest-login-pill"
+              onClick={() => {
+                if (onOpenAuthModal) onOpenAuthModal();
+              }}
+              title="Login ke Akun"
+            >
+              <UserIcon size={15} color="#e5e7eb" />
+              <span>Login</span>
+            </div>
+
+            <button
+              type="button"
+              className="sidebar-download-btn"
+              title="Unduh untuk Desktop"
+              onClick={() => {
+                if (onOpenAuthModal) onOpenAuthModal();
+              }}
+            >
+              <ArrowDownToLine size={16} />
+            </button>
+          </div>
+        ) : (
+          <div className="sidebar-footer-row">
+            <div 
+              id="user-profile-pill-btn"
+              ref={profileButtonRef}
+              className={`user-profile-pill ${showProfileMenu ? 'active' : ''}`}
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              title="Klik untuk membuka menu akun & pengaturan"
+            >
+              <div className="user-avatar-circle">
+                {currentUser.full_name ? (
                   currentUser.full_name[0].toUpperCase()
                 ) : currentUser.username ? (
                   currentUser.username[0].toUpperCase()
                 ) : (
                   'U'
-                )
-              ) : (
-                <UserIcon size={14} color="#9ca3af" />
-              )}
-            </div>
+                )}
+              </div>
 
-            <span className="user-name-text">
-              {currentUser 
-                ? (currentUser.full_name || currentUser.username)
-                : 'Belum Masuk'}
-            </span>
+              <span className="user-name-text">
+                {currentUser.full_name || currentUser.username}
+              </span>
 
-            {currentUser ? (
               <button 
                 type="button" 
                 className="upgrade-btn-pill"
@@ -418,29 +497,18 @@ export default function ChatHistorySidebar({
               >
                 Tingkatkan
               </button>
-            ) : (
-              <button 
-                type="button" 
-                className="upgrade-btn-pill login-btn-pill"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  if (onOpenAuthModal) onOpenAuthModal();
-                }}
-              >
-                Masuk
-              </button>
-            )}
-          </div>
+            </div>
 
-          <button
-            type="button"
-            className="sidebar-download-btn"
-            title="Unduh / Ekspor Percakapan"
-            onClick={() => handleMenuItemClick('app')}
-          >
-            <ArrowDownToLine size={16} />
-          </button>
-        </div>
+            <button
+              type="button"
+              className="sidebar-download-btn"
+              title="Unduh / Ekspor Percakapan"
+              onClick={() => handleMenuItemClick('app')}
+            >
+              <ArrowDownToLine size={16} />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Mini Modal Informasional dari Popover */}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { PanelLeftOpen, Sparkles, BookOpen } from 'lucide-react';
+import { PanelLeftOpen, Sparkles, BookOpen, ArrowDownToLine } from 'lucide-react';
 import ChatHistorySidebar from './components/ChatHistorySidebar';
 import ChatContainer from './components/ChatContainer';
 import SourceReferenceDrawer from './components/SourceReferenceDrawer';
@@ -433,15 +433,52 @@ export default function App() {
           </div>
 
           <div className="top-bar-right-slot">
-            {activeTab === 'chat' && activeSources && activeSources.length > 0 && (
-              <button
-                className={`top-source-toggle-btn ${drawerOpen ? 'active' : ''}`}
-                onClick={() => setDrawerOpen(!drawerOpen)}
-                title={drawerOpen ? "Tutup bar kanan rujukan" : "Buka bar kanan rujukan sumber"}
-              >
-                <BookOpen size={14} color={drawerOpen ? "#d4af37" : "currentColor"} />
-                <span>{drawerOpen ? "Tutup Bar Rujukan" : `Bar Rujukan (${activeSources.length})`}</span>
-              </button>
+            {!currentUser ? (
+              <div className="guest-header-actions">
+                <button
+                  type="button"
+                  className="btn-guest-header-login"
+                  onClick={() => setAuthModalOpen(true)}
+                  title="Masuk ke Akun"
+                >
+                  Login
+                </button>
+                <button
+                  type="button"
+                  className="btn-guest-header-download"
+                  onClick={() => setAuthModalOpen(true)}
+                  title="Unduh untuk Desktop"
+                >
+                  <ArrowDownToLine size={14} />
+                  <span>Unduh untuk Desktop</span>
+                </button>
+              </div>
+            ) : (
+              <div className="logged-header-actions">
+                {activeTab === 'chat' && activeSources && activeSources.length > 0 && (
+                  <button
+                    className={`top-source-toggle-btn ${drawerOpen ? 'active' : ''}`}
+                    onClick={() => setDrawerOpen(!drawerOpen)}
+                    title={drawerOpen ? "Tutup bar kanan rujukan" : "Buka bar kanan rujukan sumber"}
+                  >
+                    <BookOpen size={14} color={drawerOpen ? "#d4af37" : "currentColor"} />
+                    <span>{drawerOpen ? "Tutup Bar Rujukan" : `Bar Rujukan (${activeSources.length})`}</span>
+                  </button>
+                )}
+                <div 
+                  className="header-user-badge"
+                  onClick={() => {
+                    setSettingsSubTab('account');
+                    setActiveTab('settings');
+                  }}
+                  title="Buka Pengaturan Akun"
+                >
+                  <div className="header-avatar-mini">
+                    {currentUser.full_name ? currentUser.full_name[0].toUpperCase() : (currentUser.username ? currentUser.username[0].toUpperCase() : 'U')}
+                  </div>
+                  <span className="header-user-name">{currentUser.full_name || currentUser.username}</span>
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -460,6 +497,8 @@ export default function App() {
                 ragParams={ragParams}
                 setRagParams={setRagParams}
                 isRightBarOpen={drawerOpen}
+                currentUser={currentUser}
+                onOpenAuthModal={() => setAuthModalOpen(true)}
               />
             )}
 

@@ -15,7 +15,12 @@ import {
   Music,
   History,
   Shirt,
-  BarChart2
+  BarChart2,
+  Folder,
+  Code,
+  ChevronRight,
+  Presentation,
+  Palette
 } from 'lucide-react';
 
 import cardTahto from '../assets/card_tahto.jpg';
@@ -31,13 +36,26 @@ export default function ChatContainer({
   onSwitchToDocs,
   onOpenSbertModal,
   ragParams,
-  setRagParams
+  setRagParams,
+  currentUser,
+  onOpenAuthModal
 }) {
   const [inputQuery, setInputQuery] = useState('');
   const [showSettings, setShowSettings] = useState(false);
+  const [speedMode, setSpeedMode] = useState('instan'); // 'instan' | 'tinggi'
+  const [showInspirations, setShowInspirations] = useState(false);
   const [copiedIdx, setCopiedIdx] = useState(null);
   const messagesEndRef = useRef(null);
   const textareaRef = useRef(null);
+
+  // Helper gating interaksi untuk tamu belum login (Gambar 2)
+  const handleActionGated = (callback) => {
+    if (!currentUser) {
+      if (onOpenAuthModal) onOpenAuthModal();
+      return;
+    }
+    if (callback) callback();
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -45,6 +63,10 @@ export default function ChatContainer({
 
   const handleSubmit = (e) => {
     if (e) e.preventDefault();
+    if (!currentUser) {
+      if (onOpenAuthModal) onOpenAuthModal();
+      return;
+    }
     if (!inputQuery.trim() || isLoading) return;
     onSendMessage(inputQuery.trim());
     setInputQuery('');
@@ -54,6 +76,11 @@ export default function ChatContainer({
   };
 
   const handleKeyDown = (e) => {
+    if (!currentUser) {
+      e.preventDefault();
+      if (onOpenAuthModal) onOpenAuthModal();
+      return;
+    }
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
@@ -61,6 +88,10 @@ export default function ChatContainer({
   };
 
   const handleInputResize = (e) => {
+    if (!currentUser) {
+      if (onOpenAuthModal) onOpenAuthModal();
+      return;
+    }
     setInputQuery(e.target.value);
     e.target.style.height = 'auto';
     e.target.style.height = `${Math.min(e.target.scrollHeight, 150)}px`;
@@ -72,36 +103,38 @@ export default function ChatContainer({
     setTimeout(() => setCopiedIdx(null), 2000);
   };
 
-  // Render message text with clickable [1], [2] badges
-  const renderMessageContent = (text, sources) => {
-    if (!text) return null;
-    const parts = text.split(/(\[\d+\])/g);
-
-    return parts.map((part, index) => {
-      const match = part.match(/\[(\d+)\]/);
-      if (match) {
-        const citationId = parseInt(match[1], 10);
-        return (
-          <button
-            key={index}
-            className="citation-badge"
-            title={`Lihat rujukan sumber [${citationId}]`}
-            onClick={() => onOpenSources(sources, citationId)}
-          >
-            [{citationId}]
-          </button>
-        );
-      }
-      return <span key={index}>{part}</span>;
-    });
-  };
-
+  // Quick categories persis Gambar 1
   const quickCategories = [
-    { label: 'Ragam Gerak', icon: <Layers size={13} />, query: 'Jelaskan ragam gerak Tahto, Pecah, dan Tahtim pada tari Zapin!' },
-    { label: 'Musik & Marwas', icon: <Music size={13} />, query: 'Apa peran alat musik Gambus dan Marwas dalam iringan tari Zapin?' },
-    { label: 'Sejarah & Nilai', icon: <History size={13} />, query: 'Bagaimana sejarah asal usul tari Zapin dari Hadramaut ke Melayu Siak?' },
-    { label: 'Busana & Adat', icon: <Shirt size={13} />, query: 'Bagaimana etika tata busana Baju Kurung Cekak Musang dan Songket dalam Zapin?' },
-    { label: 'Evaluasi Skripsi', icon: <BarChart2 size={13} />, query: 'Bagaimana perbandingan akurasi Sentence-BERT vs BM25 untuk riset Zapin?' },
+    { 
+      label: 'Slide', 
+      icon: <Presentation size={14} />, 
+      query: 'Buatkan kerangka slide presentasi interaktif tentang ragam gerak Tahto, Pecah, dan Tahtim pada tari Zapin!' 
+    },
+    { 
+      label: 'Riset Mendalam', 
+      icon: <Sparkles size={14} />, 
+      query: 'Jelaskan riset komparatif mendalam akulturasi nilai Melayu dan Hadramaut dalam tradisi tari Zapin Nusantara!' 
+    },
+    { 
+      label: 'Buat aplikasi', 
+      icon: <Code size={14} />, 
+      query: 'Bagaimana arsitektur implementasi Sentence-BERT dan RAG untuk pelestarian ensiklopedia tari Zapin Melayu?' 
+    },
+    { 
+      label: 'Dokumen', 
+      icon: <FileText size={14} />, 
+      query: 'Rangkum dokumen naskah tari Zapin terkait busana Teluk Belanga, Cekak Musang, dan filosofi kain Songket!' 
+    },
+    { 
+      label: 'Sheets', 
+      icon: <BarChart2 size={14} />, 
+      query: 'Sajikan tabel komparasi ritme sinkopasi gendang Marwas dan langkah kaki penari Zapin Melayu!' 
+    },
+    { 
+      label: 'Desain', 
+      icon: <Palette size={14} />, 
+      query: 'Jelaskan estetika desain pola lantai dan koreografi gerak tari Zapin tradisional Melayu Siak!' 
+    },
   ];
 
   const inspirationCards = [
@@ -130,118 +163,125 @@ export default function ChatContainer({
   return (
     <div className="kimi-chat-stream">
       {isHomeView ? (
-        /* KIMI HOME STATE */
+        /* KIMI HOME STATE (Persis Gambar 1) */
         <div className="kimi-home-container">
-          {/* Big Minimalist Typography: ZAPIN */}
-          <h1 className="kimi-giant-title">ZAPIN</h1>
+          {/* Big Minimalist Typography: KIMI (Persis Gambar 1) */}
+          <h1 className="kimi-giant-title">KIMI</h1>
 
           {/* Curved Kimi Input Box */}
-          <div className="kimi-input-box">
+          <div 
+            className="kimi-input-box"
+            onClick={() => {
+              if (!currentUser) handleActionGated();
+            }}
+          >
             <textarea
               ref={textareaRef}
               className="kimi-textarea"
               rows={2}
-              placeholder='Ketik untuk bertanya tentang budaya, gerak, sejarah, atau musik Zapin...'
-              value={inputQuery}
+              placeholder='Tanya Apa Saja....'
+              value={currentUser ? inputQuery : ''}
               onChange={handleInputResize}
               onKeyDown={handleKeyDown}
+              onFocus={(e) => {
+                if (!currentUser) {
+                  e.target.blur();
+                  handleActionGated();
+                }
+              }}
+              readOnly={!currentUser}
               disabled={isLoading}
             />
 
             <div className="kimi-box-bottom">
               <div className="kimi-box-left">
-                <div 
-                  className="kimi-select-pill"
-                  onClick={onSwitchToDocs}
-                  title="Lihat katalog naskah Zapin tervalidasi"
+                {/* Plus (+) Button */}
+                <button
+                  type="button"
+                  className="kimi-tool-btn"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleActionGated(() => onSwitchToDocs());
+                  }}
+                  title="Lampirkan berkas atau konteks"
                 >
-                  <BookOpen size={13} color="#d4af37" />
-                  <span>Katalog Pustaka</span>
-                  <ChevronDown size={12} />
+                  <Plus size={16} />
+                </button>
+
+                {/* Pilih proyek pill */}
+                <div 
+                  className="kimi-pill-action"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleActionGated(() => onSwitchToDocs());
+                  }}
+                  title="Pilih proyek ruang kerja"
+                >
+                  <Folder size={13} color="#9ca3af" />
+                  <span>Pilih proyek</span>
                 </div>
 
+                {/* Plugin pill */}
                 <div 
-                  className="kimi-select-pill"
-                  onClick={onOpenSbertModal}
-                  title="Lihat spesifikasi & kalibrasi Sentence-BERT"
+                  className="kimi-pill-action"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleActionGated(() => onOpenSbertModal());
+                  }}
+                  title="Pilih Plugin atau Sentence-BERT"
                 >
-                  <Sparkles size={13} color="#60a5fa" />
-                  <span>Dense SBERT</span>
-                  <ChevronDown size={12} />
+                  <Sparkles size={13} color="#9ca3af" />
+                  <span>Plugin</span>
                 </div>
               </div>
 
               <div className="kimi-box-right">
+                {/* Segmented Toggle: Instan | Tinggi */}
                 <div 
-                  className="kimi-select-pill"
-                  onClick={() => setShowSettings(!showSettings)}
-                  style={{ color: 'var(--text-muted)' }}
+                  className="kimi-mode-toggle"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleActionGated(() => setSpeedMode(speedMode === 'instan' ? 'tinggi' : 'instan'));
+                  }}
+                  title="Pilih mode komputasi respon"
                 >
-                  <span>Top-K: {ragParams.top_k}</span>
-                  <ChevronDown size={12} />
+                  <span className={`kimi-toggle-option ${speedMode === 'instan' ? 'active' : ''}`}>
+                    Instan
+                  </span>
+                  <span className={`kimi-toggle-option ${speedMode === 'tinggi' ? 'active' : ''}`}>
+                    Tinggi
+                  </span>
                 </div>
 
+                {/* Tombol Kirim Up-Arrow (↑) */}
                 <button
-                  className="kimi-send-btn"
-                  onClick={() => handleSubmit()}
-                  disabled={!inputQuery.trim() || isLoading}
+                  type="button"
+                  className={`kimi-send-btn ${inputQuery.trim() && currentUser ? 'active' : ''}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!currentUser) {
+                      handleActionGated();
+                    } else {
+                      handleSubmit();
+                    }
+                  }}
+                  disabled={isLoading}
                   title="Kirim pesan"
                 >
-                  <ArrowUp size={18} strokeWidth={2.5} />
+                  <ArrowUp size={18} strokeWidth={2.4} />
                 </button>
               </div>
             </div>
-
-            {/* Quick parameter settings dropdown */}
-            {showSettings && (
-              <div style={{
-                marginTop: '12px',
-                paddingTop: '12px',
-                borderTop: '1px solid var(--border-subtle)',
-                display: 'flex',
-                gap: '20px',
-                fontSize: '0.78rem',
-                color: 'var(--text-secondary)'
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>Top-K:</span>
-                  <input
-                    type="range"
-                    min="1"
-                    max="6"
-                    value={ragParams.top_k}
-                    onChange={(e) => setRagParams({ ...ragParams, top_k: parseInt(e.target.value) })}
-                  />
-                  <span>{ragParams.top_k}</span>
-                </div>
-
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span>Threshold Semantik:</span>
-                  <input
-                    type="range"
-                    min="0.1"
-                    max="0.8"
-                    step="0.05"
-                    value={ragParams.threshold}
-                    onChange={(e) => setRagParams({ ...ragParams, threshold: parseFloat(e.target.value) })}
-                  />
-                  <span>{ragParams.threshold}</span>
-                </div>
-              </div>
-            )}
           </div>
 
-          <div className="kimi-sub-label">
-            <span>Tervalidasi Pakar Seni Budaya Melayu</span>
-          </div>
-
-          {/* Category Chips Under Input Box */}
+          {/* Quick Category Chips Under Input Box (Persis Gambar 1) */}
           <div className="kimi-pills-row">
             {quickCategories.map((cat, idx) => (
               <button
                 key={idx}
+                type="button"
                 className="category-chip"
-                onClick={() => onSendMessage(cat.query)}
+                onClick={() => handleActionGated(() => onSendMessage(cat.query))}
               >
                 {cat.icon}
                 <span>{cat.label}</span>
@@ -249,29 +289,35 @@ export default function ChatContainer({
             ))}
           </div>
 
-          {/* "Jelajahi Inspirasi" Section */}
-          <div className="inspiration-section">
-            <div className="inspiration-header">
-              <Lightbulb size={16} color="#d4af37" />
-              <span>Jelajahi inspirasi</span>
-            </div>
-
-            <div className="inspiration-grid">
-              {inspirationCards.map((card, idx) => (
-                <div
-                  key={idx}
-                  className="inspiration-card"
-                  style={{ backgroundImage: `url(${card.image})` }}
-                  onClick={() => onSendMessage(card.query)}
-                >
-                  <div className="inspiration-overlay">
-                    <div className="inspiration-card-title">{card.title}</div>
-                    <div className="inspiration-card-sub">{card.sub}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+          {/* Jelajahi Inspirasi (Persis Gambar 1 di bagian bawah) */}
+          <div 
+            className="kimi-explore-link"
+            onClick={() => handleActionGated(() => setShowInspirations(!showInspirations))}
+          >
+            <Lightbulb size={14} color="#9ca3af" />
+            <span>Jelajahi inspirasi &gt;&gt;</span>
           </div>
+
+          {/* Inspirasi Panel (Expanded saat diklik oleh user login) */}
+          {showInspirations && (
+            <div className="inspiration-section animate-fade-in" style={{ marginTop: '24px' }}>
+              <div className="inspiration-grid">
+                {inspirationCards.map((card, idx) => (
+                  <div
+                    key={idx}
+                    className="inspiration-card"
+                    style={{ backgroundImage: `url(${card.image})` }}
+                    onClick={() => handleActionGated(() => onSendMessage(card.query))}
+                  >
+                    <div className="inspiration-overlay">
+                      <div className="inspiration-card-title">{card.title}</div>
+                      <div className="inspiration-card-sub">{card.sub}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         /* ACTIVE CHAT STATE */
@@ -357,27 +403,48 @@ export default function ChatContainer({
           {/* Floating Bottom Dock for Active Chat */}
           <div className="chat-bottom-dock">
             <div className="chat-dock-inner">
-              <div className="kimi-input-box" style={{ padding: '12px 18px 10px 18px' }}>
+              <div 
+                className="kimi-input-box" 
+                style={{ padding: '12px 18px 10px 18px' }}
+                onClick={() => {
+                  if (!currentUser) handleActionGated();
+                }}
+              >
                 <textarea
                   ref={textareaRef}
                   className="kimi-textarea"
                   rows={1}
                   placeholder='Kirim pesan balasan...'
-                  value={inputQuery}
+                  value={currentUser ? inputQuery : ''}
                   onChange={handleInputResize}
                   onKeyDown={handleKeyDown}
+                  onFocus={(e) => {
+                    if (!currentUser) {
+                      e.target.blur();
+                      handleActionGated();
+                    }
+                  }}
+                  readOnly={!currentUser}
                   disabled={isLoading}
                   style={{ minHeight: '30px' }}
                 />
 
                 <div className="kimi-box-bottom" style={{ marginTop: '4px', paddingTop: '4px' }}>
                   <div className="kimi-box-left">
-                    <div className="kimi-select-pill" onClick={onSwitchToDocs} title="Lihat katalog pustaka">
+                    <div 
+                      className="kimi-select-pill" 
+                      onClick={() => handleActionGated(() => onSwitchToDocs())} 
+                      title="Lihat katalog pustaka"
+                    >
                       <BookOpen size={12} color="#d4af37" />
                       <span>Katalog Pustaka</span>
                     </div>
 
-                    <div className="kimi-select-pill" onClick={onOpenSbertModal} title="Lihat spesifikasi SBERT">
+                    <div 
+                      className="kimi-select-pill" 
+                      onClick={() => handleActionGated(() => onOpenSbertModal())} 
+                      title="Lihat spesifikasi SBERT"
+                    >
                       <Sparkles size={12} color="#60a5fa" />
                       <span>Dense SBERT</span>
                     </div>
@@ -385,8 +452,12 @@ export default function ChatContainer({
 
                   <div className="kimi-box-right">
                     <button
+                      type="button"
                       className="kimi-send-btn"
-                      onClick={() => handleSubmit()}
+                      onClick={() => {
+                        if (!currentUser) handleActionGated();
+                        else handleSubmit();
+                      }}
                       disabled={!inputQuery.trim() || isLoading}
                     >
                       <ArrowUp size={16} strokeWidth={2.5} />
