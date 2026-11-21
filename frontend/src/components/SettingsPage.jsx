@@ -2,27 +2,14 @@ import React, { useState } from 'react';
 import {
   ChevronLeft,
   User,
-  Bell,
   Sun,
   Command,
-  LayoutGrid,
-  Music,
-  Receipt,
-  Gift,
-  Sparkles,
   MessageSquare,
-  Box,
-  Smartphone,
   ChevronRight,
   LogOut,
   LogIn,
   Shield,
-  Sliders,
-  Check,
-  AlertTriangle,
-  Monitor,
-  Search,
-  SlidersHorizontal
+  Monitor
 } from 'lucide-react';
 
 const GoogleIcon = () => (
@@ -46,52 +33,42 @@ const GoogleIcon = () => (
   </svg>
 );
 
+const VALID_TABS = new Set(['account', 'chatsettings', 'appearance', 'shortcuts']);
+
 export default function SettingsPage({
   onBack,
   currentUser,
   onLogout,
   onOpenAuthModal,
-  ragParams,
-  setRagParams,
-  onOpenSbertModal,
   initialSubTab = 'account'
 }) {
-  const [activeSubTab, setActiveSubTab] = useState(initialSubTab);
-  const [phoneLinked, setPhoneLinked] = useState(false);
-  const [showPhoneModal, setShowPhoneModal] = useState(false);
-  const [phoneNumberInput, setPhoneNumberInput] = useState('');
+  const [activeSubTab, setActiveSubTab] = useState(
+    VALID_TABS.has(initialSubTab) ? initialSubTab : 'account'
+  );
   const [showDeviceModal, setShowDeviceModal] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
-  const [notifKimi, setNotifKimi] = useState(true);
-  const [notifRealtime, setNotifRealtime] = useState(false);
-  const [notifBrowser, setNotifBrowser] = useState(false);
 
-  // Data profil pengguna aktif dari PostgreSQL (tanpa data tiruan default)
   const username = currentUser?.username || '';
   const displayName = currentUser?.full_name || currentUser?.username || '';
   const userEmail = currentUser?.email || '';
   const userRole = currentUser?.role || 'Peneliti / Mahasiswa Budaya';
   const avatarInitial = (displayName || username || 'U')[0].toUpperCase();
 
-  const handleLinkPhone = () => {
-    if (phoneNumberInput.trim()) {
-      setPhoneLinked(true);
-      setShowPhoneModal(false);
-    }
-  };
-
   return (
     <div className="kimi-settings-screen animate-fade-in">
-      {/* Sidebar Navigasi Pengaturan Kimi AI */}
+      {/* Sidebar Navigasi Pengaturan */}
       <aside className="kimi-settings-sidebar">
-        {/* Tombol < Kembali */}
-        <button id="settings-back-btn" className="settings-back-btn" onClick={onBack} title="Kembali ke Obrolan">
+        <button
+          id="settings-back-btn"
+          className="settings-back-btn"
+          onClick={onBack}
+          title="Kembali ke Obrolan"
+        >
           <ChevronLeft size={18} />
           <span>Kembali</span>
         </button>
 
         <div className="settings-nav-scroll">
-          {/* Kelompok 1: Utama & Akun */}
+          <div className="settings-section-heading">Pengaturan</div>
           <div className="settings-nav-group">
             <button
               id="settings-nav-account"
@@ -99,16 +76,15 @@ export default function SettingsPage({
               onClick={() => setActiveSubTab('account')}
             >
               <User size={17} />
-              <span>Akun & Keamanan</span>
+              <span>Akun &amp; Keamanan</span>
             </button>
 
             <button
-              id="settings-nav-notifications"
-              className={`settings-nav-item ${activeSubTab === 'notifications' ? 'active' : ''}`}
-              onClick={() => setActiveSubTab('notifications')}
+              className={`settings-nav-item ${activeSubTab === 'chatsettings' ? 'active' : ''}`}
+              onClick={() => setActiveSubTab('chatsettings')}
             >
-              <Bell size={17} />
-              <span>Notifikasi</span>
+              <MessageSquare size={17} />
+              <span>Pengaturan Obrolan</span>
             </button>
 
             <button
@@ -126,83 +102,18 @@ export default function SettingsPage({
               <Command size={17} />
               <span>Pintasan</span>
             </button>
-
-            <button
-              className={`settings-nav-item ${activeSubTab === 'features' ? 'active' : ''}`}
-              onClick={() => setActiveSubTab('features')}
-            >
-              <LayoutGrid size={17} />
-              <span>Pengelolaan fitur</span>
-            </button>
-          </div>
-
-          {/* Kelompok 2: Langganan */}
-          <div className="settings-section-heading">Langganan</div>
-          <div className="settings-nav-group">
-            <button
-              className={`settings-nav-item ${activeSubTab === 'subscription' ? 'active' : ''}`}
-              onClick={() => setActiveSubTab('subscription')}
-            >
-              <Music size={17} />
-              <span>Langganan Saya</span>
-            </button>
-
-            <button
-              className={`settings-nav-item ${activeSubTab === 'billing' ? 'active' : ''}`}
-              onClick={() => setActiveSubTab('billing')}
-            >
-              <Receipt size={17} />
-              <span>Tagihan & Faktur</span>
-            </button>
-
-            <button
-              className={`settings-nav-item ${activeSubTab === 'giftcards' ? 'active' : ''}`}
-              onClick={() => setActiveSubTab('giftcards')}
-            >
-              <Gift size={17} />
-              <span>Kartu Hadiah</span>
-            </button>
-          </div>
-
-          {/* Kelompok 3: Personalisasi */}
-          <div className="settings-section-heading">Personalisasi</div>
-          <div className="settings-nav-group">
-            <button
-              className={`settings-nav-item ${activeSubTab === 'memory' ? 'active' : ''}`}
-              onClick={() => setActiveSubTab('memory')}
-            >
-              <Sparkles size={17} />
-              <span>Memori Chat</span>
-            </button>
-
-            <button
-              className={`settings-nav-item ${activeSubTab === 'chatsettings' ? 'active' : ''}`}
-              onClick={() => setActiveSubTab('chatsettings')}
-            >
-              <MessageSquare size={17} />
-              <span>Pengaturan obrolan</span>
-            </button>
-
-            <button
-              className={`settings-nav-item ${activeSubTab === 'presets' ? 'active' : ''}`}
-              onClick={() => setActiveSubTab('presets')}
-            >
-              <Box size={17} />
-              <span>Preset</span>
-            </button>
           </div>
         </div>
       </aside>
 
       {/* Area Konten Utama Pengaturan */}
       <main className="kimi-settings-main">
-        {/* SUBTAB 1: Akun & Keamanan (Sesuai Persis Tangkapan Layar Kimi AI) */}
+        {/* SUBTAB 1: Akun & Keamanan */}
         {activeSubTab === 'account' && (
           <div className="settings-content-wrapper">
             <div className="settings-account-content">
               {currentUser ? (
                 <>
-                  {/* Foto Profil & Username Asli */}
                   <div className="settings-profile-header">
                     <div className="settings-avatar-circle">
                       {avatarInitial}
@@ -213,11 +124,9 @@ export default function SettingsPage({
                     </div>
                   </div>
 
-                  {/* Seksi 1: Tautan Akun */}
                   <div className="settings-card-section">
-                    <span className="settings-group-label">Tautan Akun</span>
+                    <span className="settings-group-label">Informasi Akun</span>
                     <div className="settings-card-box">
-                      {/* Baris Email */}
                       <div className="settings-card-row">
                         <div className="settings-row-left">
                           <GoogleIcon />
@@ -230,32 +139,18 @@ export default function SettingsPage({
 
                       <div className="settings-row-divider" />
 
-                      {/* Baris Nomor Telepon */}
                       <div className="settings-card-row">
                         <div className="settings-row-left">
-                          <Smartphone size={18} color="#9ca3af" />
-                          <span>Nomor telepon</span>
+                          <User size={18} color="#5d5d5d" />
+                          <span>Username</span>
                         </div>
                         <div className="settings-row-right">
-                          {phoneLinked ? (
-                            <span style={{ color: '#10b981', fontSize: '0.86rem' }}>
-                              +62 812-3456-7890
-                            </span>
-                          ) : (
-                            <button
-                              type="button"
-                              className="settings-link-action-btn"
-                              onClick={() => setShowPhoneModal(true)}
-                            >
-                              Tautkan
-                            </button>
-                          )}
+                          <span className="settings-row-value">{username || '-'}</span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Seksi 2: Keamanan Akun */}
                   <div className="settings-card-section">
                     <span className="settings-group-label">Keamanan Akun</span>
                     <div className="settings-card-box">
@@ -264,18 +159,17 @@ export default function SettingsPage({
                         onClick={() => setShowDeviceModal(true)}
                       >
                         <div className="settings-row-left">
-                          <Shield size={18} color="#9ca3af" />
-                          <span>Kelola Perangkat & Sesi</span>
+                          <Shield size={18} color="#5d5d5d" />
+                          <span>Kelola Perangkat &amp; Sesi</span>
                         </div>
                         <div className="settings-row-right" style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                           <span className="settings-row-value">Sesi Aktif</span>
-                          <ChevronRight size={15} color="#71717a" />
+                          <ChevronRight size={15} color="#8e8ea0" />
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Tombol Keluar (Pill Lebar) */}
                   <button
                     type="button"
                     className="settings-logout-btn"
@@ -287,35 +181,23 @@ export default function SettingsPage({
                     <LogOut size={16} />
                     <span>Keluar ({username})</span>
                   </button>
-
-                  {/* Link Hapus Akun di Bagian Bawah */}
-                  <div className="settings-delete-account-wrap">
-                    <button
-                      type="button"
-                      className="settings-delete-account-btn"
-                      onClick={() => setShowDeleteConfirm(true)}
-                    >
-                      Hapus Akun
-                    </button>
-                  </div>
                 </>
               ) : (
-                /* Tampilan Belum Login (Mode Tamu) */
                 <div className="settings-unauth-container">
                   <div className="settings-unauth-card">
                     <div className="settings-unauth-avatar">
-                      <User size={36} color="#9ca3af" />
+                      <User size={34} color="#5d5d5d" />
                     </div>
-                    <h2 className="settings-unauth-title">Anda Belum Masuk</h2>
+                    <h2 className="settings-unauth-title">Anda Sedang dalam Mode Tamu</h2>
                     <p className="settings-unauth-desc">
-                      Saat ini Anda berada dalam mode tamu. Silakan masuk atau daftar akun untuk menyinkronkan riwayat percakapan Zapin ke cloud PostgreSQL, mengamankan data riset, dan mengelola profil akun.
+                      Anda tetap dapat menggunakan percakapan sementara dan menjelajahi fitur sistem. Masuk ke akun untuk menyimpan riwayat percakapan Zapin secara permanen di cloud PostgreSQL.
                     </p>
                     <button
                       type="button"
                       className="settings-unauth-login-btn"
                       onClick={() => {
                         onBack();
-                        if (onOpenAuthModal) onOpenAuthModal();
+                        if (onOpenAuthModal) onOpenAuthModal('login');
                       }}
                     >
                       <LogIn size={16} />
@@ -328,126 +210,76 @@ export default function SettingsPage({
           </div>
         )}
 
-        {/* SUBTAB 2: Notifikasi (Persis Kimi AI) */}
-        {activeSubTab === 'notifications' && (
+        {/* SUBTAB 2: Pengaturan Obrolan */}
+        {activeSubTab === 'chatsettings' && (
           <div className="settings-content-wrapper">
-            <div className="settings-notif-container">
-              <h2 className="settings-page-title">Notifikasi</h2>
+            <div className="settings-generic-content">
+              <h3>Pengaturan Obrolan</h3>
+              <p className="settings-subtitle">Gaya bahasa, sitasi, dan penyimpanan sesi obrolan.</p>
 
-              <div className="settings-card-box notif-card-box">
-                {/* 1. Notifikasi Kimi */}
-                <div className="settings-notif-row">
-                  <div className="settings-notif-text-group">
-                    <div className="settings-notif-item-title">Notifikasi Kimi</div>
-                    <div className="settings-notif-item-desc">
-                      Dapatkan notifikasi saat tugas Anda diperbarui atau memerlukan tanggapan Anda.
+              <div className="settings-card-box" style={{ marginTop: '16px' }}>
+                <div className="settings-card-row">
+                  <div>
+                    <div style={{ fontWeight: 500, color: '#0d0d0d' }}>Mode Penyimpanan Saat Ini</div>
+                    <div style={{ fontSize: '0.78rem', color: '#5d5d5d' }}>
+                      {currentUser
+                        ? 'Riwayat percakapan tersinkronisasi ke database cloud PostgreSQL.'
+                        : 'Mode Tamu — percakapan hanya disimpan sementara di memori hingga halaman di-refresh.'}
                     </div>
                   </div>
-                  <label className="kimi-switch">
-                    <input
-                      type="checkbox"
-                      checked={notifKimi}
-                      onChange={(e) => setNotifKimi(e.target.checked)}
-                    />
-                    <span className="kimi-switch-slider" />
-                  </label>
+                  <span style={{ color: currentUser ? '#047857' : '#b45309', fontWeight: 600, fontSize: '0.82rem' }}>
+                    {currentUser ? 'Cloud Akun' : 'Sementara'}
+                  </span>
                 </div>
-
                 <div className="settings-row-divider" />
-
-                {/* 2. Pengingat real-time beranda */}
-                <div className="settings-notif-row">
-                  <div className="settings-notif-text-group">
-                    <div className="settings-notif-item-title">Pengingat real-time beranda</div>
-                    <div className="settings-notif-item-desc">
-                      Jika diaktifkan, notifikasi Kimi akan ditampilkan secara real-time di bawah kotak input di beranda.
+                <div className="settings-card-row">
+                  <div>
+                    <div style={{ fontWeight: 500, color: '#0d0d0d' }}>Gaya Respons</div>
+                    <div style={{ fontSize: '0.78rem', color: '#5d5d5d' }}>
+                      Bahasa Indonesia santun berakar budaya Melayu &amp; terikat dokumen.
                     </div>
                   </div>
-                  <label className="kimi-switch">
-                    <input
-                      type="checkbox"
-                      checked={notifRealtime}
-                      onChange={(e) => setNotifRealtime(e.target.checked)}
-                    />
-                    <span className="kimi-switch-slider" />
-                  </label>
+                  <span style={{ color: '#5d5d5d', fontWeight: 500 }}>Grounded RAG</span>
                 </div>
-
                 <div className="settings-row-divider" />
-
-                {/* 3. Notifikasi browser */}
-                <div className="settings-notif-row notif-browser-row">
-                  <div className="settings-notif-text-group">
-                    <div className="settings-notif-item-title">Notifikasi browser</div>
-                    <div className="settings-notif-item-desc">
-                      Dapatkan notifikasi browser saat Anda tidak berada di Kimi.
-                    </div>
-
-                    {/* Ilustrasi Preview Mockup Notifikasi Desktop Kimi AI */}
-                    <div className="notif-preview-canvas">
-                      <div className="notif-preview-header-icons">
-                        <Search size={11} color="#1e3a8a" />
-                        <SlidersHorizontal size={11} color="#1e3a8a" />
-                      </div>
-                      <div className="notif-toast-mockup">
-                        <div className="notif-toast-logo">K</div>
-                        <div className="notif-toast-content">
-                          <div className="notif-toast-title">Brand upgrade planning</div>
-                          <div className="notif-toast-site">kimi.com</div>
-                          <div className="notif-toast-status">Task complete. View results</div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <label className="kimi-switch">
-                    <input
-                      type="checkbox"
-                      checked={notifBrowser}
-                      onChange={(e) => setNotifBrowser(e.target.checked)}
-                    />
-                    <span className="kimi-switch-slider" />
-                  </label>
+                <div className="settings-card-row">
+                  <span>Sitasi Sumber Otomatis [1][2]</span>
+                  <span style={{ color: '#047857', fontWeight: 600, fontSize: '0.82rem' }}>Aktif</span>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* SUBTAB 3: Tampilan */}
+        {/* SUBTAB 4: Tampilan */}
         {activeSubTab === 'appearance' && (
           <div className="settings-content-wrapper">
             <div className="settings-generic-content">
-              <h3>Tampilan & Antarmuka</h3>
-              <p className="settings-subtitle">Sesuaikan visual pengalaman riset budaya Anda.</p>
-              
+              <h3>Tampilan &amp; Antarmuka</h3>
+              <p className="settings-subtitle">Informasi tema visual aplikasi chatbot ZAPIN.</p>
+
               <div className="settings-card-box" style={{ marginTop: '16px' }}>
                 <div className="settings-card-row">
                   <span>Tema Aplikasi</span>
-                  <span style={{ color: '#d4af37', fontWeight: 500 }}>Kimi Obsidian Dark (Aktif)</span>
+                  <span style={{ color: '#0d0d0d', fontWeight: 600 }}>Zapin Clean Light (Aktif)</span>
                 </div>
                 <div className="settings-row-divider" />
                 <div className="settings-card-row">
                   <span>Nuansa Warna Aksen</span>
-                  <span style={{ color: '#9ca3af' }}>Melayu Gold & Slate</span>
-                </div>
-                <div className="settings-row-divider" />
-                <div className="settings-card-row">
-                  <span>Animasi & Efek Halus</span>
-                  <input type="checkbox" defaultChecked style={{ accentColor: '#3b82f6', width: 18, height: 18 }} />
+                  <span style={{ color: '#5d5d5d' }}>Monokrom Bersih &amp; Aksen Emas</span>
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* SUBTAB 4: Pintasan Keyboard */}
+        {/* SUBTAB 5: Pintasan Keyboard */}
         {activeSubTab === 'shortcuts' && (
           <div className="settings-content-wrapper">
             <div className="settings-generic-content">
               <h3>Pintasan Keyboard</h3>
               <p className="settings-subtitle">Navigasi lebih cepat dengan tombol pintas.</p>
-              
+
               <div className="settings-card-box" style={{ marginTop: '16px' }}>
                 <div className="settings-card-row">
                   <span>Obrolan Baru</span>
@@ -463,234 +295,11 @@ export default function SettingsPage({
                   <span>Baris Baru</span>
                   <kbd className="settings-kbd">Shift + Enter</kbd>
                 </div>
-                <div className="settings-row-divider" />
-                <div className="settings-card-row">
-                  <span>Buka / Tutup Bar Kanan Rujukan</span>
-                  <kbd className="settings-kbd">Ctrl + /</kbd>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* SUBTAB 5: Pengelolaan Fitur (SBERT RAG) */}
-        {activeSubTab === 'features' && (
-          <div className="settings-content-wrapper">
-            <div className="settings-generic-content">
-              <h3>Pengelolaan Fitur & Pipeline SBERT</h3>
-              <p className="settings-subtitle">Konfigurasi retrieval vector Sentence-BERT untuk akurasi jawaban.</p>
-              
-              <div className="settings-card-box" style={{ marginTop: '16px' }}>
-                <div className="settings-card-row">
-                  <div>
-                    <div style={{ fontWeight: 500, color: '#f3f4f6' }}>Model Semantik</div>
-                    <div style={{ fontSize: '0.78rem', color: '#9ca3af' }}>paraphrase-multilingual-MiniLM-L12-v2 (384-dim)</div>
-                  </div>
-                  <span style={{ color: '#10b981', fontSize: '0.8rem', fontWeight: 600 }}>Tervalidasi</span>
-                </div>
-                <div className="settings-row-divider" />
-                <div className="settings-card-row">
-                  <span>Parameter Top-K Chunks</span>
-                  <span style={{ color: '#f3f4f6', fontWeight: 600 }}>{ragParams?.top_k || 4} Chunks</span>
-                </div>
-                <div className="settings-row-divider" />
-                <div className="settings-card-row">
-                  <span>Threshold Kosinus Kemiripan</span>
-                  <span style={{ color: '#f3f4f6', fontWeight: 600 }}>{ragParams?.threshold || 0.30}</span>
-                </div>
-              </div>
-
-              {onOpenSbertModal && (
-                <button
-                  type="button"
-                  className="settings-action-pill-btn"
-                  onClick={onOpenSbertModal}
-                  style={{ marginTop: '16px' }}
-                >
-                  <Sliders size={16} />
-                  <span>Buka Kalibrasi Lengkap Sentence-BERT</span>
-                </button>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* SUBTAB 6: Langganan Saya */}
-        {activeSubTab === 'subscription' && (
-          <div className="settings-content-wrapper">
-            <div className="settings-generic-content">
-              <h3>Paket Keanggotaan & Riset</h3>
-              <p className="settings-subtitle">Status paket akses basis data seni dan budaya Zapin Melayu.</p>
-
-              <div className="settings-card-box" style={{ marginTop: '16px', border: '1px solid rgba(234, 179, 8, 0.3)' }}>
-                <div className="settings-card-row">
-                  <div>
-                    <div style={{ color: '#facc15', fontWeight: 600, fontSize: '1rem' }}>Peneliti Skripsi (Researcher Tier)</div>
-                    <div style={{ fontSize: '0.8rem', color: '#9ca3af', marginTop: '2px' }}>Akses terbuka penuh ke seluruh naskah primer, ground truth, dan metrik RAG.</div>
-                  </div>
-                  <span className="settings-badge-gold">Aktif</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* SUBTAB 7: Tagihan & Faktur */}
-        {activeSubTab === 'billing' && (
-          <div className="settings-content-wrapper">
-            <div className="settings-generic-content">
-              <h3>Tagihan & Faktur</h3>
-              <p className="settings-subtitle">Riwayat transaksi dan status akun akademik.</p>
-
-              <div className="settings-card-box" style={{ marginTop: '16px' }}>
-                <div className="settings-card-row">
-                  <span>Status Pembiayaan</span>
-                  <span style={{ color: '#10b981', fontWeight: 500 }}>Gratis untuk Keperluan Akademik</span>
-                </div>
-                <div className="settings-row-divider" />
-                <div className="settings-card-row">
-                  <span>Kredit Embedding & API</span>
-                  <span style={{ color: '#9ca3af' }}>Tak Terbatas (Local SBERT + Google Gemini)</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* SUBTAB 8: Kartu Hadiah */}
-        {activeSubTab === 'giftcards' && (
-          <div className="settings-content-wrapper">
-            <div className="settings-generic-content">
-              <h3>Kartu Hadiah & Voucher</h3>
-              <p className="settings-subtitle">Tukarkan kode akses khusus naskah budaya langka.</p>
-
-              <div className="settings-card-box" style={{ marginTop: '16px' }}>
-                <div className="settings-card-row">
-                  <input
-                    type="text"
-                    placeholder="Masukkan kode voucher atau hibah..."
-                    className="settings-text-input"
-                  />
-                  <button type="button" className="settings-link-action-btn">
-                    Tukarkan
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* SUBTAB 9: Memori Chat */}
-        {activeSubTab === 'memory' && (
-          <div className="settings-content-wrapper">
-            <div className="settings-generic-content">
-              <h3>Memori Chat & Riwayat Percakapan</h3>
-              <p className="settings-subtitle">Pengelolaan persistensi percakapan pada basis data PostgreSQL Neon Cloud.</p>
-
-              <div className="settings-card-box" style={{ marginTop: '16px' }}>
-                <div className="settings-card-row">
-                  <div>
-                    <div style={{ fontWeight: 500, color: '#f3f4f6' }}>Sinkronisasi Database Cloud</div>
-                    <div style={{ fontSize: '0.78rem', color: '#9ca3af' }}>Tersimpan aman di instance cloud Neon PostgreSQL.</div>
-                  </div>
-                  <span style={{ color: '#10b981', fontSize: '0.82rem', fontWeight: 600 }}>Tersambung</span>
-                </div>
-                <div className="settings-row-divider" />
-                <div className="settings-card-row">
-                  <span>Retensi Percakapan</span>
-                  <span style={{ color: '#9ca3af' }}>Selamanya</span>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* SUBTAB 10: Pengaturan Obrolan */}
-        {activeSubTab === 'chatsettings' && (
-          <div className="settings-content-wrapper">
-            <div className="settings-generic-content">
-              <h3>Pengaturan Obrolan</h3>
-              <p className="settings-subtitle">Gaya bahasa dan persona respons Zapin Cultural Assistant.</p>
-
-              <div className="settings-card-box" style={{ marginTop: '16px' }}>
-                <div className="settings-card-row">
-                  <div>
-                    <div style={{ fontWeight: 500, color: '#f3f4f6' }}>Mode Jawaban</div>
-                    <div style={{ fontSize: '0.78rem', color: '#9ca3af' }}>Bahasa Indonesia berakar Melayu santun & ilmiah.</div>
-                  </div>
-                  <span style={{ color: '#3b82f6', fontWeight: 500 }}>Standar Budaya</span>
-                </div>
-                <div className="settings-row-divider" />
-                <div className="settings-card-row">
-                  <span>Kutipan Otomatis [1][2]</span>
-                  <input type="checkbox" defaultChecked style={{ accentColor: '#3b82f6', width: 18, height: 18 }} />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* SUBTAB 11: Preset */}
-        {activeSubTab === 'presets' && (
-          <div className="settings-content-wrapper">
-            <div className="settings-generic-content">
-              <h3>Preset Konfigurasi</h3>
-              <p className="settings-subtitle">Pilih mode optimalisasi pencarian naskah tari.</p>
-
-              <div className="settings-card-box" style={{ marginTop: '16px' }}>
-                <div className="settings-card-row">
-                  <div>
-                    <div style={{ fontWeight: 500, color: '#f3f4f6' }}>Preset Riset Akademik (Default)</div>
-                    <div style={{ fontSize: '0.78rem', color: '#9ca3af' }}>Sangat presisi dengan rujukan potongan teks verbatim.</div>
-                  </div>
-                  <Check size={18} color="#10b981" />
-                </div>
               </div>
             </div>
           </div>
         )}
       </main>
-
-      {/* Modal Tautkan Nomor Telepon */}
-      {showPhoneModal && (
-        <div className="simple-modal-overlay" onClick={() => setShowPhoneModal(false)}>
-          <div className="simple-modal-card" onClick={(e) => e.stopPropagation()}>
-            <div className="simple-modal-header">
-              <h3>Tautkan Nomor Telepon</h3>
-              <button className="simple-modal-close" onClick={() => setShowPhoneModal(false)}>
-                ×
-              </button>
-            </div>
-            <div className="simple-modal-body">
-              <p style={{ fontSize: '0.86rem', color: '#9ca3af', marginBottom: '12px' }}>
-                Masukkan nomor telepon aktif untuk menerima verifikasi keamanan akun.
-              </p>
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <span style={{ padding: '8px 12px', background: '#222226', borderRadius: '8px', color: '#ededed' }}>
-                  +62
-                </span>
-                <input
-                  type="tel"
-                  placeholder="812-3456-7890"
-                  value={phoneNumberInput}
-                  onChange={(e) => setPhoneNumberInput(e.target.value)}
-                  className="settings-text-input"
-                  style={{ flex: 1 }}
-                  autoFocus
-                />
-              </div>
-            </div>
-            <div className="simple-modal-footer">
-              <button className="btn-secondary" onClick={() => setShowPhoneModal(false)}>
-                Batal
-              </button>
-              <button className="btn-primary" onClick={handleLinkPhone}>
-                Simpan
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {/* Modal Kelola Perangkat */}
       {showDeviceModal && (
@@ -703,14 +312,14 @@ export default function SettingsPage({
               </button>
             </div>
             <div className="simple-modal-body">
-              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: '#202024', borderRadius: '10px' }}>
-                <Monitor size={24} color="#3b82f6" />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '12px', background: '#f4f4f6', borderRadius: '10px', border: '1px solid #e5e5e5' }}>
+                <Monitor size={24} color="#2563eb" />
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontWeight: 600, color: '#f3f4f6', fontSize: '0.9rem' }}>
-                    Windows PC • Chrome Browser
+                  <div style={{ fontWeight: 600, color: '#0d0d0d', fontSize: '0.9rem' }}>
+                    Browser Sesi Saat Ini
                   </div>
-                  <div style={{ fontSize: '0.76rem', color: '#10b981', marginTop: '2px' }}>
-                    Sesi Aktif Ini (Pekanbaru, Indonesia)
+                  <div style={{ fontSize: '0.76rem', color: '#047857', marginTop: '2px' }}>
+                    Terautentikasi (JWT Bearer Token)
                   </div>
                 </div>
               </div>
@@ -718,45 +327,6 @@ export default function SettingsPage({
             <div className="simple-modal-footer">
               <button className="btn-secondary" onClick={() => setShowDeviceModal(false)}>
                 Tutup
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Modal Konfirmasi Hapus Akun */}
-      {showDeleteConfirm && (
-        <div className="simple-modal-overlay" onClick={() => setShowDeleteConfirm(false)}>
-          <div className="simple-modal-card" onClick={(e) => e.stopPropagation()}>
-            <div className="simple-modal-header">
-              <h3 style={{ color: '#ef4444' }}>Konfirmasi Hapus Akun</h3>
-              <button className="simple-modal-close" onClick={() => setShowDeleteConfirm(false)}>
-                ×
-              </button>
-            </div>
-            <div className="simple-modal-body">
-              <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-start' }}>
-                <AlertTriangle size={24} color="#ef4444" style={{ flexShrink: 0 }} />
-                <p style={{ fontSize: '0.86rem', color: '#d1d5db', lineHeight: 1.5 }}>
-                  Tindakan ini permanen. Semua data akun dan riwayat percakapan riset di database Neon Cloud akan dihapus secara berkala.
-                </p>
-              </div>
-            </div>
-            <div className="simple-modal-footer">
-              <button className="btn-secondary" onClick={() => setShowDeleteConfirm(false)}>
-                Batal
-              </button>
-              <button
-                className="btn-danger"
-                style={{ background: '#dc2626', color: '#fff', border: 'none', padding: '6px 14px', borderRadius: '6px', cursor: 'pointer' }}
-                onClick={() => {
-                  alert("Permintaan penghapusan akun berhasil dicatat.");
-                  setShowDeleteConfirm(false);
-                  if (onLogout) onLogout();
-                  onBack();
-                }}
-              >
-                Hapus Permanen
               </button>
             </div>
           </div>

@@ -14,7 +14,7 @@ export default function SbertPipelineModal({ isOpen, onClose, ragParams, setRagP
         <div className="sbert-modal-header">
           <div className="sbert-header-title-wrap">
             <div className="sbert-header-icon">
-              <Cpu size={17} color="#d1d5db" />
+              <Cpu size={17} color="#374151" />
             </div>
             <div>
               <h3 className="sbert-modal-heading">Pipeline Sentence-BERT</h3>
@@ -46,7 +46,7 @@ export default function SbertPipelineModal({ isOpen, onClose, ragParams, setRagP
           {/* Tabel Parameter Teknis */}
           <div className="sbert-section-card">
             <div className="sbert-section-header">
-              <Network size={15} color="#9ca3af" />
+              <Network size={15} color="#5d5d5d" />
               <span>Parameter Model & Ruang Vektor</span>
             </div>
 
@@ -86,7 +86,7 @@ export default function SbertPipelineModal({ isOpen, onClose, ragParams, setRagP
           {/* Pengaturan Live Parameter Retrieval */}
           <div className="sbert-section-card">
             <div className="sbert-section-header">
-              <Sliders size={15} color="#9ca3af" />
+              <Sliders size={15} color="#5d5d5d" />
               <span>Kalibrasi Eksperimen Retrieval</span>
             </div>
 

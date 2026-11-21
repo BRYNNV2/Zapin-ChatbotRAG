@@ -35,55 +35,6 @@ Aplikasi web AI Cultural Assistant yang menggabungkan metode **Dense Semantic Re
 
 ---
 
-## 📂 Struktur Repositori
-
-```
-ChatbotRAG/
-├── backend/
-│   ├── app/
-│   │   ├── api/
-│   │   │   ├── routes_chat.py         # Endpoint kueri RAG, saran, dan dialog
-│   │   │   ├── routes_dataset.py      # Endpoint upload & ingestion PDF/DOCX
-│   │   │   └── routes_evaluation.py   # Endpoint benchmark & evaluasi skripsi
-│   │   ├── core/
-│   │   │   ├── config.py              # Konfigurasi parameter SBERT, RAG, path
-│   │   │   └── prompts.py             # Prompt persona budaya & sitasi ketat
-│   │   ├── services/
-│   │   │   ├── document_loader.py     # Parser multi-format (PDF, DOCX, TXT)
-│   │   │   ├── chunking_service.py    # Recursive chunking & metadata pakar
-│   │   │   ├── embedding_service.py   # Sentence-BERT dense encoder
-│   │   │   ├── vector_store.py        # Persistent vector store Cosine Similarity
-│   │   │   ├── rag_service.py         # Pipeline retrieval-augmented generator
-│   │   │   ├── baseline_service.py    # Baseline BM25 Okapi & No-RAG
-│   │   │   └── evaluation_service.py  # Kalkulasi Hit@K, MRR, dan ekspor CSV
-│   │   └── main.py                    # Server FastAPI entrypoint
-│   ├── data/
-│   │   ├── raw_documents/             # File sumber PDF/DOCX
-│   │   ├── processed/                 # Indeks vektor & metadata persisten
-│   │   └── benchmark_queries.json     # Dataset pertanyaan uji ground truth
-│   ├── .env.example                   # Contoh konfigurasi environment
-│   ├── requirements.txt               # Dependensi Python
-│   └── test_pipeline.py               # Skrip verifikasi pipeline backend
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── ChatContainer.jsx          # Area dialog & rendering sitasi
-│   │   │   ├── ChatHistorySidebar.jsx     # Sidebar sesi percakapan lokal
-│   │   │   ├── SourceReferenceDrawer.jsx # Panel samping kutipan asli & pakar
-│   │   │   ├── DocumentManager.jsx        # Tab upload PDF/DOCX & validator
-│   │   │   ├── EvaluationDashboard.jsx    # Dashboard metrik riset Bab IV
-│   │   │   └── CulturalThemeHeader.jsx    # Header bertema Zapin Melayu
-│   │   ├── styles/
-│   │   │   └── index.css                  # Custom design system Melayu modern
-│   │   ├── App.jsx
-│   │   └── main.jsx
-│   ├── package.json
-│   └── vite.config.js
-└── evaluation_results/                    # Hasil ekspor evaluasi skripsi (CSV/JSON)
-```
-
----
-
 ## 🚀 Panduan Instalasi & Menjalankan
 
 ### 1. Kloning Repositori
@@ -125,21 +76,3 @@ npm install
 npx vite --port 5173 --host 127.0.0.1
 ```
 Aplikasi frontend akan aktif di `http://127.0.0.1:5173`.
-
----
-
-## 📊 Hasil Evaluasi Riset Skripsi
-
-Berdasarkan pengujian dataset kueri uji budaya Zapin (*ground truth evaluation*):
-
-| Metode Pengujian | Hit Rate@3 | Mean Reciprocal Rank (MRR) | Rata-rata Latensi | Keterlacakan Sumber |
-| :--- | :---: | :---: | :---: | :---: |
-| **Sentence-BERT Dense RAG (Usulan)** | **100% (1.000)** | **1.0000** | **~0.12 dtk** | **100% (Tervalidasi Pakar)** |
-| **BM25 Sparse Retrieval (Baseline)** | 100% (1.000) | 1.0000 | ~0.001 dtk | 100% |
-| **Raw LLM Parametrik (Baseline)** | N/A | N/A | ~0.01 dtk | **0% (Tidak Terlacak)** |
-
----
-
-## 👥 Kontributor
-- **Pengembang & Peneliti**: BRYNNV2
-- **Tujuan**: Skripsi Sarjana Komputer / Teknologi Informasi

@@ -67,7 +67,7 @@ export default function SourceReferenceDrawer({
       <div className="source-panel-header">
         <div className="source-panel-title-wrap">
           <div className="source-panel-icon-badge">
-            <BookOpen size={16} color="#d1d5db" />
+            <BookOpen size={16} color="#374151" />
           </div>
           <div>
             <h3 className="source-panel-heading">Rujukan Sumber Naskah</h3>
@@ -195,7 +195,7 @@ export default function SourceReferenceDrawer({
 
                   {/* Validasi Pakar: Gaya catatan editorial bersih */}
                   <div className="source-validator-clean">
-                    <ShieldCheck size={14} color="#9ca3af" />
+                    <ShieldCheck size={14} color="#047857" />
                     <span className="validator-clean-text">
                       Validasi: <strong>{src?.validator_name || 'Dewan Kesenian & Budayawan Melayu'}</strong>
                     </span>
@@ -213,7 +213,7 @@ export default function SourceReferenceDrawer({
                     >
                       {copiedId === citId ? (
                         <>
-                          <Check size={11} color="#ffffff" />
+                          <Check size={11} color="#047857" />
                           <span>Disalin</span>
                         </>
                       ) : (

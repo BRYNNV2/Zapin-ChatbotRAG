@@ -44,9 +44,9 @@ export default function DocumentManager() {
             fontWeight: 600,
             padding: '4px 12px',
             borderRadius: '20px',
-            background: 'rgba(16, 185, 129, 0.12)',
-            color: '#34d399',
-            border: '1px solid rgba(16, 185, 129, 0.3)',
+            background: 'rgba(4, 120, 87, 0.08)',
+            color: '#047857',
+            border: '1px solid rgba(4, 120, 87, 0.25)',
             display: 'flex',
             alignItems: 'center',
             gap: '5px'
@@ -56,7 +56,7 @@ export default function DocumentManager() {
           </span>
         </div>
         <p className="view-subtitle">
-          Daftar naskah, literatur, buku, dan jurnal otentik yang telah tertanam di dalam sistem (*embedded corpus*) dan digunakan oleh AI untuk menyajikan jawaban yang akurat serta dapat dilacak sumbernya.
+          Daftar naskah, literatur, buku, dan jurnal otentik yang telah tertanam di dalam sistem (<em>embedded corpus</em>) dan digunakan oleh AI untuk menyajikan jawaban yang akurat serta dapat dilacak sumbernya.
         </p>
       </div>
 
@@ -64,8 +64,8 @@ export default function DocumentManager() {
       <div className="metrics-grid" style={{ marginBottom: '24px' }}>
         <div className="metric-card">
           <div className="metric-label">
-            <BookOpen size={14} color="#d4af37" />
-            <span>Total Naskah & Buku Terdaftar</span>
+            <BookOpen size={14} color="#b45309" />
+            <span>Total Naskah &amp; Buku Terdaftar</span>
           </div>
           <div className="metric-value">
             {documents.length}
@@ -77,7 +77,7 @@ export default function DocumentManager() {
 
         <div className="metric-card gold-accent">
           <div className="metric-label">
-            <FileText size={14} color="#fde68a" />
+            <FileText size={14} color="#92400e" />
             <span>Potongan Teks Semantik (Chunks)</span>
           </div>
           <div className="metric-value gold">
@@ -90,14 +90,14 @@ export default function DocumentManager() {
 
         <div className="metric-card">
           <div className="metric-label">
-            <ShieldCheck size={14} color="#34d399" />
+            <ShieldCheck size={14} color="#047857" />
             <span>Status Validasi Akademis</span>
           </div>
-          <div className="metric-value" style={{ fontSize: '1.4rem', color: '#34d399', paddingTop: '8px' }}>
+          <div className="metric-value" style={{ fontSize: '1.4rem', color: '#047857', paddingTop: '8px' }}>
             100% Terverifikasi
           </div>
           <div className="metric-sub">
-            Divalidasi oleh pakar seni tari & adat Melayu
+            Divalidasi oleh pakar seni tari &amp; adat Melayu
           </div>
         </div>
       </div>
@@ -107,7 +107,7 @@ export default function DocumentManager() {
         marginBottom: '18px',
         display: 'flex',
         alignItems: 'center',
-        background: '#1a1a1f',
+        background: '#ffffff',
         border: '1px solid var(--border-subtle)',
         borderRadius: '12px',
         padding: '10px 16px',
@@ -139,7 +139,7 @@ export default function DocumentManager() {
         <table className="custom-table">
           <thead>
             <tr>
-              <th style={{ width: '38%' }}>Judul Dokumen & Literatur</th>
+              <th style={{ width: '38%' }}>Judul Dokumen &amp; Literatur</th>
               <th>Kapasitas Chunk</th>
               <th>Pakar / Lembaga Validator</th>
               <th>Cakupan Kategori Budaya</th>
@@ -154,16 +154,16 @@ export default function DocumentManager() {
                       width: '32px',
                       height: '32px',
                       borderRadius: '8px',
-                      background: 'rgba(212, 175, 55, 0.12)',
+                      background: 'rgba(180, 83, 9, 0.08)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       flexShrink: 0
                     }}>
-                      <FileText size={16} color="#d4af37" />
+                      <FileText size={16} color="#b45309" />
                     </div>
                     <div>
-                      <div style={{ color: '#ffffff' }}>{doc.document_name}</div>
+                      <div style={{ color: '#0d0d0d' }}>{doc.document_name}</div>
                       <div style={{ fontSize: '0.74rem', color: 'var(--text-muted)' }}>
                         {doc.total_pages} Halaman Terekstraksi
                       </div>
@@ -174,8 +174,8 @@ export default function DocumentManager() {
                   <span style={{
                     padding: '3px 9px',
                     borderRadius: '6px',
-                    background: 'rgba(255, 255, 255, 0.06)',
-                    color: 'var(--text-secondary)',
+                    background: '#f3f4f6',
+                    color: '#374151',
                     fontWeight: 600,
                     fontSize: '0.76rem'
                   }}>
@@ -187,7 +187,7 @@ export default function DocumentManager() {
                     display: 'inline-flex',
                     alignItems: 'center',
                     gap: '5px',
-                    color: '#34d399',
+                    color: '#047857',
                     fontSize: '0.82rem',
                     fontWeight: 500
                   }}>

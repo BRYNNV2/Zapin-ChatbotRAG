@@ -1,7 +1,13 @@
+import json
+import secrets
+import urllib.request
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Header, status
 from pydantic import BaseModel, EmailStr
 from sqlalchemy.orm import Session
+from google.oauth2 import id_token
+from google.auth.transport import requests as google_requests
+from app.core.config import settings
 from app.db.session import get_db
 from app.db.models import User
 from app.core.security import hash_password, verify_password, generate_session_token
@@ -20,6 +26,10 @@ class RegisterRequest(BaseModel):
 class LoginRequest(BaseModel):
     identifier: str  # username, email, or phone number
     password: str
+
+class GoogleAuthRequest(BaseModel):
+    credential: Optional[str] = None
+    access_token: Optional[str] = None
 
 class AuthResponse(BaseModel):
     status: str
@@ -146,6 +156,116 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
         token=token,
         user=user.to_dict()
     )
+
+@router.post("/google", response_model=AuthResponse)
+def google_auth(req: GoogleAuthRequest, db: Session = Depends(get_db)):
+    """Autentikasi menggunakan akun Google (Login / Auto-Register)."""
+    if not db:
+        raise HTTPException(status_code=500, detail="Database belum terhubung.")
+
+    user_info = None
+
+    if req.credential:
+        try:
+            # Verifikasi ID token JWT langsung dengan library resmi Google
+            idinfo = id_token.verify_oauth2_token(
+                req.credential,
+                google_requests.Request(),
+                settings.GOOGLE_CLIENT_ID
+            )
+            user_info = {
+                "email": idinfo.get("email"),
+                "name": idinfo.get("name"),
+                "sub": idinfo.get("sub"),
+                "picture": idinfo.get("picture"),
+            }
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Token Google tidak valid: {str(e)}"
+            )
+    elif req.access_token:
+        # Fallback jika frontend menggunakan token client
+        try:
+            req_url = f"https://www.googleapis.com/oauth2/v3/userinfo?access_token={req.access_token}"
+            with urllib.request.urlopen(req_url, timeout=10) as response:
+                if response.status == 200:
+                    data = json.loads(response.read().decode())
+                    user_info = {
+                        "email": data.get("email"),
+                        "name": data.get("name"),
+                        "sub": data.get("sub"),
+                        "picture": data.get("picture"),
+                    }
+        except Exception as e:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Access token Google tidak valid: {str(e)}"
+            )
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Token Google tidak disertakan."
+        )
+
+    if not user_info or not user_info.get("email"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Gagal mendapatkan informasi email dari akun Google."
+        )
+
+    clean_email = user_info["email"].strip().lower()
+    full_name = user_info.get("name") or clean_email.split("@")[0]
+
+    # Cek apakah user sudah terdaftar di PostgreSQL Neon
+    user = db.query(User).filter(User.email == clean_email).first()
+
+    if user:
+        # User sudah ada -> login & update session token
+        token = generate_session_token()
+        user.session_token = token
+        if not user.full_name and full_name:
+            user.full_name = full_name
+        db.commit()
+        db.refresh(user)
+        return AuthResponse(
+            status="success",
+            message="Berhasil masuk dengan akun Google.",
+            token=token,
+            user=user.to_dict()
+        )
+    else:
+        # User baru -> auto-register
+        base_username = clean_email.split("@")[0]
+        clean_username = "".join(c for c in base_username if c.isalnum() or c == "_")[:25]
+        if len(clean_username) < 3:
+            clean_username = f"user_{secrets.token_hex(3)}"
+
+        # Cek jika username sudah terpakai
+        existing_username = db.query(User).filter(User.username == clean_username).first()
+        if existing_username:
+            clean_username = f"{clean_username[:20]}_{secrets.token_hex(2)}"
+
+        token = generate_session_token()
+        random_pw = secrets.token_urlsafe(32)
+        new_user = User(
+            username=clean_username,
+            email=clean_email,
+            full_name=full_name,
+            password_hash=hash_password(random_pw),
+            role="Peneliti / Mahasiswa Budaya",
+            session_token=token
+        )
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+
+        return AuthResponse(
+            status="success",
+            message="Pendaftaran dan login dengan Google berhasil.",
+            token=token,
+            user=new_user.to_dict()
+        )
 
 @router.get("/me")
 def get_me(current_user: User = Depends(get_current_user)):

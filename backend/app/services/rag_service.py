@@ -1,5 +1,7 @@
 import re
 import os
+import time
+import requests
 from typing import List, Dict, Any, Optional, Tuple
 from app.core.config import settings
 from app.core.prompts import ZAPIN_SYSTEM_PERSONA, RAG_GENERATION_PROMPT, BASELINE_NO_RAG_PROMPT
@@ -10,27 +12,25 @@ class RAGService:
     """Service orkestrator utama Retrieval-Augmented Generation (RAG) Budaya Zapin."""
 
     def __init__(self):
+        self._api_key = ""
         self._gemini_configured = False
+        self._last_llm_model = settings.GEMINI_MODEL
         self._check_llm_config()
 
     def _check_llm_config(self):
-        """Memeriksa apakah API Key Gemini tersedia secara dinamis dari file .env."""
+        """Memeriksa apakah API Key Gemini tersedia dari file .env / settings."""
         from dotenv import load_dotenv
         env_path = settings.BASE_DIR / ".env"
         if env_path.exists():
             load_dotenv(env_path, override=True)
-        
-        api_key = os.getenv("GEMINI_API_KEY", "") or settings.GEMINI_API_KEY
-        if api_key and api_key.strip():
-            try:
-                import google.generativeai as genai
-                genai.configure(api_key=api_key.strip())
-                self._gemini_configured = True
-                print("[RAGService] Google Gemini API berhasil dikonfigurasi.")
-            except Exception as e:
-                print(f"[RAGService] Gagal konfigurasi Gemini API: {e}")
-                self._gemini_configured = False
+
+        api_key = (os.getenv("GEMINI_API_KEY", "") or settings.GEMINI_API_KEY or "").strip()
+        if api_key:
+            self._api_key = api_key
+            self._gemini_configured = True
+            print("[RAGService] Google Gemini API key terdeteksi.")
         else:
+            self._api_key = ""
             self._gemini_configured = False
 
     def retrieve_context(self, query: str, top_k: int = None, threshold: float = None) -> List[Dict[str, Any]]:
@@ -72,31 +72,52 @@ class RAGService:
         return "\n".join(context_lines), source_references
 
     def _generate_with_gemini(self, prompt: str) -> str:
-        """Memanggil Google Gemini API untuk melakukan grounded generation."""
-        import google.generativeai as genai
-        models_to_try = [
+        """Memanggil Google Gemini REST API dengan timeout cepat dan fallback model aktif."""
+        raw_candidates = [
             settings.GEMINI_MODEL,
             "gemini-3.6-flash",
-            "gemini-flash-latest",
-            "gemini-3.7-flash",
-            "gemini-2.5-flash"
+            "gemini-3.5-flash-lite",
+            "gemini-flash-lite-latest",
+            "gemini-3.8-flash",
+            "gemini-flash-latest"
         ]
-        
+        models_to_try = list(dict.fromkeys([m for m in raw_candidates if m]))
+
         last_error = None
         for model_name in models_to_try:
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent"
             try:
-                model = genai.GenerativeModel(model_name)
-                response = model.generate_content(prompt)
-                if response and response.text:
-                    return response.text.strip()
+                resp = requests.post(
+                    url,
+                    headers={
+                        "Content-Type": "application/json",
+                        "x-goog-api-key": self._api_key
+                    },
+                    json={"contents": [{"parts": [{"text": prompt}]}]},
+                    timeout=18
+                )
+                if resp.status_code == 200:
+                    data = resp.json()
+                    candidates = data.get("candidates") or []
+                    if candidates:
+                        parts = candidates[0].get("content", {}).get("parts", [])
+                        if parts and parts[0].get("text"):
+                            self._last_llm_model = model_name
+                            return parts[0]["text"].strip()
+                    last_error = RuntimeError(f"Model {model_name} mengembalikan respons kosong.")
+                    print(f"[RAGService] {last_error} Pindah ke model berikutnya...")
+                else:
+                    last_error = RuntimeError(f"HTTP {resp.status_code}")
+                    print(f"[RAGService] Model {model_name} gagal (HTTP {resp.status_code}), pindah ke model berikutnya...")
             except Exception as e:
                 last_error = e
+                print(f"[RAGService] Model {model_name} gagal ({e}), pindah ke model berikutnya...")
                 continue
-        
+
         raise last_error or RuntimeError("Gagal menghasilkan konten dengan model Gemini yang tersedia.")
 
     def _generate_local_fallback(self, query: str, chunks: List[Dict[str, Any]]) -> str:
-        """Fallback cerdas jika pengguna belum memasukkan API Key Gemini saat pengujian awal."""
+        """Fallback cerdas jika API Gemini sedang sibuk atau API Key belum diisi."""
         if not chunks:
             return "Berdasarkan pangkalan data pengetahuan budaya Zapin yang telah divalidasi pakar saat ini, informasi mengenai pertanyaan tersebut belum tercatat dalam dokumen terverifikasi kami."
 
@@ -114,11 +135,12 @@ class RAGService:
 
     @staticmethod
     def _is_conversational_query(query: str) -> bool:
-        """Mendeteksi apakah kueri adalah sapaan, salam, perkenalan, atau ucapan terima kasih."""
+        """Mendeteksi apakah kueri murni berupa sapaan, salam, perkenalan, atau terima kasih."""
         q = query.strip().lower()
-        # Hapus tanda baca
-        q_clean = re.sub(r'[^\w\s]', '', q)
-        
+        q_clean = re.sub(r'[^\w\s]', '', q).strip()
+        if not q_clean:
+            return False
+
         greetings = [
             "hai", "halo", "hello", "hi", "hey",
             "assalamualaikum", "assalamu'alaikum", "assalam",
@@ -129,12 +151,17 @@ class RAGService:
             "terima kasih", "makasih", "matur nuwun", "thanks", "thank you",
             "apa kabar", "bagaimana kabarmu", "tes", "test", "halo zapin"
         ]
-        
-        # Cek jika kueri pendek dan persis/mengandung kata sapaan
-        if q_clean in greetings or any(q_clean.startswith(g) for g in ["hai", "halo", "assalam", "selamat"]):
+
+        if q_clean in greetings:
             return True
-        if len(q_clean.split()) <= 4 and any(g in q_clean for g in greetings):
-            return True
+
+        words = q_clean.split()
+        if len(words) <= 4:
+            if any(q_clean.startswith(g) for g in ["hai", "halo", "assalam", "selamat"]):
+                return True
+            if any(re.search(rf'\b{re.escape(g)}\b', q_clean) for g in greetings):
+                return True
+
         return False
 
     def _generate_conversational_response(self, query: str) -> str:
@@ -142,8 +169,8 @@ class RAGService:
         q = query.strip().lower()
         if "terima kasih" in q or "makasih" in q or "thanks" in q:
             return "Sama-sama! Senang dapat membantu Anda. Jangan ragu bertanya kembali seputar seni, ragam gerak, musik, atau sejarah Tari Zapin Melayu."
-        
-        if "siapa kamu" in q or "kamu siapa" in q or "tentang kamu" in q:
+
+        if "siapa kamu" in q or "kamu siapa" in q or "tentang kamu" in q or "apa itu zapinai" in q:
             return (
                 "Saya adalah **ZapinAI Cultural Assistant**, asisten cerdas berbasis *Retrieval-Augmented Generation (RAG)* "
                 "dan *Sentence-BERT*. Tugas saya adalah membantu Anda mengakses pengetahuan otentik tentang seni, tradisi, "
@@ -164,20 +191,13 @@ class RAGService:
 
     def generate_response(self, query: str, top_k: int = None, threshold: float = None) -> Dict[str, Any]:
         """Menjalankan siklus lengkap RAG: Retrieval -> Prompt Grounding -> LLM Synthesis -> Source Attribution."""
-        self._check_llm_config()
+        if not self._gemini_configured:
+            self._check_llm_config()
         clean_q = query.strip()
 
-        # 0. Penanganan Khusus untuk Sapaan / Percakapan Ramah (Small-talk)
+        # 0. Penanganan Khusus untuk Sapaan / Percakapan Ramah (Respon instan lokal tanpa antre LLM)
         if self._is_conversational_query(clean_q):
-            if self._gemini_configured:
-                try:
-                    chat_prompt = f"{ZAPIN_SYSTEM_PERSONA}\n\nPengguna menyapa: \"{clean_q}\". Berikan sambutan yang ramah, sopan, dan perkenalkan diri Anda sebagai ZapinAI Cultural Assistant secara singkat."
-                    greeting_ans = self._generate_with_gemini(chat_prompt)
-                except Exception:
-                    greeting_ans = self._generate_conversational_response(clean_q)
-            else:
-                greeting_ans = self._generate_conversational_response(clean_q)
-
+            greeting_ans = self._generate_conversational_response(clean_q)
             return {
                 "query": clean_q,
                 "answer": greeting_ans,
@@ -188,18 +208,18 @@ class RAGService:
                 "highest_similarity": 1.0,
                 "source_traceability_rate": 1.0
             }
-        
+
         # 1. Retrieval dengan Sentence-BERT
-        # Gunakan threshold yang lebih adaptif (default 0.22 agar tidak terlalu ketat membuang konteks relevan)
+        t_ret_start = time.perf_counter()
         effective_threshold = threshold if threshold is not None else 0.22
         retrieved_chunks = self.retrieve_context(clean_q, top_k=top_k, threshold=effective_threshold)
+        t_ret = time.perf_counter() - t_ret_start
 
         if not retrieved_chunks:
-            # Fallback edukatif jika pertanyaan tidak ada di dataset
             fallback_msg = (
                 "Berdasarkan pangkalan data pengetahuan budaya Zapin yang telah divalidasi oleh pakar saat ini, "
                 f"informasi mengenai topik *\"{clean_q}\"* belum tercatat dalam dokumen terverifikasi kami.\n\n"
-                "- **Saran:** Anda dapat menambahkan naskah/buku/jurnal Zapin berformat **PDF/DOCX** melalui tab **Pangkalan Dokumen**.\n"
+                "- **Saran:** Coba susun ulang pertanyaan Anda agar lebih spesifik mengenai Seni Budaya Tari Zapin Melayu Riau.\n"
                 "- Atau coba gunakan kata kunci terkait seperti: *gerak Tahto, gerak Pecah, alat musik Marwas, Gambus, busana Teluk Belanga, atau sejarah Hadramaut*."
             )
             return {
@@ -220,6 +240,8 @@ class RAGService:
         )
 
         # 3. Pemanggilan LLM
+        t_llm_start = time.perf_counter()
+        self._last_llm_model = "local-fallback"
         if self._gemini_configured:
             try:
                 answer = self._generate_with_gemini(full_prompt)
@@ -228,12 +250,14 @@ class RAGService:
                 answer = self._generate_local_fallback(query, retrieved_chunks)
         else:
             answer = self._generate_local_fallback(query, retrieved_chunks)
+        t_llm = time.perf_counter() - t_llm_start
+
+        print(f"[RAGService] Retrieval: {t_ret:.2f}s | LLM ({self._last_llm_model}): {t_llm:.2f}s")
 
         # 4. Keterlacakan Sumber (Traceability Analysis)
-        # Cari angka sitasi [1], [2], dst. dalam teks jawaban
         cited_numbers = [int(num) for num in re.findall(r'\[(\d+)\]', answer)]
         valid_citations = [n for n in cited_numbers if 1 <= n <= len(source_references)]
-        
+
         traceability_rate = 1.0 if (len(cited_numbers) > 0 and len(valid_citations) == len(cited_numbers)) else 0.8
 
         return {
@@ -249,7 +273,8 @@ class RAGService:
 
     def generate_baseline_no_rag(self, query: str) -> Dict[str, Any]:
         """Baseline 1: Menghasilkan jawaban menggunakan LLM saja (tanpa konteks RAG)."""
-        self._check_llm_config()
+        if not self._gemini_configured:
+            self._check_llm_config()
         prompt = BASELINE_NO_RAG_PROMPT.format(query=query)
 
         if self._gemini_configured:

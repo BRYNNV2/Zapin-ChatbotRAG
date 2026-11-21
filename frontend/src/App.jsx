@@ -1,11 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { PanelLeftOpen, Sparkles, BookOpen, ArrowDownToLine } from 'lucide-react';
+import { PanelLeftOpen, BookOpen } from 'lucide-react';
 import ChatHistorySidebar from './components/ChatHistorySidebar';
 import ChatContainer from './components/ChatContainer';
 import SourceReferenceDrawer from './components/SourceReferenceDrawer';
-import DocumentManager from './components/DocumentManager';
-import EvaluationDashboard from './components/EvaluationDashboard';
-import SbertPipelineModal from './components/SbertPipelineModal';
 import AuthModal from './components/AuthModal';
 import SettingsPage from './components/SettingsPage';
 
@@ -14,7 +11,6 @@ export default function App() {
   const [previousTab, setPreviousTab] = useState('chat');
   const [settingsSubTab, setSettingsSubTab] = useState('account');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [stats, setStats] = useState({ totalChunks: 0, totalDocuments: 0 });
 
   // Autentikasi Pengguna
   const [currentUser, setCurrentUser] = useState(() => {
@@ -31,6 +27,12 @@ export default function App() {
   });
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [authModalMode, setAuthModalMode] = useState('login');
+
+  const openAuthModal = (mode = 'login') => {
+    setAuthModalMode(mode === 'register' ? 'register' : 'login');
+    setAuthModalOpen(true);
+  };
 
   // Riwayat percakapan (sinkron dengan database PostgreSQL Neon)
   const [sessions, setSessions] = useState([]);
@@ -38,34 +40,17 @@ export default function App() {
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Parameter RAG
-  const [ragParams, setRagParams] = useState({ top_k: 4, threshold: 0.30 });
+  // Parameter RAG default (berjalan di belakang layar)
+  const [ragParams] = useState({ top_k: 4, threshold: 0.30 });
 
-  // Drawer & Modal state
+  // Drawer state (Bar Rujukan Sitasi)
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [sbertModalOpen, setSbertModalOpen] = useState(false);
   const [activeSources, setActiveSources] = useState([]);
   const [highlightedCitationId, setHighlightedCitationId] = useState(null);
 
-  // Fetch status pangkalan data
-  const fetchStats = async () => {
-    try {
-      const res = await fetch('http://localhost:8000/api/dataset/documents');
-      if (res.ok) {
-        const data = await res.json();
-        setStats({
-          totalChunks: data.total_chunks || 0,
-          totalDocuments: data.total_documents || 0
-        });
-      }
-    } catch (err) {
-      console.warn('Backend server belum aktif:', err.message);
-    }
-  };
-
   // Fetch daftar sesi dari PostgreSQL (Neon)
-  const fetchSessions = async (token = authToken) => {
-    // Mode tamu (belum login): riwayat percakapan tidak dimuat dari database
+  const fetchSessions = async (token = authToken, selectFirst = false) => {
+    // Mode tamu (belum login): riwayat percakapan hanya disimpan sementara di memori React
     if (!token) {
       setSessions([]);
       setActiveSessionId(null);
@@ -80,9 +65,9 @@ export default function App() {
         const data = await res.json();
         if (data.sessions) {
           setSessions(data.sessions);
-          // Jika belum ada sesi aktif dan ada daftar sesi, pilih sesi pertama
-          if (data.sessions.length > 0 && !activeSessionId) {
-            handleSelectSession(data.sessions[0].id, token);
+          // Jika belum ada sesi aktif (atau baru login dari sesi tamu), pilih sesi pertama dari cloud
+          if (data.sessions.length > 0 && (selectFirst || !activeSessionId || String(activeSessionId).startsWith('guest-'))) {
+            handleSelectSession(data.sessions[0].id, token, data.sessions);
           }
         }
       }
@@ -92,7 +77,6 @@ export default function App() {
   };
 
   useEffect(() => {
-    fetchStats();
     if (authToken) {
       fetchSessions(authToken);
     } else {
@@ -108,7 +92,11 @@ export default function App() {
     setAuthToken(token);
     localStorage.setItem('zapin_user', JSON.stringify(user));
     localStorage.setItem('zapin_token', token);
-    fetchSessions(token);
+    setActiveSessionId(null);
+    setMessages([]);
+    setActiveSources([]);
+    setDrawerOpen(false);
+    fetchSessions(token, true);
   };
 
   // Handler Logout
@@ -134,23 +122,23 @@ export default function App() {
     setDrawerOpen(false);
   };
 
-  // Handler Percakapan Baru (Kimi "Obrolan baru")
+  // Handler Percakapan Baru
   const handleNewChat = async () => {
     setActiveTab('chat');
     setMessages([]);
     setActiveSources([]);
     setDrawerOpen(false);
 
-    // Mode tamu: langsung mulai percakapan baru di layar tanpa simpan ke database
+    // Mode tamu: langsung mulai percakapan baru di memori tanpa simpan ke database
     if (!authToken) {
       setActiveSessionId(null);
       return;
     }
 
     try {
-      const headers = { 
+      const headers = {
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${authToken}` 
+        'Authorization': `Bearer ${authToken}`
       };
 
       const res = await fetch('http://localhost:8000/api/chat/sessions', {
@@ -173,13 +161,29 @@ export default function App() {
     setActiveSessionId(Date.now().toString());
   };
 
-  // Handler Pilih Sesi & Ambil Riwayat dari PostgreSQL
-  const handleSelectSession = async (id, token = authToken) => {
+  // Handler Pilih Sesi (Memori Sementara untuk Tamu / PostgreSQL untuk Akun)
+  const handleSelectSession = async (id, token = authToken, sessionList = sessions) => {
     setActiveSessionId(id);
     setActiveTab('chat');
 
+    if (!token || String(id).startsWith('guest-')) {
+      const selected = sessionList.find((s) => s.id === id);
+      const localMessages = selected?.messages || [];
+      setMessages(localMessages);
+      const lastWithSources = [...localMessages].reverse().find(
+        (m) => m.sources && m.sources.length > 0
+      );
+      if (lastWithSources) {
+        setActiveSources(lastWithSources.sources);
+      } else {
+        setActiveSources([]);
+        setDrawerOpen(false);
+      }
+      return;
+    }
+
     try {
-      const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+      const headers = { 'Authorization': `Bearer ${token}` };
       const res = await fetch(`http://localhost:8000/api/chat/sessions/${id}`, { headers });
       if (res.ok) {
         const data = await res.json();
@@ -209,30 +213,30 @@ export default function App() {
       console.warn('Gagal memuat pesan dari cloud:', err.message);
     }
 
-    // Fallback jika memori lokal
-    const selected = sessions.find((s) => s.id === id);
+    const selected = sessionList.find((s) => s.id === id);
     if (selected) {
       setMessages(selected.messages || []);
     }
   };
 
-  // Handler Hapus Sesi di PostgreSQL
+  // Handler Hapus Sesi (Memori Sementara untuk Tamu / PostgreSQL untuk Akun)
   const handleDeleteSession = async (id) => {
-    try {
-      const headers = authToken ? { 'Authorization': `Bearer ${authToken}` } : {};
-      await fetch(`http://localhost:8000/api/chat/sessions/${id}`, {
-        method: 'DELETE',
-        headers
-      });
-    } catch (err) {
-      console.warn('Gagal menghapus sesi dari cloud database:', err.message);
+    if (authToken && !String(id).startsWith('guest-')) {
+      try {
+        await fetch(`http://localhost:8000/api/chat/sessions/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+      } catch (err) {
+        console.warn('Gagal menghapus sesi dari cloud database:', err.message);
+      }
     }
 
     const updated = sessions.filter((s) => s.id !== id);
     setSessions(updated);
     if (activeSessionId === id) {
       if (updated.length > 0) {
-        handleSelectSession(updated[0].id);
+        handleSelectSession(updated[0].id, authToken, updated);
       } else {
         setActiveSessionId(null);
         setMessages([]);
@@ -242,7 +246,7 @@ export default function App() {
     }
   };
 
-  // Handler Kirim Pesan RAG
+  // Handler Kirim Pesan RAG (Mendukung Mode Tamu Sementara & Mode Login Cloud)
   const handleSendMessage = async (queryText) => {
     const userMsg = { sender: 'user', text: queryText, timestamp: new Date().toISOString() };
     const updatedMessages = [...messages, userMsg];
@@ -250,21 +254,20 @@ export default function App() {
     setIsLoading(true);
 
     let currentSessionId = activeSessionId;
+    const shortTitle = queryText.slice(0, 38) + (queryText.length > 38 ? '...' : '');
 
     // Jika sudah login dan belum ada sesi aktif, buat sesi baru di PostgreSQL
     if (authToken && !currentSessionId) {
       try {
-        const headers = { 
+        const headers = {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${authToken}` 
+          'Authorization': `Bearer ${authToken}`
         };
 
         const sessRes = await fetch('http://localhost:8000/api/chat/sessions', {
           method: 'POST',
           headers,
-          body: JSON.stringify({
-            title: queryText.slice(0, 35) + (queryText.length > 35 ? '...' : '')
-          })
+          body: JSON.stringify({ title: shortTitle })
         });
 
         if (sessRes.ok) {
@@ -276,6 +279,33 @@ export default function App() {
       } catch (err) {
         console.warn('Gagal inisialisasi sesi otomatis:', err.message);
       }
+    } else if (!authToken) {
+      // Mode tamu: simpan sementara di memori state React (hilang saat halaman di-refresh)
+      if (!currentSessionId) {
+        currentSessionId = `guest-${Date.now()}`;
+        setActiveSessionId(currentSessionId);
+        const guestSession = {
+          id: currentSessionId,
+          title: shortTitle,
+          isTemporary: true,
+          message_count: updatedMessages.length,
+          messages: updatedMessages
+        };
+        setSessions((prev) => [guestSession, ...prev]);
+      } else {
+        setSessions((prev) =>
+          prev.map((s) =>
+            s.id === currentSessionId
+              ? {
+                  ...s,
+                  title: !s.title || s.title === 'Obrolan Baru' ? shortTitle : s.title,
+                  message_count: updatedMessages.length,
+                  messages: updatedMessages
+                }
+              : s
+          )
+        );
+      }
     }
 
     try {
@@ -286,7 +316,10 @@ export default function App() {
           query: queryText,
           top_k: ragParams.top_k,
           threshold: ragParams.threshold,
-          session_id: currentSessionId
+          session_id:
+            currentSessionId && !String(currentSessionId).startsWith('guest-')
+              ? currentSessionId
+              : null
         })
       });
 
@@ -311,19 +344,21 @@ export default function App() {
         setActiveSources(data.sources);
       }
 
-      // Perbarui judul sesi di state jika sebelumnya masih 'Obrolan Baru'
-      setSessions((prev) =>
-        prev.map((s) => {
-          if (s.id === currentSessionId) {
-            return {
-              ...s,
-              title: s.title === 'Obrolan Baru' ? queryText.slice(0, 35) + '...' : s.title,
-              message_count: (s.message_count || 0) + 2
-            };
-          }
-          return s;
-        })
-      );
+      if (currentSessionId) {
+        setSessions((prev) =>
+          prev.map((s) => {
+            if (s.id === currentSessionId) {
+              return {
+                ...s,
+                title: !s.title || s.title === 'Obrolan Baru' ? shortTitle : s.title,
+                message_count: finalMessages.length,
+                messages: finalMessages
+              };
+            }
+            return s;
+          })
+        );
+      }
     } catch (err) {
       const errorMsg = {
         sender: 'assistant',
@@ -331,7 +366,22 @@ export default function App() {
         sources: [],
         timestamp: new Date().toISOString()
       };
-      setMessages([...updatedMessages, errorMsg]);
+      const finalMessages = [...updatedMessages, errorMsg];
+      setMessages(finalMessages);
+
+      if (currentSessionId) {
+        setSessions((prev) =>
+          prev.map((s) =>
+            s.id === currentSessionId
+              ? {
+                  ...s,
+                  message_count: finalMessages.length,
+                  messages: finalMessages
+                }
+              : s
+          )
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -369,22 +419,14 @@ export default function App() {
           onBack={() => setActiveTab(previousTab || 'chat')}
           currentUser={currentUser}
           onLogout={handleLogout}
-          onOpenAuthModal={() => setAuthModalOpen(true)}
-          ragParams={ragParams}
-          setRagParams={setRagParams}
-          onOpenSbertModal={() => setSbertModalOpen(true)}
+          onOpenAuthModal={openAuthModal}
           initialSubTab={settingsSubTab}
-        />
-        <SbertPipelineModal
-          isOpen={sbertModalOpen}
-          onClose={() => setSbertModalOpen(false)}
-          ragParams={ragParams}
-          setRagParams={setRagParams}
         />
         <AuthModal
           isOpen={authModalOpen}
           onClose={() => setAuthModalOpen(false)}
           onAuthSuccess={handleAuthSuccess}
+          initialMode={authModalMode}
         />
       </div>
     );
@@ -392,7 +434,7 @@ export default function App() {
 
   return (
     <div className="app-layout">
-      {/* Kimi Left Sidebar */}
+      {/* Left Sidebar */}
       <ChatHistorySidebar
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -404,80 +446,78 @@ export default function App() {
         onSelectSession={handleSelectSession}
         onNewChat={handleNewChat}
         onDeleteSession={handleDeleteSession}
-        stats={stats}
-        onOpenSbertModal={() => setSbertModalOpen(true)}
         currentUser={currentUser}
-        onOpenAuthModal={() => setAuthModalOpen(true)}
+        onOpenAuthModal={openAuthModal}
         onLogout={handleLogout}
       />
 
       {/* Main Content Stage */}
       <div className="main-stage">
-        {/* Minimalist Top Header Bar */}
+        {/* Clean Top Header Bar */}
         <div className="stage-top-bar">
-          <div>
+          <div className="top-bar-left-slot">
             {sidebarCollapsed && (
-              <button
-                className="sidebar-uncollapse-btn"
-                onClick={() => setSidebarCollapsed(false)}
-                title="Buka bilah samping"
-              >
-                <PanelLeftOpen size={18} />
-              </button>
+              <>
+                <button
+                  className="sidebar-uncollapse-btn"
+                  onClick={() => setSidebarCollapsed(false)}
+                  title="Buka bilah samping"
+                >
+                  <PanelLeftOpen size={18} />
+                </button>
+                <span className="top-brand-name">ZAPIN</span>
+              </>
             )}
           </div>
 
-          <div className="top-pill-badge">
-            <Sparkles size={13} color="#9ca3af" />
-            <span>Sentence-BERT Dense RAG • {stats.totalChunks || 5} Chunks Tervalidasi</span>
-          </div>
-
           <div className="top-bar-right-slot">
+            {activeTab === 'chat' && activeSources && activeSources.length > 0 && (
+              <button
+                className={`top-source-toggle-btn ${drawerOpen ? 'active' : ''}`}
+                onClick={() => setDrawerOpen(!drawerOpen)}
+                title={drawerOpen ? "Tutup bar kanan rujukan" : "Buka bar kanan rujukan sumber"}
+              >
+                <BookOpen size={14} color={drawerOpen ? "#b45309" : "currentColor"} />
+                <span>{drawerOpen ? "Tutup Bar Rujukan" : `Bar Rujukan (${activeSources.length})`}</span>
+              </button>
+            )}
+
             {!currentUser ? (
-              <div className="guest-header-actions">
+              <div className="clean-header-auth-group">
                 <button
                   type="button"
-                  className="btn-guest-header-login"
-                  onClick={() => setAuthModalOpen(true)}
+                  className="btn-clean-primary"
+                  onClick={() => openAuthModal('login')}
                   title="Masuk ke Akun"
                 >
-                  Login
+                  Masuk
                 </button>
                 <button
                   type="button"
-                  className="btn-guest-header-download"
-                  onClick={() => setAuthModalOpen(true)}
-                  title="Unduh untuk Desktop"
+                  className="btn-clean-outline"
+                  onClick={() => openAuthModal('register')}
+                  title="Daftar Akun Baru"
                 >
-                  <ArrowDownToLine size={14} />
-                  <span>Unduh untuk Desktop</span>
+                  Daftar gratis
                 </button>
               </div>
             ) : (
-              <div className="logged-header-actions">
-                {activeTab === 'chat' && activeSources && activeSources.length > 0 && (
-                  <button
-                    className={`top-source-toggle-btn ${drawerOpen ? 'active' : ''}`}
-                    onClick={() => setDrawerOpen(!drawerOpen)}
-                    title={drawerOpen ? "Tutup bar kanan rujukan" : "Buka bar kanan rujukan sumber"}
-                  >
-                    <BookOpen size={14} color={drawerOpen ? "#d4af37" : "currentColor"} />
-                    <span>{drawerOpen ? "Tutup Bar Rujukan" : `Bar Rujukan (${activeSources.length})`}</span>
-                  </button>
-                )}
-                <div 
-                  className="header-user-badge"
-                  onClick={() => {
-                    setSettingsSubTab('account');
-                    setActiveTab('settings');
-                  }}
-                  title="Buka Pengaturan Akun"
-                >
-                  <div className="header-avatar-mini">
-                    {currentUser.full_name ? currentUser.full_name[0].toUpperCase() : (currentUser.username ? currentUser.username[0].toUpperCase() : 'U')}
-                  </div>
-                  <span className="header-user-name">{currentUser.full_name || currentUser.username}</span>
+              <div
+                className="header-user-badge"
+                onClick={() => {
+                  setSettingsSubTab('account');
+                  setActiveTab('settings');
+                }}
+                title="Buka Pengaturan Akun"
+              >
+                <div className="header-avatar-mini">
+                  {currentUser.full_name
+                    ? currentUser.full_name[0].toUpperCase()
+                    : currentUser.username
+                    ? currentUser.username[0].toUpperCase()
+                    : 'U'}
                 </div>
+                <span className="header-user-name">{currentUser.full_name || currentUser.username}</span>
               </div>
             )}
           </div>
@@ -486,57 +526,33 @@ export default function App() {
         {/* Workspace Body with Docked Bar Kanan Support */}
         <div className="stage-workspace-body">
           <div className="stage-main-scrollable">
-            {activeTab === 'chat' && (
-              <ChatContainer
-                messages={messages}
-                onSendMessage={handleSendMessage}
-                isLoading={isLoading}
-                onOpenSources={handleOpenSources}
-                onSwitchToDocs={() => setActiveTab('documents')}
-                onOpenSbertModal={() => setSbertModalOpen(true)}
-                ragParams={ragParams}
-                setRagParams={setRagParams}
-                isRightBarOpen={drawerOpen}
-                currentUser={currentUser}
-                onOpenAuthModal={() => setAuthModalOpen(true)}
-              />
-            )}
-
-            {activeTab === 'documents' && (
-              <DocumentManager onRefreshStats={fetchStats} />
-            )}
-
-            {activeTab === 'evaluation' && (
-              <EvaluationDashboard />
-            )}
+            <ChatContainer
+              messages={messages}
+              onSendMessage={handleSendMessage}
+              isLoading={isLoading}
+              onOpenSources={handleOpenSources}
+              currentUser={currentUser}
+              onOpenAuthModal={openAuthModal}
+            />
           </div>
 
           {/* Bar Kanan (Docked Right Side Panel) */}
-          {activeTab === 'chat' && (
-            <SourceReferenceDrawer
-              isOpen={drawerOpen}
-              onClose={() => setDrawerOpen(false)}
-              sources={activeSources}
-              highlightedId={highlightedCitationId}
-              onSelectCitation={(id) => setHighlightedCitationId(id)}
-            />
-          )}
+          <SourceReferenceDrawer
+            isOpen={drawerOpen}
+            onClose={() => setDrawerOpen(false)}
+            sources={activeSources}
+            highlightedId={highlightedCitationId}
+            onSelectCitation={(id) => setHighlightedCitationId(id)}
+          />
         </div>
       </div>
-
-      {/* SBERT Pipeline Specification Modal */}
-      <SbertPipelineModal
-        isOpen={sbertModalOpen}
-        onClose={() => setSbertModalOpen(false)}
-        ragParams={ragParams}
-        setRagParams={setRagParams}
-      />
 
       {/* Modal Autentikasi Pengguna (Login & Register) */}
       <AuthModal
         isOpen={authModalOpen}
         onClose={() => setAuthModalOpen(false)}
         onAuthSuccess={handleAuthSuccess}
+        initialMode={authModalMode}
       />
     </div>
   );

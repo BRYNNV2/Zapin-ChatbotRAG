@@ -1,5 +1,6 @@
+import time
 import numpy as np
-from typing import List, Union
+from typing import List
 from app.core.config import settings
 
 class EmbeddingService:
@@ -11,13 +12,18 @@ class EmbeddingService:
 
     @classmethod
     def get_model(cls):
-        """Lazy loader model Sentence-BERT agar hanya di-load sekali di memory."""
+        """Loader model Sentence-BERT (prioritaskan cache lokal agar startup dan query cepat)."""
         if cls._model is None:
+            t0 = time.perf_counter()
             print(f"[EmbeddingService] Memuat model Sentence-BERT: {settings.SBERT_MODEL_NAME}...")
             try:
                 from sentence_transformers import SentenceTransformer
-                cls._model = SentenceTransformer(settings.SBERT_MODEL_NAME)
-                print(f"[EmbeddingService] Model berhasil dimuat. Dimensi: {settings.EMBEDDING_DIMENSION}")
+                try:
+                    cls._model = SentenceTransformer(settings.SBERT_MODEL_NAME, local_files_only=True)
+                except Exception:
+                    cls._model = SentenceTransformer(settings.SBERT_MODEL_NAME)
+                elapsed = time.perf_counter() - t0
+                print(f"[EmbeddingService] Model berhasil dimuat dalam {elapsed:.2f}s. Dimensi: {settings.EMBEDDING_DIMENSION}")
             except Exception as e:
                 print(f"[EmbeddingService] Gagal memuat Sentence-BERT: {e}")
                 raise e

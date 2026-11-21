@@ -26,6 +26,16 @@ class Settings(BaseSettings):
     # PostgreSQL Database URL
     DATABASE_URL: str = ""
     
+    # Google OAuth2
+    GOOGLE_CLIENT_ID: str = "958780297350-1f7cicsb2nei8rcvtpibfvptv452s902.apps.googleusercontent.com"
+    
+    # Cloudflare R2 Object Storage (S3-Compatible)
+    R2_ACCOUNT_ID: str = ""
+    R2_ACCESS_KEY_ID: str = ""
+    R2_SECRET_ACCESS_KEY: str = ""
+    R2_BUCKET_NAME: str = "zapin-dataset"
+    R2_PUBLIC_URL: str = ""  # URL publik r2.dev jika diaktifkan
+    
     # Storage Paths
     DATA_DIR: Path = BASE_DIR / "data"
     RAW_DOCS_DIR: Path = DATA_DIR / "raw_documents"

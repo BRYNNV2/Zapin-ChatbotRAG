@@ -20,7 +20,7 @@ class CompareRequest(BaseModel):
     query: str = Field(..., description="Pertanyaan untuk perbandingan RAG vs Baseline")
 
 @router.post("/query")
-async def ask_zapin_assistant(req: ChatRequest, db: Session = Depends(get_db)):
+def ask_zapin_assistant(req: ChatRequest, db: Session = Depends(get_db)):
     """Endpoint utama dialog AI Cultural Assistant Budaya Zapin berbasis RAG Sentence-BERT."""
     clean_q = req.query.strip()
     if not clean_q:
@@ -78,7 +78,7 @@ async def ask_zapin_assistant(req: ChatRequest, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Terjadi kesalahan pemrosesan RAG: {str(e)}")
 
 @router.post("/compare")
-async def compare_rag_vs_baseline(req: CompareRequest):
+def compare_rag_vs_baseline(req: CompareRequest):
     """Endpoint untuk membandingkan langsung jawaban SBERT RAG vs Raw LLM."""
     if not req.query.strip():
         raise HTTPException(status_code=400, detail="Pertanyaan tidak boleh kosong.")

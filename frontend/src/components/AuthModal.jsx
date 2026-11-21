@@ -1,5 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X, ChevronDown, Check, Sparkles, Eye, EyeOff } from 'lucide-react';
+
+const GOOGLE_CLIENT_ID = '958780297350-1f7cicsb2nei8rcvtpibfvptv452s902.apps.googleusercontent.com';
 
 const GoogleIcon = () => (
   <svg width="18" height="18" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
@@ -22,8 +24,15 @@ const GoogleIcon = () => (
   </svg>
 );
 
-export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
-  const [isRegister, setIsRegister] = useState(false);
+export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode = 'login' }) {
+  const [isRegister, setIsRegister] = useState(initialMode === 'register');
+
+  useEffect(() => {
+    if (isOpen) {
+      setIsRegister(initialMode === 'register');
+      setErrorMsg('');
+    }
+  }, [isOpen, initialMode]);
   const [countryCode, setCountryCode] = useState('+62');
   const [showCountryMenu, setShowCountryMenu] = useState(false);
   const [identifier, setIdentifier] = useState('');
@@ -34,13 +43,113 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [toastMsg, setToastMsg] = useState('');
-
-  if (!isOpen) return null;
+  const googleBtnContainerRef = useRef(null);
 
   const showToast = (msg) => {
     setToastMsg(msg);
     setTimeout(() => setToastMsg(''), 4500);
   };
+
+  const handleGoogleAuthResponse = async (payload) => {
+    if (!agreed) {
+      setErrorMsg('Harap setujui Perjanjian Layanan dan Kebijakan Privasi terlebih dahulu.');
+      return;
+    }
+
+    setLoading(true);
+    setErrorMsg('');
+
+    try {
+      const res = await fetch('http://localhost:8000/api/auth/google', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.detail || 'Gagal masuk dengan akun Google.');
+      }
+
+      onAuthSuccess(data.user, data.token);
+      onClose();
+    } catch (err) {
+      setErrorMsg(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = () => {
+    if (!agreed) {
+      setErrorMsg('Harap setujui Perjanjian Layanan dan Kebijakan Privasi terlebih dahulu.');
+      return;
+    }
+
+    // Gunakan OAuth2 Token Client (membuka popup Google resmi)
+    if (window.google?.accounts?.oauth2) {
+      try {
+        const tokenClient = window.google.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID,
+          scope: 'email profile openid',
+          callback: (tokenResponse) => {
+            if (tokenResponse?.error) {
+              setErrorMsg(`Login Google dibatalkan atau gagal: ${tokenResponse.error}`);
+              return;
+            }
+            if (tokenResponse?.access_token) {
+              handleGoogleAuthResponse({ access_token: tokenResponse.access_token });
+            }
+          }
+        });
+        tokenClient.requestAccessToken({ prompt: 'select_account' });
+      } catch (err) {
+        console.error('OAuth2 token client error:', err);
+        if (window.google?.accounts?.id) {
+          window.google.accounts.id.prompt();
+        }
+      }
+    } else if (window.google?.accounts?.id) {
+      window.google.accounts.id.prompt();
+    } else {
+      setErrorMsg('Layanan Google Sign-In sedang dimuat. Pastikan koneksi internet aktif dan coba sesaat lagi.');
+    }
+  };
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const initGoogleGsi = () => {
+      if (window.google?.accounts?.id) {
+        try {
+          window.google.accounts.id.initialize({
+            client_id: GOOGLE_CLIENT_ID,
+            callback: (res) => {
+              if (res.credential) {
+                handleGoogleAuthResponse({ credential: res.credential });
+              }
+            },
+            auto_select: false,
+            cancel_on_tap_outside: true
+          });
+        } catch (e) {
+          console.warn('Google GSI init notice:', e);
+        }
+      }
+    };
+
+    if (window.google?.accounts?.id) {
+      initGoogleGsi();
+    } else {
+      const checkInterval = setInterval(() => {
+        if (window.google?.accounts?.id) {
+          clearInterval(checkInterval);
+          initGoogleGsi();
+        }
+      }, 300);
+      return () => clearInterval(checkInterval);
+    }
+  }, [isOpen, agreed]);
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
@@ -125,6 +234,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
     { code: '+1', name: 'Amerika Serikat (+1)' }
   ];
 
+  if (!isOpen) return null;
+
   return (
     <div className="auth-kimi-backdrop animate-fade-in" onClick={onClose}>
       <div 
@@ -171,9 +282,9 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
 
         {/* ================= PANEL KANAN: FORM LOGIN KIMI ================= */}
         <div className="auth-kimi-form-panel">
-          {/* Header Judul KIMI / ZAPIN */}
+          {/* Header Judul ZAPIN */}
           <div className="auth-kimi-brand-header">
-            <h1 className="auth-kimi-title">KIMI</h1>
+            <h1 className="auth-kimi-title">ZAPIN</h1>
           </div>
 
           {/* Alert Error / Toast Pesan */}
@@ -198,7 +309,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                 title="Pilih kode negara"
               >
                 <span>{countryCode}</span>
-                <ChevronDown size={14} color="#9ca3af" />
+                <ChevronDown size={14} color="#6b7280" />
               </div>
 
               {showCountryMenu && (
@@ -213,7 +324,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                       }}
                     >
                       <span>{opt.name}</span>
-                      {countryCode === opt.code && <Check size={14} color="#d4af37" />}
+                      {countryCode === opt.code && <Check size={14} color="#b45309" />}
                     </div>
                   ))}
                 </div>
@@ -281,9 +392,9 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                   Memproses...
                 </span>
               ) : isRegister ? (
-                'Daftar Sekarang'
+                'Daftar gratis'
               ) : (
-                'Login'
+                'Masuk'
               )}
             </button>
 
@@ -298,13 +409,16 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
             <button
               type="button"
               className="auth-kimi-google-btn"
-              onClick={() => showToast('Login akun Google akan segera tersedia nanti. Silakan masuk menggunakan Nomor Telepon/Email dan Kata Sandi.')}
+              onClick={handleGoogleLogin}
+              disabled={loading}
+              title="Masuk menggunakan akun Google Anda"
             >
               <GoogleIcon />
-              <span>Lanjutkan dengan Google</span>
+              <span>{loading ? 'Menghubungkan ke Google...' : 'Lanjutkan dengan Google'}</span>
             </button>
+            <div ref={googleBtnContainerRef} id="google-hidden-container" style={{ display: 'none' }} />
 
-            {/* Link Toggle Mode / SSO */}
+            {/* Link Toggle Mode */}
             <div className="auth-kimi-extra-links">
               <button
                 type="button"
@@ -314,18 +428,8 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                   setErrorMsg('');
                 }}
               >
-                {isRegister ? 'Sudah memiliki akun? Login di sini' : 'Belum punya akun? Daftar sekarang'}
+                {isRegister ? 'Sudah memiliki akun? Masuk di sini' : 'Belum punya akun? Daftar gratis'}
               </button>
-              
-              {!isRegister && (
-                <button
-                  type="button"
-                  className="auth-kimi-text-link sub"
-                  onClick={() => showToast('Login SSO perusahaan sedang dalam pengembangan.')}
-                >
-                  Login SSO perusahaan
-                </button>
-              )}
             </div>
 
             {/* Checkbox Persetujuan Perjanjian Layanan */}

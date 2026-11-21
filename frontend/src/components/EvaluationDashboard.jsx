@@ -67,9 +67,9 @@ export default function EvaluationDashboard() {
               value={topK}
               onChange={(e) => setTopK(parseInt(e.target.value))}
               style={{
-                background: 'rgba(7, 11, 20, 0.8)',
-                border: '1px solid var(--border-gold)',
-                color: 'var(--gold-300)',
+                background: '#ffffff',
+                border: '1px solid #d1d5db',
+                color: '#0d0d0d',
                 padding: '6px 12px',
                 borderRadius: '8px',
                 fontWeight: 600
@@ -105,7 +105,7 @@ export default function EvaluationDashboard() {
             {/* SBERT Hit Rate */}
             <div className="metric-card gold-accent">
               <div className="metric-label">
-                <Zap size={14} color="#FBBF24" />
+                <Zap size={14} color="#b45309" />
                 <span>Hit Rate@{topK} (Sentence-BERT Usulan)</span>
               </div>
               <div className="metric-value gold">
@@ -119,7 +119,7 @@ export default function EvaluationDashboard() {
             {/* BM25 Hit Rate */}
             <div className="metric-card">
               <div className="metric-label">
-                <Cpu size={14} color="#94A3B8" />
+                <Cpu size={14} color="#5d5d5d" />
                 <span>Hit Rate@{topK} (BM25 Baseline)</span>
               </div>
               <div className="metric-value">
@@ -133,7 +133,7 @@ export default function EvaluationDashboard() {
             {/* SBERT MRR */}
             <div className="metric-card gold-accent">
               <div className="metric-label">
-                <ArrowUpRight size={14} color="#FBBF24" />
+                <ArrowUpRight size={14} color="#b45309" />
                 <span>MRR (Sentence-BERT Usulan)</span>
               </div>
               <div className="metric-value gold">
@@ -147,7 +147,7 @@ export default function EvaluationDashboard() {
             {/* BM25 MRR */}
             <div className="metric-card">
               <div className="metric-label">
-                <ArrowUpRight size={14} color="#94A3B8" />
+                <ArrowUpRight size={14} color="#5d5d5d" />
                 <span>MRR (BM25 Baseline)</span>
               </div>
               <div className="metric-value">
@@ -187,7 +187,7 @@ export default function EvaluationDashboard() {
                           Rank #{r.sbert_rank}
                         </span>
                       ) : (
-                        <span style={{ color: '#F87171' }}>Miss (0)</span>
+                        <span style={{ color: '#dc2626' }}>Miss (0)</span>
                       )}
                     </td>
                     <td>
@@ -196,7 +196,7 @@ export default function EvaluationDashboard() {
                           Rank #{r.bm25_rank}
                         </span>
                       ) : (
-                        <span style={{ color: '#F87171' }}>Miss (0)</span>
+                        <span style={{ color: '#dc2626' }}>Miss (0)</span>
                       )}
                     </td>
                     <td style={{ fontSize: '0.8125rem', color: 'var(--text-muted)' }}>
@@ -208,7 +208,7 @@ export default function EvaluationDashboard() {
                           <CheckCircle size={14} /> Terverifikasi
                         </span>
                       ) : (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#F87171', fontSize: '0.75rem' }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', color: '#dc2626', fontSize: '0.75rem' }}>
                           <XCircle size={14} /> Belum Cocok
                         </span>
                       )}
@@ -223,7 +223,7 @@ export default function EvaluationDashboard() {
 
       {/* Komparasi Jawaban Langsung: Usulan RAG SBERT vs Raw LLM */}
       <div className="glass-card" style={{ padding: '28px' }}>
-        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--gold-300)', marginBottom: '8px' }}>
+        <h3 style={{ fontSize: '1.25rem', fontWeight: 700, color: '#92400e', marginBottom: '8px' }}>
           Eksperimen Komparasi Jawaban Langsung: SBERT RAG vs Raw LLM
         </h3>
         <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: '20px' }}>
@@ -240,9 +240,9 @@ export default function EvaluationDashboard() {
               flex: 1,
               padding: '12px 16px',
               borderRadius: '10px',
-              background: 'rgba(7, 11, 20, 0.7)',
-              border: '1px solid var(--border-gold)',
-              color: 'var(--text-primary)',
+              background: '#ffffff',
+              border: '1px solid #d1d5db',
+              color: '#0d0d0d',
               fontSize: '0.9375rem'
             }}
           />
@@ -260,28 +260,28 @@ export default function EvaluationDashboard() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))', gap: '20px' }}>
             {/* Kolom 1: Usulan SBERT RAG */}
             <div style={{
-              background: 'rgba(13, 21, 39, 0.9)',
-              border: '1px solid var(--border-gold)',
+              background: '#fffbeb',
+              border: '1px solid rgba(180, 83, 9, 0.28)',
               borderRadius: '14px',
               padding: '20px',
-              boxShadow: '0 0 16px var(--gold-glow)'
+              boxShadow: '0 4px 14px rgba(180, 83, 9, 0.08)'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
-                <span style={{ fontWeight: 700, color: 'var(--gold-300)', fontSize: '0.9375rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <ShieldAlert size={16} color="#FBBF24" />
+                <span style={{ fontWeight: 700, color: '#92400e', fontSize: '0.9375rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <ShieldAlert size={16} color="#b45309" />
                   <span>Metode Usulan (SBERT RAG)</span>
                 </span>
-                <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '6px', background: 'rgba(16, 185, 129, 0.15)', color: 'var(--emerald-400)', fontWeight: 600 }}>
+                <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '6px', background: 'rgba(4, 120, 87, 0.1)', color: '#047857', fontWeight: 600 }}>
                   Keterlacakan: {Math.round(compareResult.proposed_sbert_rag.traceability_rate * 100)}%
                 </span>
               </div>
 
-              <div style={{ fontSize: '0.875rem', lineHeight: '1.6', color: '#F1F5F9', whiteSpace: 'pre-wrap', marginBottom: '16px' }}>
+              <div style={{ fontSize: '0.875rem', lineHeight: '1.6', color: '#111827', whiteSpace: 'pre-wrap', marginBottom: '16px' }}>
                 {compareResult.proposed_sbert_rag.answer}
               </div>
 
               <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '12px' }}>
-                <div style={{ fontSize: '0.75rem', color: 'var(--gold-400)', fontWeight: 600, marginBottom: '6px' }}>
+                <div style={{ fontSize: '0.75rem', color: '#92400e', fontWeight: 600, marginBottom: '6px' }}>
                   Sumber Rujukan Tervalidasi ({compareResult.proposed_sbert_rag.sources_count} Dokumen):
                 </div>
                 {compareResult.proposed_sbert_rag.sources.map((s, idx) => (
@@ -294,22 +294,22 @@ export default function EvaluationDashboard() {
 
             {/* Kolom 2: Baseline Raw LLM */}
             <div style={{
-              background: 'rgba(19, 30, 56, 0.5)',
+              background: '#f9fafb',
               border: '1px solid var(--border-subtle)',
               borderRadius: '14px',
               padding: '20px'
             }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px' }}>
                 <span style={{ fontWeight: 700, color: 'var(--text-secondary)', fontSize: '0.9375rem', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <Cpu size={16} color="#94A3B8" />
+                  <Cpu size={16} color="#5d5d5d" />
                   <span>Baseline (Raw LLM Tanpa RAG)</span>
                 </span>
-                <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '6px', background: 'rgba(239, 68, 68, 0.15)', color: '#FCA5A5', fontWeight: 600 }}>
+                <span style={{ fontSize: '0.75rem', padding: '3px 8px', borderRadius: '6px', background: 'rgba(220, 38, 38, 0.1)', color: '#dc2626', fontWeight: 600 }}>
                   Keterlacakan: 0% (Tanpa Sumber)
                 </span>
               </div>
 
-              <div style={{ fontSize: '0.875rem', lineHeight: '1.6', color: '#CBD5E1', whiteSpace: 'pre-wrap', marginBottom: '16px' }}>
+              <div style={{ fontSize: '0.875rem', lineHeight: '1.6', color: '#1f2937', whiteSpace: 'pre-wrap', marginBottom: '16px' }}>
                 {compareResult.baseline_raw_llm.answer}
               </div>
 

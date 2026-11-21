@@ -25,6 +25,13 @@ async def lifespan(app: FastAPI):
     except Exception as db_e:
         print(f"[Startup] Peringatan koneksi database: {db_e}")
 
+    # Pre-load model Sentence-BERT saat startup agar pertanyaan pertama tidak mengalami cold-start lama
+    try:
+        from app.services.embedding_service import embedding_service
+        embedding_service.get_model()
+    except Exception as emb_e:
+        print(f"[Startup] Peringatan pre-load Sentence-BERT: {emb_e}")
+
     # Jika vector store masih kosong, otomatis seed materi dasar agar langsung bisa dipakai demo
     if len(vector_store.documents) == 0:
         print("[Startup] Pangkalan data kosong, melakukan inisialisasi starter dataset Zapin...")
