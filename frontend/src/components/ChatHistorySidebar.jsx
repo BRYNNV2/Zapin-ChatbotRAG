@@ -119,13 +119,13 @@ export default function ChatHistorySidebar({
         </button>
       </nav>
 
-      {/* Area Tengah Sidebar: Riwayat Cloud (Login) / Sementara (Tamu bila sudah chat) / Lapang jika belum ada */}
+      {/* Area Tengah Sidebar: Riwayat Percakapan */}
       <div className="sidebar-history-scroll">
         {(currentUser || sessions.length > 0) && (
           <>
             <div className="sidebar-divider" />
             <div className="sidebar-section-title">
-              {currentUser ? 'Terbaru' : 'Sementara'}
+              Terbaru
             </div>
 
             {sessions.length === 0 ? (
@@ -145,12 +145,6 @@ export default function ChatHistorySidebar({
                   <span className="history-text">
                     {sess.title || 'Percakapan Budaya Zapin'}
                   </span>
-
-                  {sess.isTemporary && (
-                    <span className="history-temp-badge" title="Disimpan sementara sebelum halaman dimuat ulang">
-                      Sementara
-                    </span>
-                  )}
 
                   <button
                     className="history-delete-btn"

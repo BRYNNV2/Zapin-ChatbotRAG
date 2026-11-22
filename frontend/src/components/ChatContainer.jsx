@@ -163,25 +163,10 @@ export default function ChatContainer({
 
           {/* Minimal Bottom Footer */}
           <footer className="clean-home-footer">
-            {!currentUser ? (
-              <span>
-                ZAPIN adalah asisten AI budaya berbasis Sentence-BERT RAG. Percakapan mode tamu
-                bersifat sementara dan hilang saat halaman dimuat ulang.{' '}
-                <button
-                  type="button"
-                  className="clean-footer-link"
-                  onClick={() => onOpenAuthModal && onOpenAuthModal('login')}
-                >
-                  Masuk
-                </button>{' '}
-                untuk menyimpan riwayat.
-              </span>
-            ) : (
-              <span>
-                ZAPIN adalah asisten AI budaya berbasis Sentence-BERT RAG menggunakan korpus Tari
-                Zapin Riau tervalidasi.
-              </span>
-            )}
+            <span>
+              ZAPIN adalah asisten AI budaya berbasis Sentence-BERT RAG menggunakan korpus Tari
+              Zapin Riau tervalidasi.
+            </span>
           </footer>
         </div>
       ) : (
