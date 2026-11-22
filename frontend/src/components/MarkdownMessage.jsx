@@ -8,7 +8,7 @@ import React from 'react';
  * - Italic: *text*
  * - Code: `code`
  */
-function renderInlineContent(text, sources, onOpenSources) {
+function renderInlineContent(text, sources, onOpenSources, showCitations = true) {
   if (!text) return null;
 
   const tokenRegex = /(\[\d+\]|\*\*\*[^*]+?\*\*\*|\*\*[^*]+?\*\*|\*[^*]+?\*|`[^`]+?`)/g;
@@ -18,6 +18,7 @@ function renderInlineContent(text, sources, onOpenSources) {
     // 1. Interactive Citation [1]
     const citMatch = part.match(/^\[(\d+)\]$/);
     if (citMatch) {
+      if (!showCitations) return null;
       const citationId = parseInt(citMatch[1], 10);
       return (
         <button
@@ -80,7 +81,7 @@ function renderInlineContent(text, sources, onOpenSources) {
  * - Unordered lists <ul><li>...</li></ul>
  * - Ordered lists <ol><li>...</li></ol>
  */
-export default function MarkdownMessage({ text, sources, onOpenSources }) {
+export default function MarkdownMessage({ text, sources, onOpenSources, showCitations = true }) {
   if (!text) return null;
 
   const lines = text.split(/\r?\n/);
@@ -154,14 +155,14 @@ export default function MarkdownMessage({ text, sources, onOpenSources }) {
           case 'h3':
             return (
               <h4 key={bIdx} className="md-heading">
-                {renderInlineContent(block.content, sources, onOpenSources)}
+                {renderInlineContent(block.content, sources, onOpenSources, showCitations)}
               </h4>
             );
 
           case 'subheading':
             return (
               <div key={bIdx} className="md-subheading">
-                {renderInlineContent(block.content, sources, onOpenSources)}
+                {renderInlineContent(block.content, sources, onOpenSources, showCitations)}
               </div>
             );
 
@@ -172,7 +173,7 @@ export default function MarkdownMessage({ text, sources, onOpenSources }) {
                   <li key={itemIdx} className="md-list-item">
                     <span className="md-bullet">•</span>
                     <span className="md-item-content">
-                      {renderInlineContent(item, sources, onOpenSources)}
+                      {renderInlineContent(item, sources, onOpenSources, showCitations)}
                     </span>
                   </li>
                 ))}
@@ -186,7 +187,7 @@ export default function MarkdownMessage({ text, sources, onOpenSources }) {
                   <li key={itemIdx} className="md-list-item">
                     <span className="md-number">{item.num}.</span>
                     <span className="md-item-content">
-                      {renderInlineContent(item.content, sources, onOpenSources)}
+                      {renderInlineContent(item.content, sources, onOpenSources, showCitations)}
                     </span>
                   </li>
                 ))}
@@ -197,7 +198,7 @@ export default function MarkdownMessage({ text, sources, onOpenSources }) {
           default:
             return (
               <p key={bIdx} className="md-paragraph">
-                {renderInlineContent(block.content, sources, onOpenSources)}
+                {renderInlineContent(block.content, sources, onOpenSources, showCitations)}
               </p>
             );
         }

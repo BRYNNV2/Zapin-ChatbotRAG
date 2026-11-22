@@ -2794,3 +2794,518 @@ body {
     padding: 28px 24px;
   }
 }
+
+/* ========================================================================== */
+/* SINGLE-COLUMN CLEAN SETTINGS VIEW IN MAIN STAGE (PERSIS REFERENSI)         */
+/* ========================================================================== */
+.settings-clean-view {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  width: 100%;
+  background: var(--bg-main);
+  overflow: hidden;
+}
+
+.settings-clean-header {
+  height: 60px;
+  padding: 0 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-shrink: 0;
+  background: var(--bg-main);
+}
+
+.settings-clean-header-left,
+.settings-clean-header-right {
+  width: 80px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.settings-circle-back-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-main);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.settings-circle-back-btn:hover {
+  background: var(--bg-subtle);
+  border-color: var(--border-medium);
+}
+
+.settings-clean-title {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: var(--text-main);
+  margin: 0;
+  text-align: center;
+}
+
+.settings-clean-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px 24px 56px 24px;
+}
+
+.settings-clean-container {
+  width: 100%;
+  max-width: 680px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.settings-clean-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.settings-clean-section-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: var(--text-main);
+  padding-left: 2px;
+}
+
+.settings-clean-card {
+  width: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.settings-clean-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 15px 18px;
+  min-height: 54px;
+  transition: background 0.15s ease;
+}
+
+.settings-clean-row-toggle {
+  align-items: center;
+  padding: 16px 18px;
+}
+
+.settings-clean-row-divider {
+  height: 1px;
+  background: var(--border-subtle);
+  margin: 0;
+}
+
+.settings-clean-label {
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.settings-clean-text-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.settings-clean-item-title {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--text-main);
+  line-height: 1.35;
+}
+
+.settings-clean-item-desc {
+  font-size: 0.78rem;
+  color: var(--text-secondary);
+  line-height: 1.48;
+  margin: 0;
+}
+
+.settings-clean-select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.settings-clean-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--text-secondary);
+  font-family: var(--font-sans);
+  font-size: 0.86rem;
+  font-weight: 500;
+  padding: 5px 26px 5px 10px;
+  cursor: pointer;
+  outline: none;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.settings-clean-select:hover,
+.settings-clean-select:focus {
+  background: var(--bg-subtle);
+  color: var(--text-main);
+}
+
+.settings-clean-select-icon {
+  position: absolute;
+  right: 8px;
+  pointer-events: none;
+  color: var(--text-secondary);
+}
+
+/* Toggle Switch Biru Persis Gambar Referensi */
+.clean-toggle-switch {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 24px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.clean-toggle-switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.clean-toggle-slider {
+  position: absolute;
+  inset: 0;
+  background-color: #d1d5db;
+  border-radius: 9999px;
+  transition: background-color 0.2s ease;
+}
+
+.clean-toggle-slider::before {
+  content: "";
+  position: absolute;
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  top: 3px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease;
+}
+
+.clean-toggle-switch input:checked + .clean-toggle-slider {
+  background-color: #2563eb;
+}
+
+.clean-toggle-switch input:checked + .clean-toggle-slider::before {
+  transform: translateX(18px);
+}
+
+/* Account Card Inside Settings */
+.settings-clean-account-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.settings-clean-account-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #0d0d0d;
+  color: #ffffff;
+  font-size: 0.88rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.settings-clean-logout-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  background: transparent;
+  border: 1px solid #fecaca;
+  border-radius: 9999px;
+  color: #dc2626;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.settings-clean-logout-btn:hover {
+  background: #fef2f2;
+}
+
+/* ========================================================================== */
+/* DARK THEME SUPPORT (VIA PENGATURAN > TAMPILAN)                             */
+/* ========================================================================== */
+[data-theme="dark"] {
+  --bg-main: #212121;
+  --bg-sidebar: #171717;
+  --bg-sidebar-hover: #262626;
+  --bg-sidebar-active: #2f2f2f;
+
+  --bg-surface: #2a2a2a;
+  --bg-subtle: #303030;
+  --bg-card-hover: #333333;
+
+  --text-main: #ececec;
+  --text-primary: #ececec;
+  --text-secondary: #b4b4b4;
+  --text-muted: #8e8e8e;
+
+  --border-subtle: rgba(255, 255, 255, 0.1);
+  --border-medium: rgba(255, 255, 255, 0.18);
+  --border-focus: rgba(255, 255, 255, 0.28);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+[data-theme="dark"] .sidebar-brand-logo,
+[data-theme="dark"] .top-brand-name,
+[data-theme="dark"] .clean-home-heading,
+[data-theme="dark"] .sidebar-guest-card-title,
+[data-theme="dark"] .kimi-assistant-content,
+[data-theme="dark"] .kimi-markdown-body .md-bold,
+[data-theme="dark"] .kimi-markdown-body .md-heading,
+[data-theme="dark"] .kimi-markdown-body .md-subheading,
+[data-theme="dark"] .simple-modal-header h3,
+[data-theme="dark"] .auth-kimi-title,
+[data-theme="dark"] .auth-kimi-input-field,
+[data-theme="dark"] .source-panel-heading,
+[data-theme="dark"] .origin-value.doc-name,
+[data-theme="dark"] .origin-meta-item strong,
+[data-theme="dark"] .validator-clean-text strong {
+  color: #ececec;
+}
+
+[data-theme="dark"] .sidebar-nav-item {
+  color: #d4d4d4;
+}
+
+[data-theme="dark"] .sidebar-nav-item svg {
+  color: #a3a3a3;
+}
+
+[data-theme="dark"] .sidebar-nav-item:hover,
+[data-theme="dark"] .sidebar-nav-item.active {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .sidebar-nav-item.active svg,
+[data-theme="dark"] .sidebar-toggle-btn:hover,
+[data-theme="dark"] .sidebar-uncollapse-btn:hover {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .history-row {
+  color: #c4c4c4;
+}
+
+[data-theme="dark"] .history-row:hover,
+[data-theme="dark"] .history-row.active {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .sidebar-guest-card-desc,
+[data-theme="dark"] .clean-home-footer,
+[data-theme="dark"] .clean-home-greet-sub,
+[data-theme="dark"] .kimi-markdown-body .md-italic {
+  color: #a3a3a3;
+}
+
+[data-theme="dark"] .sidebar-guest-card-btn,
+[data-theme="dark"] .btn-clean-outline,
+[data-theme="dark"] .clean-capability-btn,
+[data-theme="dark"] .clean-capability-chip,
+[data-theme="dark"] .source-pill-btn {
+  background: #2b2b2b;
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #ececec;
+}
+
+[data-theme="dark"] .sidebar-guest-card-btn:hover,
+[data-theme="dark"] .btn-clean-outline:hover,
+[data-theme="dark"] .clean-capability-btn:hover,
+[data-theme="dark"] .clean-capability-btn.active,
+[data-theme="dark"] .clean-capability-chip:hover:not(:disabled),
+[data-theme="dark"] .source-pill-btn:hover {
+  background: #383838;
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .btn-clean-primary,
+[data-theme="dark"] .clean-send-btn.active,
+[data-theme="dark"] .kimi-assistant-avatar,
+[data-theme="dark"] .settings-clean-account-avatar {
+  background: #ffffff;
+  color: #171717;
+  border-color: #ffffff;
+}
+
+[data-theme="dark"] .btn-clean-primary:hover,
+[data-theme="dark"] .clean-send-btn.active:hover {
+  background: #e5e5e5;
+}
+
+[data-theme="dark"] .clean-input-pill {
+  background: #2f2f2f;
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .clean-textarea {
+  color: #ececec;
+}
+
+[data-theme="dark"] .clean-send-btn {
+  background: #444444;
+  color: #171717;
+}
+
+[data-theme="dark"] .clean-footer-link {
+  color: #ececec;
+}
+
+[data-theme="dark"] .chat-bottom-dock {
+  background: linear-gradient(180deg, rgba(33, 33, 33, 0) 0%, rgba(33, 33, 33, 0.94) 30%, #212121 100%);
+}
+
+[data-theme="dark"] .kimi-user-bubble {
+  background: #2f2f2f;
+  color: #ececec;
+}
+
+[data-theme="dark"] .kimi-markdown-body .md-inline-code,
+[data-theme="dark"] .citation-badge,
+[data-theme="dark"] .source-citation-badge {
+  background: #2f2f2f;
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #ececec;
+}
+
+[data-theme="dark"] .citation-badge:hover {
+  background: #ffffff;
+  color: #171717;
+}
+
+[data-theme="dark"] .header-user-badge,
+[data-theme="dark"] .user-profile-pill {
+  background: #262626;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .header-user-name,
+[data-theme="dark"] .user-name-text,
+[data-theme="dark"] .popover-user-name {
+  color: #ececec;
+}
+
+[data-theme="dark"] .kimi-profile-popover,
+[data-theme="dark"] .simple-modal-card,
+[data-theme="dark"] .auth-kimi-split-card,
+[data-theme="dark"] .auth-kimi-form-panel,
+[data-theme="dark"] .auth-country-dropdown {
+  background: #242424;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .popover-user-profile-card,
+[data-theme="dark"] .auth-kimi-art-panel,
+[data-theme="dark"] .auth-kimi-input-box {
+  background: #1c1c1c;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .popover-menu-item,
+[data-theme="dark"] .simple-modal-body,
+[data-theme="dark"] .auth-kimi-country-btn,
+[data-theme="dark"] .auth-country-item {
+  color: #e5e5e5;
+}
+
+[data-theme="dark"] .popover-menu-item:hover,
+[data-theme="dark"] .auth-country-item:hover {
+  background: #333333;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .auth-kimi-google-btn,
+[data-theme="dark"] .btn-secondary,
+[data-theme="dark"] .top-source-toggle-btn {
+  background: #2b2b2b;
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #ececec;
+}
+
+[data-theme="dark"] .source-side-panel {
+  background: #1b1b1b;
+}
+
+[data-theme="dark"] .source-panel-header,
+[data-theme="dark"] .source-filter-chips-row,
+[data-theme="dark"] .source-detail-card,
+[data-theme="dark"] .source-panel-footer {
+  background: #242424;
+}
+
+[data-theme="dark"] .source-method-banner,
+[data-theme="dark"] .source-validator-clean,
+[data-theme="dark"] .source-quote-box-clean {
+  background: #1f1f1f;
+  color: #d4d4d4;
+}
+
+[data-theme="dark"] .source-chip-btn {
+  background: #2c2c2c;
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #b4b4b4;
+}
+
+[data-theme="dark"] .source-chip-btn.active {
+  background: #ffffff;
+  color: #171717;
+  border-color: #ffffff;
+}
+
+[data-theme="dark"] .clean-toggle-slider {
+  background-color: #4b5563;
+}
+
+[data-theme="dark"] .settings-clean-select option {
+  background: #242424;
+  color: #ececec;
+}
+
+[data-theme="dark"] .settings-clean-logout-btn {
+  border-color: rgba(248, 113, 113, 0.35);
+  color: #fca5a5;
+}
+
+[data-theme="dark"] .settings-clean-logout-btn:hover {
+  background: rgba(220, 38, 38, 0.15);
+}

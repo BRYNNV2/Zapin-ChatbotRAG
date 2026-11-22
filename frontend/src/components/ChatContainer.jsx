@@ -19,7 +19,8 @@ export default function ChatContainer({
   isLoading,
   onOpenSources,
   currentUser,
-  onOpenAuthModal
+  onOpenAuthModal,
+  userPrefs
 }) {
   const [inputQuery, setInputQuery] = useState('');
   const [showCapabilities, setShowCapabilities] = useState(false);
@@ -42,7 +43,8 @@ export default function ChatContainer({
   };
 
   const handleKeyDown = (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
+    const enterToSend = userPrefs?.enterToSend !== false;
+    if (enterToSend && e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault();
       handleSubmit();
     }
@@ -205,11 +207,13 @@ export default function ChatContainer({
                           text={msg.text}
                           sources={msg.sources}
                           onOpenSources={onOpenSources}
+                          showCitations={userPrefs?.showCitations !== false}
                         />
 
                         {/* Action Bar Below Response */}
                         <div className="assistant-actions-bar">
                           {(() => {
+                            if (userPrefs?.showCitations === false) return null;
                             let srcList = [];
                             if (Array.isArray(msg.sources)) {
                               srcList = msg.sources;

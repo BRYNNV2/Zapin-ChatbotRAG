@@ -43,6 +43,49 @@ export default function App() {
   // Parameter RAG default (berjalan di belakang layar)
   const [ragParams] = useState({ top_k: 4, threshold: 0.30 });
 
+  // Preferensi Tampilan & Obrolan Pengguna
+  const [userPrefs, setUserPrefs] = useState(() => {
+    const defaults = {
+      theme: 'light',
+      language: 'auto',
+      showCitations: true,
+      enterToSend: true,
+      autoOpenSources: false
+    };
+    try {
+      const saved = localStorage.getItem('zapin_prefs');
+      return saved ? { ...defaults, ...JSON.parse(saved) } : defaults;
+    } catch {
+      return defaults;
+    }
+  });
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('zapin_prefs', JSON.stringify(userPrefs));
+    } catch {}
+  }, [userPrefs]);
+
+  useEffect(() => {
+    const applyTheme = () => {
+      let resolved = userPrefs.theme;
+      if (resolved === 'system') {
+        resolved = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
+          ? 'dark'
+          : 'light';
+      }
+      document.documentElement.setAttribute('data-theme', resolved);
+    };
+
+    applyTheme();
+    if (userPrefs.theme === 'system' && window.matchMedia) {
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
+      const handler = () => applyTheme();
+      mq.addEventListener('change', handler);
+      return () => mq.removeEventListener('change', handler);
+    }
+  }, [userPrefs.theme]);
+
   // Drawer state (Bar Rujukan Sitasi)
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [activeSources, setActiveSources] = useState([]);
@@ -342,6 +385,9 @@ export default function App() {
 
       if (data.sources && data.sources.length > 0) {
         setActiveSources(data.sources);
+        if (userPrefs.autoOpenSources) {
+          setDrawerOpen(true);
+        }
       }
 
       if (currentSessionId) {
@@ -412,29 +458,9 @@ export default function App() {
     setActiveTab(tab);
   };
 
-  if (activeTab === 'settings') {
-    return (
-      <div className="app-root-container">
-        <SettingsPage
-          onBack={() => setActiveTab(previousTab || 'chat')}
-          currentUser={currentUser}
-          onLogout={handleLogout}
-          onOpenAuthModal={openAuthModal}
-          initialSubTab={settingsSubTab}
-        />
-        <AuthModal
-          isOpen={authModalOpen}
-          onClose={() => setAuthModalOpen(false)}
-          onAuthSuccess={handleAuthSuccess}
-          initialMode={authModalMode}
-        />
-      </div>
-    );
-  }
-
   return (
     <div className="app-layout">
-      {/* Left Sidebar */}
+      {/* Left Sidebar (Tetap tampil termasuk saat membuka Pengaturan) */}
       <ChatHistorySidebar
         isCollapsed={sidebarCollapsed}
         onToggleCollapse={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -453,98 +479,113 @@ export default function App() {
 
       {/* Main Content Stage */}
       <div className="main-stage">
-        {/* Clean Top Header Bar */}
-        <div className="stage-top-bar">
-          <div className="top-bar-left-slot">
-            {sidebarCollapsed && (
-              <>
-                <button
-                  className="sidebar-uncollapse-btn"
-                  onClick={() => setSidebarCollapsed(false)}
-                  title="Buka bilah samping"
-                >
-                  <PanelLeftOpen size={18} />
-                </button>
-                <span className="top-brand-name">ZAPIN</span>
-              </>
-            )}
-          </div>
-
-          <div className="top-bar-right-slot">
-            {activeTab === 'chat' && activeSources && activeSources.length > 0 && (
-              <button
-                className={`top-source-toggle-btn ${drawerOpen ? 'active' : ''}`}
-                onClick={() => setDrawerOpen(!drawerOpen)}
-                title={drawerOpen ? "Tutup bar kanan rujukan" : "Buka bar kanan rujukan sumber"}
-              >
-                <BookOpen size={14} color={drawerOpen ? "#b45309" : "currentColor"} />
-                <span>{drawerOpen ? "Tutup Bar Rujukan" : `Bar Rujukan (${activeSources.length})`}</span>
-              </button>
-            )}
-
-            {!currentUser ? (
-              <div className="clean-header-auth-group">
-                <button
-                  type="button"
-                  className="btn-clean-primary"
-                  onClick={() => openAuthModal('login')}
-                  title="Masuk ke Akun"
-                >
-                  Masuk
-                </button>
-                <button
-                  type="button"
-                  className="btn-clean-outline"
-                  onClick={() => openAuthModal('register')}
-                  title="Daftar Akun Baru"
-                >
-                  Daftar gratis
-                </button>
-              </div>
-            ) : (
-              <div
-                className="header-user-badge"
-                onClick={() => {
-                  setSettingsSubTab('account');
-                  setActiveTab('settings');
-                }}
-                title="Buka Pengaturan Akun"
-              >
-                <div className="header-avatar-mini">
-                  {currentUser.full_name
-                    ? currentUser.full_name[0].toUpperCase()
-                    : currentUser.username
-                    ? currentUser.username[0].toUpperCase()
-                    : 'U'}
-                </div>
-                <span className="header-user-name">{currentUser.full_name || currentUser.username}</span>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Workspace Body with Docked Bar Kanan Support */}
-        <div className="stage-workspace-body">
-          <div className="stage-main-scrollable">
-            <ChatContainer
-              messages={messages}
-              onSendMessage={handleSendMessage}
-              isLoading={isLoading}
-              onOpenSources={handleOpenSources}
-              currentUser={currentUser}
-              onOpenAuthModal={openAuthModal}
-            />
-          </div>
-
-          {/* Bar Kanan (Docked Right Side Panel) */}
-          <SourceReferenceDrawer
-            isOpen={drawerOpen}
-            onClose={() => setDrawerOpen(false)}
-            sources={activeSources}
-            highlightedId={highlightedCitationId}
-            onSelectCitation={(id) => setHighlightedCitationId(id)}
+        {activeTab === 'settings' ? (
+          <SettingsPage
+            onBack={() => setActiveTab(previousTab || 'chat')}
+            currentUser={currentUser}
+            onLogout={handleLogout}
+            userPrefs={userPrefs}
+            setUserPrefs={setUserPrefs}
+            sidebarCollapsed={sidebarCollapsed}
+            onExpandSidebar={() => setSidebarCollapsed(false)}
           />
-        </div>
+        ) : (
+          <>
+            {/* Clean Top Header Bar */}
+            <div className="stage-top-bar">
+              <div className="top-bar-left-slot">
+                {sidebarCollapsed && (
+                  <>
+                    <button
+                      className="sidebar-uncollapse-btn"
+                      onClick={() => setSidebarCollapsed(false)}
+                      title="Buka bilah samping"
+                    >
+                      <PanelLeftOpen size={18} />
+                    </button>
+                    <span className="top-brand-name">ZAPIN</span>
+                  </>
+                )}
+              </div>
+
+              <div className="top-bar-right-slot">
+                {activeTab === 'chat' && activeSources && activeSources.length > 0 && (
+                  <button
+                    className={`top-source-toggle-btn ${drawerOpen ? 'active' : ''}`}
+                    onClick={() => setDrawerOpen(!drawerOpen)}
+                    title={drawerOpen ? "Tutup bar kanan rujukan" : "Buka bar kanan rujukan sumber"}
+                  >
+                    <BookOpen size={14} color={drawerOpen ? "#b45309" : "currentColor"} />
+                    <span>{drawerOpen ? "Tutup Bar Rujukan" : `Bar Rujukan (${activeSources.length})`}</span>
+                  </button>
+                )}
+
+                {!currentUser ? (
+                  <div className="clean-header-auth-group">
+                    <button
+                      type="button"
+                      className="btn-clean-primary"
+                      onClick={() => openAuthModal('login')}
+                      title="Masuk ke Akun"
+                    >
+                      Masuk
+                    </button>
+                    <button
+                      type="button"
+                      className="btn-clean-outline"
+                      onClick={() => openAuthModal('register')}
+                      title="Daftar Akun Baru"
+                    >
+                      Daftar gratis
+                    </button>
+                  </div>
+                ) : (
+                  <div
+                    className="header-user-badge"
+                    onClick={() => {
+                      setSettingsSubTab('account');
+                      handleSelectTab('settings');
+                    }}
+                    title="Buka Pengaturan Akun"
+                  >
+                    <div className="header-avatar-mini">
+                      {currentUser.full_name
+                        ? currentUser.full_name[0].toUpperCase()
+                        : currentUser.username
+                        ? currentUser.username[0].toUpperCase()
+                        : 'U'}
+                    </div>
+                    <span className="header-user-name">{currentUser.full_name || currentUser.username}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Workspace Body with Docked Bar Kanan Support */}
+            <div className="stage-workspace-body">
+              <div className="stage-main-scrollable">
+                <ChatContainer
+                  messages={messages}
+                  onSendMessage={handleSendMessage}
+                  isLoading={isLoading}
+                  onOpenSources={handleOpenSources}
+                  currentUser={currentUser}
+                  onOpenAuthModal={openAuthModal}
+                  userPrefs={userPrefs}
+                />
+              </div>
+
+              {/* Bar Kanan (Docked Right Side Panel) */}
+              <SourceReferenceDrawer
+                isOpen={drawerOpen}
+                onClose={() => setDrawerOpen(false)}
+                sources={activeSources}
+                highlightedId={highlightedCitationId}
+                onSelectCitation={(id) => setHighlightedCitationId(id)}
+              />
+            </div>
+          </>
+        )}
       </div>
 
       {/* Modal Autentikasi Pengguna (Login & Register) */}
