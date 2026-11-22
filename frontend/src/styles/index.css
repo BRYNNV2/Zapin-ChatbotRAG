@@ -2096,34 +2096,52 @@ body {
 
 .auth-kimi-art-panel {
   width: 42%;
-  background: #f7f7f8;
-  border-right: 1px solid #ececec;
+  background: #111114;
+  border-right: 1px solid #26262b;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 0;
   position: relative;
   user-select: none;
   overflow: hidden;
 }
 
-.auth-globe-wrapper {
+.auth-dancer-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 100%;
-  height: 100%;
 }
 
-.auth-ascii-sphere {
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 8.5px;
-  line-height: 1.15;
-  letter-spacing: 0.5px;
-  color: #4b5563;
-  margin: 0;
-  transform: scale(0.95);
-  user-select: none;
+.auth-dancer-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  display: block;
+}
+
+.auth-dancer-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 28px 18px 16px 18px;
+  background: linear-gradient(180deg, rgba(17, 17, 20, 0) 0%, rgba(17, 17, 20, 0.9) 75%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.auth-dancer-caption span {
+  font-size: 0.76rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #e5e7eb;
 }
 
 .auth-kimi-form-panel {
@@ -3235,10 +3253,14 @@ body {
 }
 
 [data-theme="dark"] .popover-user-profile-card,
-[data-theme="dark"] .auth-kimi-art-panel,
 [data-theme="dark"] .auth-kimi-input-box {
   background: #1c1c1c;
   border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .auth-kimi-art-panel {
+  background: #111114;
+  border-right-color: rgba(255, 255, 255, 0.1);
 }
 
 [data-theme="dark"] .popover-menu-item,

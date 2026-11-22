@@ -91,8 +91,8 @@ export default function App() {
   const [activeSources, setActiveSources] = useState([]);
   const [highlightedCitationId, setHighlightedCitationId] = useState(null);
 
-  // Fetch daftar sesi dari PostgreSQL (Neon)
-  const fetchSessions = async (token = authToken, selectFirst = false) => {
+  // Fetch daftar sesi dari PostgreSQL (Neon) tanpa otomatis membuka percakapan lama
+  const fetchSessions = async (token = authToken) => {
     // Mode tamu (belum login): riwayat percakapan hanya disimpan sementara di memori React
     if (!token) {
       setSessions([]);
@@ -108,10 +108,6 @@ export default function App() {
         const data = await res.json();
         if (data.sessions) {
           setSessions(data.sessions);
-          // Jika belum ada sesi aktif (atau baru login dari sesi tamu), pilih sesi pertama dari cloud
-          if (data.sessions.length > 0 && (selectFirst || !activeSessionId || String(activeSessionId).startsWith('guest-'))) {
-            handleSelectSession(data.sessions[0].id, token, data.sessions);
-          }
         }
       }
     } catch (err) {
@@ -129,7 +125,7 @@ export default function App() {
     }
   }, []);
 
-  // Handler Auth Berhasil
+  // Handler Auth Berhasil: muat daftar riwayat ke sidebar, tetapi tetap mulai dari percakapan baru
   const handleAuthSuccess = (user, token) => {
     setCurrentUser(user);
     setAuthToken(token);
@@ -139,7 +135,7 @@ export default function App() {
     setMessages([]);
     setActiveSources([]);
     setDrawerOpen(false);
-    fetchSessions(token, true);
+    fetchSessions(token);
   };
 
   // Handler Logout

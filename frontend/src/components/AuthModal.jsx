@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, ChevronDown, Check, Sparkles, Eye, EyeOff } from 'lucide-react';
+import zapinDancerArt from '../assets/zapin_login_dancer.png';
 
 const GOOGLE_CLIENT_ID = '958780297350-1f7cicsb2nei8rcvtpibfvptv452s902.apps.googleusercontent.com';
 
@@ -247,36 +248,17 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess, initialMode 
           <X size={18} />
         </button>
 
-        {/* ================= PANEL KIRI: ARTWORK HALFTONE GLOBE ================= */}
+        {/* ================= PANEL KIRI: ILUSTRASI PENARI ZAPIN RIAU ================= */}
         <div className="auth-kimi-art-panel">
-          <div className="auth-globe-wrapper">
-            {/* ASCII / Halftone Globe Art sesuai Screenshot Kimi AI (Gambar 2) */}
-            <pre className="auth-ascii-sphere" aria-hidden="true">
-{`                        .*#^▲▲▲▲▲▲▲▲...
-              ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲*******
-          /// ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲*********
-        //    ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲*******
-              ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲*****
-      (---)(---)  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲***
-            ////  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-                  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-          •••///  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
-                  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
-                  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
-       (---)(---) ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
-                  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
-                  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
-                  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
-          •••///  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
-                  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
-                  ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●●
-                     ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●●●●
-                        ▲▲▲▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●●●●●
-                           ▲▲▲▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●●●●●
-                              ▲▲▲▲▲▲▲▲●●●●●●●●●●●●●●
-                                 ▲▲▲▲▲●●●●●●●●●●
-                                    ▲▲●●●●●`}
-            </pre>
+          <div className="auth-dancer-wrapper">
+            <img
+              src={zapinDancerArt}
+              alt="Ilustrasi Sepasang Penari Tari Zapin Melayu Riau"
+              className="auth-dancer-img"
+            />
+            <div className="auth-dancer-caption">
+              <span>Seni Budaya Tari Zapin Riau</span>
+            </div>
           </div>
         </div>
 
