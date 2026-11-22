@@ -5,6 +5,7 @@ import ChatContainer from './components/ChatContainer';
 import SourceReferenceDrawer from './components/SourceReferenceDrawer';
 import AuthModal from './components/AuthModal';
 import SettingsPage from './components/SettingsPage';
+import SettingsModal from './components/SettingsModal';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('chat');
@@ -28,10 +29,23 @@ export default function App() {
 
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState('login');
+  const [settingsModalOpen, setSettingsModalOpen] = useState(false);
 
   const openAuthModal = (mode = 'login') => {
     setAuthModalMode(mode === 'register' ? 'register' : 'login');
     setAuthModalOpen(true);
+  };
+
+  const openSettings = (subTab = 'account') => {
+    setSettingsSubTab(subTab);
+    if (currentUser) {
+      setSettingsModalOpen(true);
+    } else {
+      if (activeTab !== 'settings') {
+        setPreviousTab(activeTab);
+      }
+      setActiveTab('settings');
+    }
   };
 
   // Riwayat percakapan (sinkron dengan database PostgreSQL Neon)
@@ -159,6 +173,7 @@ export default function App() {
     setMessages([]);
     setActiveSources([]);
     setDrawerOpen(false);
+    setSettingsModalOpen(false);
   };
 
   // Handler Percakapan Baru
@@ -293,9 +308,8 @@ export default function App() {
     setIsLoading(true);
 
     let currentSessionId = activeSessionId;
-    const shortTitle = queryText.slice(0, 38) + (queryText.length > 38 ? '...' : '');
 
-    // Jika sudah login dan belum ada sesi aktif, buat sesi baru di PostgreSQL
+    // Jika sudah login dan belum ada sesi aktif, buat sesi baru dengan judul default 'Obrolan Baru'
     if (authToken && !currentSessionId) {
       try {
         const headers = {
@@ -306,7 +320,7 @@ export default function App() {
         const sessRes = await fetch('http://localhost:8000/api/chat/sessions', {
           method: 'POST',
           headers,
-          body: JSON.stringify({ title: shortTitle })
+          body: JSON.stringify({ title: 'Obrolan Baru' })
         });
 
         if (sessRes.ok) {
@@ -325,7 +339,7 @@ export default function App() {
         setActiveSessionId(currentSessionId);
         const guestSession = {
           id: currentSessionId,
-          title: shortTitle,
+          title: 'Obrolan Baru',
           isTemporary: true,
           message_count: updatedMessages.length,
           messages: updatedMessages
@@ -337,7 +351,6 @@ export default function App() {
             s.id === currentSessionId
               ? {
                   ...s,
-                  title: !s.title || s.title === 'Obrolan Baru' ? shortTitle : s.title,
                   message_count: updatedMessages.length,
                   messages: updatedMessages
                 }
@@ -390,9 +403,16 @@ export default function App() {
         setSessions((prev) =>
           prev.map((s) => {
             if (s.id === currentSessionId) {
+              const currentTitle = (s.title || '').trim();
+              const isPlaceholder =
+                !currentTitle ||
+                currentTitle === 'Obrolan Baru' ||
+                currentTitle === 'Percakapan Budaya Zapin' ||
+                /^(hai|halo|hello|hi|hey|assalam|tes|test)\b/i.test(currentTitle);
+
               return {
                 ...s,
-                title: !s.title || s.title === 'Obrolan Baru' ? shortTitle : s.title,
+                title: data.session_title && isPlaceholder ? data.session_title : (s.title || 'Obrolan Baru'),
                 message_count: finalMessages.length,
                 messages: finalMessages
               };
@@ -470,6 +490,7 @@ export default function App() {
         onDeleteSession={handleDeleteSession}
         currentUser={currentUser}
         onOpenAuthModal={openAuthModal}
+        onOpenSettings={openSettings}
         onLogout={handleLogout}
       />
 
@@ -538,10 +559,7 @@ export default function App() {
                 ) : (
                   <div
                     className="header-user-badge"
-                    onClick={() => {
-                      setSettingsSubTab('account');
-                      handleSelectTab('settings');
-                    }}
+                    onClick={() => openSettings('account')}
                     title="Buka Pengaturan Akun"
                   >
                     <div className="header-avatar-mini">
@@ -590,6 +608,18 @@ export default function App() {
         onClose={() => setAuthModalOpen(false)}
         onAuthSuccess={handleAuthSuccess}
         initialMode={authModalMode}
+      />
+
+      {/* Modal Card Pengaturan untuk User Login */}
+      <SettingsModal
+        isOpen={settingsModalOpen && Boolean(currentUser)}
+        onClose={() => setSettingsModalOpen(false)}
+        initialTab={settingsSubTab}
+        currentUser={currentUser}
+        sessionsCount={sessions.length}
+        onLogout={handleLogout}
+        userPrefs={userPrefs}
+        setUserPrefs={setUserPrefs}
       />
     </div>
   );
