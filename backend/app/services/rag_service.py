@@ -164,6 +164,81 @@ class RAGService:
 
         return False
 
+    @classmethod
+    def is_placeholder_title(cls, title: Optional[str]) -> bool:
+        """Memeriksa apakah judul sesi masih default atau sekadar sapaan singkat."""
+        if not title or not title.strip():
+            return True
+        clean = title.strip()
+        if clean in ("Obrolan Baru", "Percakapan Budaya Zapin"):
+            return True
+        return cls._is_conversational_query(clean)
+
+    @classmethod
+    def generate_conversation_title(
+        cls,
+        query: str,
+        sources: Optional[List[Dict[str, Any]]] = None
+    ) -> Optional[str]:
+        """Menghasilkan judul topik ringkas dari pertanyaan inti pengguna tanpa menyertakan sapaan."""
+        clean_q = (query or "").strip()
+        if not clean_q or cls._is_conversational_query(clean_q):
+            return None
+
+        text = re.sub(r'[?!.\s]+$', '', clean_q).strip()
+        text = re.sub(r'^[,\s:;-]+', '', text).strip()
+
+        prefixes = [
+            "assalamu'alaikum", "assalamualaikum", "permisi", "selamat pagi",
+            "selamat siang", "selamat sore", "selamat malam", "halo", "hai", "hello",
+            "tolong", "coba", "bisakah", "bisa", "apa saja", "apa itu", "apakah", "apa",
+            "bagaimanakah", "bagaimana", "jelaskanlah", "jelaskan", "sebutkanlah",
+            "sebutkan", "ceritakanlah", "ceritakan", "berikanlah", "berikan",
+            "uraikanlah", "uraikan", "darimana", "dari mana", "siapa", "kapan",
+            "mengapa", "kenapa", "mengenai", "tentang"
+        ]
+
+        changed = True
+        while changed and text:
+            changed = False
+            lower_text = text.lower()
+            for p in prefixes:
+                m = re.match(rf'^{re.escape(p)}(?:\s+|,\s*)+(.+)$', lower_text)
+                if m:
+                    offset = len(lower_text) - len(m.group(1))
+                    text = text[offset:].strip(" ,:-")
+                    changed = True
+                    break
+
+        if len(text) < 3:
+            if sources and isinstance(sources, list) and len(sources) > 0:
+                cat = str(sources[0].get("cultural_category", "")).strip()
+                if cat:
+                    text = cat
+            if len(text) < 3:
+                text = re.sub(r'[?!.\s]+$', '', clean_q).strip()
+
+        small_words = {"dan", "di", "ke", "dari", "pada", "dalam", "yang", "untuk", "atau", "dengan"}
+        formatted_words = []
+        for idx, word in enumerate(text.split()):
+            if len(word) > 1 and word.isupper():
+                formatted_words.append(word)
+            elif idx > 0 and word.lower() in small_words:
+                formatted_words.append(word.lower())
+            else:
+                formatted_words.append(word[0].upper() + word[1:].lower())
+
+        formatted = " ".join(formatted_words).strip()
+        max_len = 45
+        if len(formatted) > max_len:
+            cut = formatted[: max_len - 3].rfind(" ")
+            if cut > 12:
+                formatted = formatted[:cut].rstrip() + "..."
+            else:
+                formatted = formatted[: max_len - 3].rstrip() + "..."
+
+        return formatted or None
+
     def _generate_conversational_response(self, query: str) -> str:
         """Menghasilkan respon ramah dan sopan untuk sapaan atau percakapan umum."""
         q = query.strip().lower()

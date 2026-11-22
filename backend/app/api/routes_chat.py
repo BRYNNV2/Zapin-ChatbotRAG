@@ -34,6 +34,11 @@ def ask_zapin_assistant(req: ChatRequest, db: Session = Depends(get_db)):
             threshold=req.threshold
         )
 
+        suggested_title = rag_service.generate_conversation_title(
+            clean_q, response.get("sources")
+        )
+        resolved_session_title = suggested_title
+
         # 2. Jika session_id disediakan, db aktif, dan bukan mode tamu, simpan percakapan ke PostgreSQL
         if req.session_id and db and not req.session_id.startswith("guest-"):
             try:
@@ -61,18 +66,18 @@ def ask_zapin_assistant(req: ChatRequest, db: Session = Depends(get_db)):
                     )
                     db.add(assistant_msg)
 
-                    # Update judul percakapan jika masih judul default
-                    if conv.title in ["Obrolan Baru", "Percakapan Budaya Zapin"]:
-                        # Ringkas judul dari pertanyaan pertama (maksimal 45 karakter)
-                        short_title = clean_q[:42] + "..." if len(clean_q) > 42 else clean_q
-                        conv.title = short_title
+                    # Update judul percakapan jika masih default/sapaan dan sudah ada topik inti
+                    if suggested_title and rag_service.is_placeholder_title(conv.title):
+                        conv.title = suggested_title
 
+                    resolved_session_title = conv.title
                     conv.updated_at = datetime.utcnow()
                     db.commit()
             except Exception as db_err:
                 print(f"[ChatRoute] Peringatan penyimpanan ke database: {db_err}")
                 db.rollback()
 
+        response["session_title"] = resolved_session_title
         return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Terjadi kesalahan pemrosesan RAG: {str(e)}")
