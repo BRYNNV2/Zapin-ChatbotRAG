@@ -11,6 +11,8 @@ import {
   LifeBuoy,
   ChevronRight
 } from 'lucide-react';
+import HelpSubmenu from './HelpSubmenu';
+import HelpInfoModal from './HelpInfoModal';
 
 const getInitials = (user) => {
   if (!user) return 'U';
@@ -44,20 +46,51 @@ export default function ChatHistorySidebar({
   setSettingsSubTab
 }) {
   const [showProfileMenu, setShowProfileMenu] = useState(false);
-  const [activeModal, setActiveModal] = useState(null); // 'about' | 'profile' | 'help' | null
+  const [showHelpSubmenu, setShowHelpSubmenu] = useState(false);
+  const [activeModal, setActiveModal] = useState(null); // 'about' | 'profile' | null
+  const [helpModalSection, setHelpModalSection] = useState(null);
   const popoverRef = useRef(null);
   const profileButtonRef = useRef(null);
+  const helpHoverTimeoutRef = useRef(null);
 
   const initials = getInitials(currentUser);
   const displayName = currentUser?.full_name || currentUser?.username || 'Pengguna';
   const userSub = currentUser?.email || currentUser?.role || 'Pengguna';
 
-  // Shortcut Ctrl+K untuk Obrolan Baru
+  const clearHelpHoverTimeout = () => {
+    if (helpHoverTimeoutRef.current) {
+      clearTimeout(helpHoverTimeoutRef.current);
+      helpHoverTimeoutRef.current = null;
+    }
+  };
+
+  const openHelpSubmenu = () => {
+    clearHelpHoverTimeout();
+    setShowHelpSubmenu(true);
+  };
+
+  const scheduleCloseHelpSubmenu = () => {
+    clearHelpHoverTimeout();
+    helpHoverTimeoutRef.current = setTimeout(() => {
+      setShowHelpSubmenu(false);
+    }, 120);
+  };
+
+  useEffect(() => {
+    return () => clearHelpHoverTimeout();
+  }, []);
+
+  // Shortcut Ctrl+K untuk Obrolan Baru & Ctrl+/ untuk Pintasan Keyboard
   useEffect(() => {
     const handleKeyDown = (e) => {
       if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
         onNewChat();
+      } else if ((e.ctrlKey || e.metaKey) && e.key === '/') {
+        e.preventDefault();
+        setShowProfileMenu(false);
+        setShowHelpSubmenu(false);
+        setHelpModalSection('shortcuts');
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -75,6 +108,7 @@ export default function ChatHistorySidebar({
         !profileButtonRef.current.contains(e.target)
       ) {
         setShowProfileMenu(false);
+        setShowHelpSubmenu(false);
       }
     };
     document.addEventListener('mousedown', handleClickOutside);
@@ -83,6 +117,7 @@ export default function ChatHistorySidebar({
 
   const handleMenuItemClick = (type) => {
     setShowProfileMenu(false);
+    setShowHelpSubmenu(false);
 
     if (currentUser && onOpenSettings) {
       if (type === 'settings' || type === 'profile') {
@@ -97,11 +132,16 @@ export default function ChatHistorySidebar({
     if (type === 'settings') {
       if (setSettingsSubTab) setSettingsSubTab('account');
       setActiveTab('settings');
-    } else if (type === 'help') {
-      setActiveModal('help');
     } else if (type === 'about') {
       setActiveModal('about');
     }
+  };
+
+  const handleSelectHelpSection = (sectionKey) => {
+    clearHelpHoverTimeout();
+    setShowHelpSubmenu(false);
+    setShowProfileMenu(false);
+    setHelpModalSection(sectionKey);
   };
 
   return (
@@ -270,21 +310,43 @@ export default function ChatHistorySidebar({
 
                 <div className="popover-menu-divider" />
 
-                {/* Kelompok 2: Bantuan & Keluar */}
+                {/* Kelompok 2: Bantuan (dengan submenu samping) & Keluar */}
                 <div
-                  className="popover-menu-item"
-                  onClick={() => handleMenuItemClick('help')}
+                  className="popover-help-wrapper"
+                  onMouseEnter={openHelpSubmenu}
+                  onMouseLeave={scheduleCloseHelpSubmenu}
                 >
-                  <div className="popover-menu-left">
-                    <LifeBuoy size={16} />
-                    <span>Bantuan</span>
+                  <div
+                    id="profile-popover-help"
+                    className={`popover-menu-item ${showHelpSubmenu ? 'submenu-open' : ''}`}
+                    onClick={() => {
+                      clearHelpHoverTimeout();
+                      setShowHelpSubmenu((prev) => !prev);
+                    }}
+                    aria-haspopup="menu"
+                    aria-expanded={showHelpSubmenu}
+                  >
+                    <div className="popover-menu-left">
+                      <LifeBuoy size={16} />
+                      <span>Bantuan</span>
+                    </div>
+                    <ChevronRight size={15} className="popover-chevron" />
                   </div>
-                  <ChevronRight size={15} className="popover-chevron" />
+
+                  {showHelpSubmenu && (
+                    <HelpSubmenu
+                      onSelect={handleSelectHelpSection}
+                      onMouseEnter={openHelpSubmenu}
+                      onMouseLeave={scheduleCloseHelpSubmenu}
+                    />
+                  )}
                 </div>
 
                 <div
                   className="popover-menu-item logout"
                   onClick={() => {
+                    clearHelpHoverTimeout();
+                    setShowHelpSubmenu(false);
                     setShowProfileMenu(false);
                     if (onLogout) onLogout();
                   }}
@@ -302,7 +364,11 @@ export default function ChatHistorySidebar({
                 id="user-profile-pill-btn"
                 ref={profileButtonRef}
                 className={`user-profile-pill ${showProfileMenu ? 'active' : ''}`}
-                onClick={() => setShowProfileMenu(!showProfileMenu)}
+                onClick={() => {
+                  clearHelpHoverTimeout();
+                  setShowHelpSubmenu(false);
+                  setShowProfileMenu((prev) => !prev);
+                }}
                 title="Klik untuk membuka menu akun & pengaturan"
               >
                 <div className="user-avatar-circle">{initials}</div>
@@ -317,7 +383,7 @@ export default function ChatHistorySidebar({
         )}
       </div>
 
-      {/* Modal Informasi (Tentang ZapinAI, Profil, Bantuan) */}
+      {/* Modal Informasi (Tentang ZapinAI, Profil) */}
       {activeModal && (
         <div className="simple-modal-overlay" onClick={() => setActiveModal(null)}>
           <div className="simple-modal-card" onClick={(e) => e.stopPropagation()}>
@@ -325,7 +391,6 @@ export default function ChatHistorySidebar({
               <h3>
                 {activeModal === 'about' && 'Tentang ZapinAI'}
                 {activeModal === 'profile' && 'Profil Akun'}
-                {activeModal === 'help' && 'Bantuan Penggunaan ZAPIN'}
               </h3>
               <button className="simple-modal-close" onClick={() => setActiveModal(null)}>
                 ×
@@ -377,32 +442,6 @@ export default function ChatHistorySidebar({
                   </div>
                 </div>
               )}
-
-              {activeModal === 'help' && (
-                <div className="help-guide-list">
-                  <div className="help-guide-item">
-                    <strong>1. Ajukan Pertanyaan Budaya Zapin</strong>
-                    <p>
-                      Ketik pertanyaan seputar sejarah, ragam gerak (Tahto, Pecah, Tahtim), musik
-                      pengiring (Gambus &amp; Marwas), atau busana Tari Zapin Melayu Riau.
-                    </p>
-                  </div>
-                  <div className="help-guide-item">
-                    <strong>2. Periksa Sumber Sitasi [1][2]</strong>
-                    <p>
-                      Klik angka sitasi pada jawaban atau tombol <em>Bar Rujukan</em> untuk melihat
-                      kutipan naskah asli beserta halaman dokumennya.
-                    </p>
-                  </div>
-                  <div className="help-guide-item">
-                    <strong>3. Pintasan Keyboard</strong>
-                    <p>
-                      <code>Ctrl + K</code> untuk obrolan baru, <code>Enter</code> untuk mengirim
-                      pesan, dan <code>Shift + Enter</code> untuk baris baru.
-                    </p>
-                  </div>
-                </div>
-              )}
             </div>
 
             <div className="simple-modal-footer">
@@ -413,6 +452,12 @@ export default function ChatHistorySidebar({
           </div>
         </div>
       )}
+
+      {/* Modal Detail Menu Bantuan (Pusat bantuan, Pintasan, Legal, Bug) */}
+      <HelpInfoModal
+        section={helpModalSection}
+        onClose={() => setHelpModalSection(null)}
+      />
     </aside>
   );
 }

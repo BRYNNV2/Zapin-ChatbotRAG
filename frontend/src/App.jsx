@@ -176,6 +176,28 @@ export default function App() {
     setSettingsModalOpen(false);
   };
 
+  const handleUserUpdated = (updatedUser) => {
+    setCurrentUser(updatedUser);
+    try {
+      localStorage.setItem('zapin_user', JSON.stringify(updatedUser));
+    } catch {}
+  };
+
+  const handleAccountDeleted = () => {
+    setCurrentUser(null);
+    setAuthToken('');
+    try {
+      localStorage.removeItem('zapin_user');
+      localStorage.removeItem('zapin_token');
+    } catch {}
+    setSessions([]);
+    setActiveSessionId(null);
+    setMessages([]);
+    setActiveSources([]);
+    setDrawerOpen(false);
+    setSettingsModalOpen(false);
+  };
+
   // Handler Percakapan Baru
   const handleNewChat = async () => {
     setActiveTab('chat');
@@ -616,7 +638,9 @@ export default function App() {
         onClose={() => setSettingsModalOpen(false)}
         initialTab={settingsSubTab}
         currentUser={currentUser}
-        sessionsCount={sessions.length}
+        authToken={authToken}
+        onUserUpdated={handleUserUpdated}
+        onAccountDeleted={handleAccountDeleted}
         onLogout={handleLogout}
         userPrefs={userPrefs}
         setUserPrefs={setUserPrefs}

@@ -11,6 +11,7 @@ import {
   LogOut,
   ArrowUpRight
 } from 'lucide-react';
+import AccountSettingsTab from './AccountSettingsTab';
 
 const getInitials = (user) => {
   if (!user) return 'U';
@@ -32,7 +33,9 @@ export default function SettingsModal({
   onClose,
   initialTab = 'account',
   currentUser,
-  sessionsCount = 0,
+  authToken,
+  onUserUpdated,
+  onAccountDeleted,
   onLogout,
   userPrefs = {
     theme: 'light',
@@ -71,15 +74,12 @@ export default function SettingsModal({
 
   const initials = getInitials(currentUser);
   const displayName = currentUser.full_name || currentUser.username || 'Pengguna';
-  const usernameHandle = currentUser.username ? `@${currentUser.username}` : '-';
-  const userEmail = currentUser.email || '-';
-  const userRole = currentUser.role || 'Peneliti / Mahasiswa Budaya';
 
   const accountItems = [
     {
       id: 'account',
       label: 'Akun',
-      keywords: 'akun profil nama username email peran',
+      keywords: 'akun profil nama username email',
       icon: <UserCircle size={16} />
     },
     {
@@ -220,54 +220,12 @@ export default function SettingsModal({
 
           <div className="settings-modal-body-scroll">
             {activeTab === 'account' && (
-              <div className="settings-modal-pane">
-                <h2 className="settings-modal-heading">Akun</h2>
-                <p className="settings-modal-subheading">Tinjau detail akun Anda</p>
-
-                <div className="settings-modal-section-label">Detail</div>
-
-                <div className="settings-modal-detail-list">
-                  <div className="settings-modal-detail-row">
-                    <div className="settings-modal-row-left">
-                      <div className="settings-modal-row-title">Nama</div>
-                      <div className="settings-modal-row-desc">Nama yang terhubung dengan akun Anda</div>
-                    </div>
-                    <div className="settings-modal-row-value">{displayName}</div>
-                  </div>
-
-                  <div className="settings-modal-detail-row">
-                    <div className="settings-modal-row-left">
-                      <div className="settings-modal-row-title">Nama pengguna</div>
-                      <div className="settings-modal-row-desc">Identitas unik Anda di ZAPIN</div>
-                    </div>
-                    <div className="settings-modal-row-value">{usernameHandle}</div>
-                  </div>
-
-                  <div className="settings-modal-detail-row">
-                    <div className="settings-modal-row-left">
-                      <div className="settings-modal-row-title">Email</div>
-                      <div className="settings-modal-row-desc">Alamat email yang tertaut pada akun</div>
-                    </div>
-                    <div className="settings-modal-row-value">{userEmail}</div>
-                  </div>
-
-                  <div className="settings-modal-detail-row">
-                    <div className="settings-modal-row-left">
-                      <div className="settings-modal-row-title">Peran</div>
-                      <div className="settings-modal-row-desc">Status pengguna pada sistem ZAPIN</div>
-                    </div>
-                    <div className="settings-modal-row-value">{userRole}</div>
-                  </div>
-
-                  <div className="settings-modal-detail-row">
-                    <div className="settings-modal-row-left">
-                      <div className="settings-modal-row-title">Riwayat Tersimpan</div>
-                      <div className="settings-modal-row-desc">Jumlah percakapan tersinkron di cloud</div>
-                    </div>
-                    <div className="settings-modal-row-value">{sessionsCount} sesi</div>
-                  </div>
-                </div>
-              </div>
+              <AccountSettingsTab
+                currentUser={currentUser}
+                authToken={authToken}
+                onUserUpdated={onUserUpdated}
+                onAccountDeleted={onAccountDeleted}
+              />
             )}
 
             {activeTab === 'security' && (

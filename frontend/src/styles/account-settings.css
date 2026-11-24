@@ -1,0 +1,262 @@
+/* ========================================================================== */
+/* TAB AKUN PENGATURAN (DETAIL + EDIT INLINE + HAPUS AKUN)                    */
+/* ========================================================================== */
+
+.account-feedback {
+  margin-bottom: 14px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.account-feedback.error {
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  color: #b91c1c;
+}
+
+.account-feedback.success {
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+  color: #047857;
+}
+
+.account-value-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+}
+
+.account-edit-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: none;
+  background: transparent;
+  color: #8e8ea0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+
+.account-edit-btn:hover {
+  background: #f3f4f6;
+  color: #0d0d0d;
+}
+
+.account-inline-editor {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.account-inline-input {
+  width: 210px;
+  height: 34px;
+  padding: 0 11px;
+  border-radius: 9px;
+  border: 1px solid #d4d4d8;
+  background: #ffffff;
+  color: #0d0d0d;
+  font-size: 0.84rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.14s ease;
+}
+
+.account-inline-input:focus {
+  border-color: #71717a;
+}
+
+.account-inline-save,
+.account-inline-cancel {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid #e5e5e5;
+  background: #ffffff;
+  color: #374151;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+
+.account-inline-save {
+  background: #0d0d0d;
+  border-color: #0d0d0d;
+  color: #ffffff;
+}
+
+.account-inline-save:disabled,
+.account-inline-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.account-inline-cancel:hover:not(:disabled) {
+  background: #f3f4f6;
+  color: #0d0d0d;
+}
+
+/* Hapus Akun Section (mengikuti proporsi spasi lapang pada referensi) */
+.account-danger-section {
+  margin-top: 34px;
+  padding-top: 8px;
+}
+
+.account-danger-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 16px 0;
+}
+
+.account-delete-pill-btn {
+  padding: 8px 20px;
+  border-radius: 9999px;
+  border: none;
+  background: #fde8e8;
+  color: #dc2626;
+  font-size: 0.84rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.account-delete-pill-btn:hover {
+  background: #fbd5d5;
+  color: #b91c1c;
+}
+
+.account-delete-confirm {
+  margin-top: 8px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.account-delete-confirm-text {
+  margin: 0;
+  font-size: 0.82rem;
+  color: #7f1d1d;
+  line-height: 1.45;
+}
+
+.account-delete-confirm-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.account-confirm-cancel-btn {
+  padding: 7px 14px;
+  border-radius: 9999px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #374151;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.account-confirm-delete-btn {
+  padding: 7px 16px;
+  border-radius: 9999px;
+  border: none;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.account-confirm-delete-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* ========================================================================== */
+/* DARK THEME SUPPORT                                                         */
+/* ========================================================================== */
+
+[data-theme="dark"] .account-feedback.error {
+  background: rgba(220, 38, 38, 0.14);
+  border-color: rgba(248, 113, 113, 0.3);
+  color: #fca5a5;
+}
+
+[data-theme="dark"] .account-feedback.success {
+  background: rgba(16, 185, 129, 0.14);
+  border-color: rgba(52, 211, 153, 0.3);
+  color: #6ee7b7;
+}
+
+[data-theme="dark"] .account-edit-btn {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .account-edit-btn:hover {
+  background: #333333;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .account-inline-input {
+  background: #1c1c1c;
+  border-color: rgba(255, 255, 255, 0.16);
+  color: #ececec;
+}
+
+[data-theme="dark"] .account-inline-save {
+  background: #ffffff;
+  border-color: #ffffff;
+  color: #171717;
+}
+
+[data-theme="dark"] .account-inline-cancel,
+[data-theme="dark"] .account-confirm-cancel-btn {
+  background: #2b2b2b;
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #e5e5e5;
+}
+
+[data-theme="dark"] .account-delete-pill-btn {
+  background: rgba(220, 38, 38, 0.2);
+  color: #fca5a5;
+}
+
+[data-theme="dark"] .account-delete-pill-btn:hover {
+  background: rgba(220, 38, 38, 0.3);
+  color: #fecaca;
+}
+
+[data-theme="dark"] .account-delete-confirm {
+  background: rgba(220, 38, 38, 0.14);
+  border-color: rgba(248, 113, 113, 0.28);
+}
+
+[data-theme="dark"] .account-delete-confirm-text {
+  color: #fecaca;
+}
+
+@media (max-width: 640px) {
+  .account-inline-input {
+    width: 150px;
+  }
+}
