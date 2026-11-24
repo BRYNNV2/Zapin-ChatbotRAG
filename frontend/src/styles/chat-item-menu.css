@@ -1,0 +1,385 @@
+/* ========================================================================== */
+/* MENU AKSI ITEM PERCAKAPAN SIDEBAR (...) & STATUS SEMAT/ARSIP               */
+/* ========================================================================== */
+
+.history-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+
+.history-pin-indicator {
+  color: #6b7280;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+}
+
+.history-more-btn {
+  opacity: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #6b7280;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.14s ease, background 0.14s ease, color 0.14s ease;
+}
+
+.history-row:hover .history-more-btn,
+.history-row.active .history-more-btn,
+.history-more-btn.menu-open {
+  opacity: 1;
+}
+
+.history-more-btn:hover,
+.history-more-btn.menu-open {
+  background: rgba(0, 0, 0, 0.08);
+  color: #0d0d0d;
+}
+
+/* Inline rename input inside sidebar row */
+.history-rename-input {
+  flex: 1;
+  min-width: 0;
+  height: 26px;
+  padding: 0 8px;
+  border-radius: 7px;
+  border: 1px solid #9ca3af;
+  background: #ffffff;
+  color: #0d0d0d;
+  font-size: 0.82rem;
+  font-family: inherit;
+  outline: none;
+}
+
+.history-rename-input:focus {
+  border-color: #374151;
+}
+
+/* Floating Action Card Menu (rendered via Portal) */
+.chat-item-menu-card {
+  position: fixed;
+  min-width: 220px;
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 16px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.11), 0 2px 8px rgba(0, 0, 0, 0.05);
+  padding: 6px;
+  z-index: 9000;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.chat-item-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 9px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  color: #1f2937;
+  font-size: 0.85rem;
+  font-weight: 450;
+  font-family: inherit;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: background 0.12s ease, color 0.12s ease;
+  user-select: none;
+}
+
+.chat-item-menu-item:hover {
+  background: #f3f4f6;
+  color: #0d0d0d;
+}
+
+.chat-item-menu-left {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  color: inherit;
+}
+
+.chat-item-menu-left svg {
+  color: #374151;
+  flex-shrink: 0;
+}
+
+.chat-item-menu-item:hover .chat-item-menu-left svg {
+  color: #0d0d0d;
+}
+
+.chat-item-menu-shortcut {
+  font-size: 0.75rem;
+  color: #8e8ea0;
+  font-weight: 400;
+  flex-shrink: 0;
+}
+
+.chat-item-menu-item.danger {
+  color: #ef4444;
+}
+
+.chat-item-menu-item.danger .chat-item-menu-left svg {
+  color: #ef4444;
+}
+
+.chat-item-menu-item.danger:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+.chat-item-menu-item.danger:hover .chat-item-menu-left svg {
+  color: #dc2626;
+}
+
+/* Archived toggle section in sidebar */
+.sidebar-archived-wrap {
+  margin-top: 8px;
+}
+
+.sidebar-archived-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 6px 14px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.74rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: background 0.14s ease, color 0.14s ease;
+}
+
+.sidebar-archived-toggle:hover {
+  background: var(--bg-sidebar-hover);
+  color: #374151;
+}
+
+.sidebar-archived-chevron {
+  transition: transform 0.16s ease;
+}
+
+.sidebar-archived-chevron.open {
+  transform: rotate(180deg);
+}
+
+/* Action Toast Notification */
+.sidebar-action-toast {
+  margin: 6px 10px 4px 10px;
+  padding: 7px 12px;
+  border-radius: 10px;
+  background: #18181b;
+  color: #ffffff;
+  font-size: 0.76rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ========================================================================== */
+/* DARK THEME SUPPORT                                                         */
+/* ========================================================================== */
+
+[data-theme="dark"] .history-pin-indicator,
+[data-theme="dark"] .history-more-btn {
+  color: #9ca3af;
+}
+
+[data-theme="dark"] .history-more-btn:hover,
+[data-theme="dark"] .history-more-btn.menu-open {
+  background: rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+}
+
+[data-theme="dark"] .history-rename-input {
+  background: #1c1c1c;
+  border-color: rgba(255, 255, 255, 0.22);
+  color: #ececec;
+}
+
+[data-theme="dark"] .chat-item-menu-card {
+  background: #242424;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .chat-item-menu-item {
+  color: #e5e5e5;
+}
+
+[data-theme="dark"] .chat-item-menu-left svg {
+  color: #a3a3a3;
+}
+
+[data-theme="dark"] .chat-item-menu-item:hover {
+  background: #333333;
+  color: #ffffff;
+}
+
+[data-theme="dark"] .chat-item-menu-item:hover .chat-item-menu-left svg {
+  color: #ffffff;
+}
+
+[data-theme="dark"] .chat-item-menu-shortcut {
+  color: #8e8e8e;
+}
+
+[data-theme="dark"] .chat-item-menu-item.danger {
+  color: #f87171;
+}
+
+[data-theme="dark"] .chat-item-menu-item.danger .chat-item-menu-left svg {
+  color: #f87171;
+}
+
+[data-theme="dark"] .chat-item-menu-item.danger:hover {
+  background: rgba(220, 38, 38, 0.18);
+  color: #fca5a5;
+}
+
+[data-theme="dark"] .chat-item-menu-item.danger:hover .chat-item-menu-left svg {
+  color: #fca5a5;
+}
+
+[data-theme="dark"] .sidebar-archived-toggle:hover {
+  color: #e5e5e5;
+}
+
+[data-theme="dark"] .sidebar-action-toast {
+  background: #ffffff;
+  color: #171717;
+}
+
+/* ========================================================================== */
+/* POPUP KONFIRMASI HAPUS PERCAKAPAN (DeleteChatModal)                        */
+/* ========================================================================== */
+
+.delete-chat-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.36);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 9600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.delete-chat-modal-card {
+  width: 100%;
+  max-width: 420px;
+  background: #ffffff;
+  border: 1px solid #e5e5e5;
+  border-radius: 18px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.18), 0 4px 16px rgba(0, 0, 0, 0.06);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.delete-chat-modal-title {
+  margin: 0;
+  font-size: 1.06rem;
+  font-weight: 600;
+  color: #0d0d0d;
+}
+
+.delete-chat-modal-desc {
+  margin: 0;
+  font-size: 0.86rem;
+  color: #4b5563;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.delete-chat-modal-desc strong {
+  color: #0d0d0d;
+  font-weight: 600;
+}
+
+.delete-chat-modal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.delete-chat-cancel-btn {
+  height: 36px;
+  padding: 0 18px;
+  border-radius: 9999px;
+  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  color: #1f2937;
+  font-size: 0.84rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.14s ease, border-color 0.14s ease;
+}
+
+.delete-chat-cancel-btn:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.delete-chat-confirm-btn {
+  height: 36px;
+  padding: 0 18px;
+  border-radius: 9999px;
+  border: none;
+  background: #dc2626;
+  color: #ffffff;
+  font-size: 0.84rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.14s ease;
+}
+
+.delete-chat-confirm-btn:hover {
+  background: #b91c1c;
+}
+
+[data-theme="dark"] .delete-chat-modal-card {
+  background: #242424;
+  border-color: rgba(255, 255, 255, 0.12);
+}
+
+[data-theme="dark"] .delete-chat-modal-title,
+[data-theme="dark"] .delete-chat-modal-desc strong {
+  color: #ececec;
+}
+
+[data-theme="dark"] .delete-chat-modal-desc {
+  color: #b4b4b4;
+}
+
+[data-theme="dark"] .delete-chat-cancel-btn {
+  background: #2b2b2b;
+  border-color: rgba(255, 255, 255, 0.14);
+  color: #e5e5e5;
+}
+
+[data-theme="dark"] .delete-chat-cancel-btn:hover {
+  background: #383838;
+  color: #ffffff;
+}

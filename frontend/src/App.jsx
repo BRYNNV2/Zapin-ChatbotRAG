@@ -322,6 +322,73 @@ export default function App() {
     }
   };
 
+  // Handler Ganti Nama Sesi
+  const handleRenameSession = async (id, newTitle) => {
+    const cleanTitle = (newTitle || '').trim();
+    if (!cleanTitle) return;
+
+    setSessions((prev) =>
+      prev.map((s) => (s.id === id ? { ...s, title: cleanTitle } : s))
+    );
+
+    if (authToken && !String(id).startsWith('guest-')) {
+      try {
+        const res = await fetch(`http://localhost:8000/api/chat/sessions/${id}`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${authToken}`
+          },
+          body: JSON.stringify({ title: cleanTitle })
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.session) {
+            setSessions((prev) =>
+              prev.map((s) => (s.id === id ? { ...s, ...data.session } : s))
+            );
+          }
+        }
+      } catch (err) {
+        console.warn('Gagal memperbarui judul sesi:', err.message);
+      }
+    }
+  };
+
+  // Handler Bagikan Sesi (Salin transkrip percakapan ke clipboard)
+  const handleShareSession = async (id) => {
+    const targetSession = sessions.find((s) => s.id === id);
+    let sessionMessages = activeSessionId === id ? messages : targetSession?.messages || [];
+
+    if (sessionMessages.length === 0 && authToken && !String(id).startsWith('guest-')) {
+      try {
+        const res = await fetch(`http://localhost:8000/api/chat/sessions/${id}`, {
+          headers: { 'Authorization': `Bearer ${authToken}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          sessionMessages = data.session?.messages || [];
+        }
+      } catch (err) {
+        console.warn('Gagal mengambil detail sesi untuk dibagikan:', err.message);
+      }
+    }
+
+    const title = targetSession?.title || 'Percakapan Budaya Zapin';
+    const lines = sessionMessages.map((m) => {
+      const label = m.sender === 'user' ? 'Pengguna' : 'ZAPIN';
+      return `${label}:\n${m.text || ''}`;
+    });
+    const shareText = lines.length > 0 ? `${title}\n\n${lines.join('\n\n')}` : title;
+
+    try {
+      await navigator.clipboard.writeText(shareText);
+      return true;
+    } catch {
+      return false;
+    }
+  };
+
   // Handler Kirim Pesan RAG (Mendukung Mode Tamu Sementara & Mode Login Cloud)
   const handleSendMessage = async (queryText) => {
     const userMsg = { sender: 'user', text: queryText, timestamp: new Date().toISOString() };
@@ -510,6 +577,8 @@ export default function App() {
         onSelectSession={handleSelectSession}
         onNewChat={handleNewChat}
         onDeleteSession={handleDeleteSession}
+        onRenameSession={handleRenameSession}
+        onShareSession={handleShareSession}
         currentUser={currentUser}
         onOpenAuthModal={openAuthModal}
         onOpenSettings={openSettings}

@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import {
   SquarePen,
-  Trash2,
+  MoreHorizontal,
+  Pin,
   PanelLeftClose,
   HelpCircle,
   Settings,
@@ -9,10 +10,29 @@ import {
   Smile,
   UserCircle,
   LifeBuoy,
-  ChevronRight
+  ChevronRight,
+  ChevronDown
 } from 'lucide-react';
 import HelpSubmenu from './HelpSubmenu';
 import HelpInfoModal from './HelpInfoModal';
+import ChatItemMenu from './ChatItemMenu';
+import DeleteChatModal from './DeleteChatModal';
+
+const readStorageMap = (storageKey) => {
+  try {
+    const raw = localStorage.getItem(storageKey);
+    const parsed = raw ? JSON.parse(raw) : {};
+    return parsed && typeof parsed === 'object' ? parsed : {};
+  } catch {
+    return {};
+  }
+};
+
+const writeStorageMap = (storageKey, value) => {
+  try {
+    localStorage.setItem(storageKey, JSON.stringify(value));
+  } catch {}
+};
 
 const getInitials = (user) => {
   if (!user) return 'U';
@@ -39,6 +59,8 @@ export default function ChatHistorySidebar({
   onSelectSession,
   onNewChat,
   onDeleteSession,
+  onRenameSession,
+  onShareSession,
   currentUser,
   onOpenAuthModal,
   onOpenSettings,
@@ -49,10 +71,22 @@ export default function ChatHistorySidebar({
   const [showHelpSubmenu, setShowHelpSubmenu] = useState(false);
   const [activeModal, setActiveModal] = useState(null); // 'about' | 'profile' | null
   const [helpModalSection, setHelpModalSection] = useState(null);
+  const [menuState, setMenuState] = useState(null); // { sessionId, rect }
+  const [renamingSessionId, setRenamingSessionId] = useState(null);
+  const [renameDraft, setRenameDraft] = useState('');
+  const [showArchived, setShowArchived] = useState(false);
+  const [pinnedByUser, setPinnedByUser] = useState(() => readStorageMap('zapin_pinned_sessions'));
+  const [archivedByUser, setArchivedByUser] = useState(() => readStorageMap('zapin_archived_sessions'));
+  const [pendingDeleteSession, setPendingDeleteSession] = useState(null);
+  const [actionToast, setActionToast] = useState('');
   const popoverRef = useRef(null);
   const profileButtonRef = useRef(null);
   const helpHoverTimeoutRef = useRef(null);
+  const toastTimeoutRef = useRef(null);
 
+  const userKey = currentUser?.id || 'guest';
+  const pinnedIds = pinnedByUser[userKey] || [];
+  const archivedIds = archivedByUser[userKey] || [];
   const initials = getInitials(currentUser);
   const displayName = currentUser?.full_name || currentUser?.username || 'Pengguna';
   const userSub = currentUser?.email || currentUser?.role || 'Pengguna';
@@ -77,8 +111,89 @@ export default function ChatHistorySidebar({
   };
 
   useEffect(() => {
-    return () => clearHelpHoverTimeout();
+    return () => {
+      clearHelpHoverTimeout();
+      if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    };
   }, []);
+
+  const showToast = (msg) => {
+    if (toastTimeoutRef.current) clearTimeout(toastTimeoutRef.current);
+    setActionToast(msg);
+    toastTimeoutRef.current = setTimeout(() => setActionToast(''), 2200);
+  };
+
+  const handleTogglePin = (sessionId) => {
+    const isCurrentlyPinned = pinnedIds.includes(sessionId);
+    const nextList = isCurrentlyPinned
+      ? pinnedIds.filter((id) => id !== sessionId)
+      : [sessionId, ...pinnedIds];
+    const nextMap = { ...pinnedByUser, [userKey]: nextList };
+    setPinnedByUser(nextMap);
+    writeStorageMap('zapin_pinned_sessions', nextMap);
+  };
+
+  const handleToggleArchive = (sessionId) => {
+    const isCurrentlyArchived = archivedIds.includes(sessionId);
+    const nextList = isCurrentlyArchived
+      ? archivedIds.filter((id) => id !== sessionId)
+      : [sessionId, ...archivedIds];
+    const nextMap = { ...archivedByUser, [userKey]: nextList };
+    setArchivedByUser(nextMap);
+    writeStorageMap('zapin_archived_sessions', nextMap);
+    showToast(isCurrentlyArchived ? 'Percakapan dipulihkan dari arsip' : 'Percakapan diarsipkan');
+  };
+
+  const handleStartRename = (sess) => {
+    setRenamingSessionId(sess.id);
+    setRenameDraft(sess.title || 'Percakapan Budaya Zapin');
+  };
+
+  const handleCommitRename = async (sessionId) => {
+    const trimmed = renameDraft.trim();
+    setRenamingSessionId(null);
+    if (trimmed && onRenameSession) {
+      await onRenameSession(sessionId, trimmed);
+    }
+  };
+
+  const handleShareClick = async (sessionId) => {
+    if (!onShareSession) return;
+    const copied = await onShareClickResult(sessionId);
+    showToast(copied ? 'Percakapan disalin ke clipboard' : 'Gagal menyalin percakapan');
+  };
+
+  const onShareClickResult = async (sessionId) => {
+    return Boolean(await onShareSession(sessionId));
+  };
+
+  const handleDeleteWithCleanup = (sessionId) => {
+    if (pinnedIds.includes(sessionId)) {
+      const nextPinned = { ...pinnedByUser, [userKey]: pinnedIds.filter((id) => id !== sessionId) };
+      setPinnedByUser(nextPinned);
+      writeStorageMap('zapin_pinned_sessions', nextPinned);
+    }
+    if (archivedIds.includes(sessionId)) {
+      const nextArchived = { ...archivedByUser, [userKey]: archivedIds.filter((id) => id !== sessionId) };
+      setArchivedByUser(nextArchived);
+      writeStorageMap('zapin_archived_sessions', nextArchived);
+    }
+    if (onDeleteSession) onDeleteSession(sessionId);
+  };
+
+  const activeMenuSession = menuState
+    ? sessions.find((s) => s.id === menuState.sessionId) || null
+    : null;
+
+  const visibleSessions = sessions
+    .filter((s) => !archivedIds.includes(s.id))
+    .sort((a, b) => {
+      const aPinned = pinnedIds.includes(a.id) ? 1 : 0;
+      const bPinned = pinnedIds.includes(b.id) ? 1 : 0;
+      return bPinned - aPinned;
+    });
+
+  const archivedSessions = sessions.filter((s) => archivedIds.includes(s.id));
 
   // Shortcut Ctrl+K untuk Obrolan Baru & Ctrl+/ untuk Pintasan Keyboard
   useEffect(() => {
@@ -197,6 +312,10 @@ export default function ChatHistorySidebar({
 
       {/* Area Tengah Sidebar: Riwayat Percakapan */}
       <div className="sidebar-history-scroll">
+        {actionToast && (
+          <div className="sidebar-action-toast animate-fade-in">{actionToast}</div>
+        )}
+
         {(currentUser || sessions.length > 0) && (
           <>
             <div className="sidebar-divider" />
@@ -204,40 +323,197 @@ export default function ChatHistorySidebar({
               Terbaru
             </div>
 
-            {sessions.length === 0 ? (
+            {visibleSessions.length === 0 ? (
               <div className="sidebar-empty-history">
-                Belum ada riwayat percakapan.
+                {archivedSessions.length > 0
+                  ? 'Semua percakapan berada di arsip.'
+                  : 'Belum ada riwayat percakapan.'}
               </div>
             ) : (
-              sessions.map((sess) => (
-                <div
-                  key={sess.id}
-                  className={`history-row ${sess.id === activeSessionId && activeTab === 'chat' ? 'active' : ''}`}
-                  onClick={() => {
-                    setActiveTab('chat');
-                    onSelectSession(sess.id);
-                  }}
-                >
-                  <span className="history-text">
-                    {sess.title || 'Percakapan Budaya Zapin'}
-                  </span>
+              visibleSessions.map((sess) => {
+                const isPinned = pinnedIds.includes(sess.id);
+                const isMenuOpen = menuState?.sessionId === sess.id;
+                const isRenaming = renamingSessionId === sess.id;
 
-                  <button
-                    className="history-delete-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onDeleteSession(sess.id);
+                return (
+                  <div
+                    key={sess.id}
+                    className={`history-row ${sess.id === activeSessionId && activeTab === 'chat' ? 'active' : ''}`}
+                    onClick={() => {
+                      if (isRenaming) return;
+                      setActiveTab('chat');
+                      onSelectSession(sess.id);
                     }}
-                    title="Hapus percakapan"
                   >
-                    <Trash2 size={13} />
-                  </button>
-                </div>
-              ))
+                    {isRenaming ? (
+                      <input
+                        type="text"
+                        className="history-rename-input"
+                        value={renameDraft}
+                        autoFocus
+                        onClick={(e) => e.stopPropagation()}
+                        onChange={(e) => setRenameDraft(e.target.value)}
+                        onBlur={() => handleCommitRename(sess.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            handleCommitRename(sess.id);
+                          } else if (e.key === 'Escape') {
+                            e.preventDefault();
+                            setRenamingSessionId(null);
+                          }
+                        }}
+                      />
+                    ) : (
+                      <>
+                        <span className="history-text">
+                          {sess.title || 'Percakapan Budaya Zapin'}
+                        </span>
+
+                        <div className="history-row-actions">
+                          {isPinned && (
+                            <span className="history-pin-indicator" title="Disematkan">
+                              <Pin size={13} />
+                            </span>
+                          )}
+                          <button
+                            type="button"
+                            className={`history-more-btn ${isMenuOpen ? 'menu-open' : ''}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              const rect = e.currentTarget.getBoundingClientRect();
+                              setMenuState((prev) =>
+                                prev?.sessionId === sess.id ? null : { sessionId: sess.id, rect }
+                              );
+                            }}
+                            title="Opsi percakapan"
+                            aria-label="Opsi percakapan"
+                            aria-haspopup="menu"
+                            aria-expanded={isMenuOpen}
+                          >
+                            <MoreHorizontal size={15} />
+                          </button>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                );
+              })
+            )}
+
+            {archivedSessions.length > 0 && (
+              <div className="sidebar-archived-wrap">
+                <button
+                  type="button"
+                  className="sidebar-archived-toggle"
+                  onClick={() => setShowArchived((prev) => !prev)}
+                >
+                  <span>Diarsipkan ({archivedSessions.length})</span>
+                  <ChevronDown
+                    size={14}
+                    className={`sidebar-archived-chevron ${showArchived ? 'open' : ''}`}
+                  />
+                </button>
+
+                {showArchived &&
+                  archivedSessions.map((sess) => {
+                    const isMenuOpen = menuState?.sessionId === sess.id;
+                    const isRenaming = renamingSessionId === sess.id;
+
+                    return (
+                      <div
+                        key={sess.id}
+                        className={`history-row ${sess.id === activeSessionId && activeTab === 'chat' ? 'active' : ''}`}
+                        onClick={() => {
+                          if (isRenaming) return;
+                          setActiveTab('chat');
+                          onSelectSession(sess.id);
+                        }}
+                      >
+                        {isRenaming ? (
+                          <input
+                            type="text"
+                            className="history-rename-input"
+                            value={renameDraft}
+                            autoFocus
+                            onClick={(e) => e.stopPropagation()}
+                            onChange={(e) => setRenameDraft(e.target.value)}
+                            onBlur={() => handleCommitRename(sess.id)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault();
+                                handleCommitRename(sess.id);
+                              } else if (e.key === 'Escape') {
+                                e.preventDefault();
+                                setRenamingSessionId(null);
+                              }
+                            }}
+                          />
+                        ) : (
+                          <>
+                            <span className="history-text">
+                              {sess.title || 'Percakapan Budaya Zapin'}
+                            </span>
+
+                            <div className="history-row-actions">
+                              <button
+                                type="button"
+                                className={`history-more-btn ${isMenuOpen ? 'menu-open' : ''}`}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const rect = e.currentTarget.getBoundingClientRect();
+                                  setMenuState((prev) =>
+                                    prev?.sessionId === sess.id
+                                      ? null
+                                      : { sessionId: sess.id, rect }
+                                  );
+                                }}
+                                title="Opsi percakapan"
+                                aria-label="Opsi percakapan"
+                                aria-haspopup="menu"
+                                aria-expanded={isMenuOpen}
+                              >
+                                <MoreHorizontal size={15} />
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    );
+                  })}
+              </div>
             )}
           </>
         )}
       </div>
+
+      {/* Menu Aksi Mengambang (...) Percakapan Sidebar */}
+      <ChatItemMenu
+        session={activeMenuSession}
+        anchorRect={menuState?.rect}
+        isPinned={activeMenuSession ? pinnedIds.includes(activeMenuSession.id) : false}
+        isArchived={activeMenuSession ? archivedIds.includes(activeMenuSession.id) : false}
+        onClose={() => setMenuState(null)}
+        onTogglePin={handleTogglePin}
+        onRename={handleStartRename}
+        onShare={handleShareClick}
+        onToggleArchive={handleToggleArchive}
+        onDelete={(sessionId) => {
+          const target = sessions.find((s) => s.id === sessionId);
+          if (target) setPendingDeleteSession(target);
+        }}
+      />
+
+      {/* Popup Konfirmasi Hapus Percakapan */}
+      <DeleteChatModal
+        session={pendingDeleteSession}
+        onCancel={() => setPendingDeleteSession(null)}
+        onConfirm={(sessionId) => {
+          handleDeleteWithCleanup(sessionId);
+          setPendingDeleteSession(null);
+          showToast('Percakapan dihapus');
+        }}
+      />
 
       {/* Footer Sidebar */}
       <div className="sidebar-footer">
